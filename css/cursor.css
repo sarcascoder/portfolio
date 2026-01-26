@@ -1,0 +1,179 @@
+/* ========================================
+   CUSTOM CURSOR STYLES
+   ======================================== */
+
+/* Hide default cursor on all elements */
+html, body, * {
+    cursor: none !important;
+}
+
+/* Main cursor dot */
+.cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-neon-green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+    mix-blend-mode: difference;
+}
+
+/* Cursor outline ring */
+.cursor-outline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-neon-green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    opacity: 0.5;
+}
+
+/* Cursor states */
+
+/* Hover state - on interactive elements */
+.cursor-dot.hover {
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-white);
+}
+
+.cursor-outline.hover {
+    width: 60px;
+    height: 60px;
+    border-color: var(--color-white);
+    opacity: 0.8;
+}
+
+/* Click/Active state */
+.cursor-dot.active {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-electric-blue);
+}
+
+.cursor-outline.active {
+    width: 30px;
+    height: 30px;
+    border-color: var(--color-electric-blue);
+}
+
+/* Text hover state */
+.cursor-dot.text {
+    width: 4px;
+    height: 20px;
+    border-radius: 2px;
+    background-color: var(--color-neon-green);
+}
+
+.cursor-outline.text {
+    opacity: 0;
+}
+
+/* Link hover state */
+.cursor-dot.link {
+    width: 16px;
+    height: 16px;
+    background-color: transparent;
+    border: 2px solid var(--color-neon-green);
+}
+
+.cursor-outline.link {
+    width: 50px;
+    height: 50px;
+    opacity: 1;
+}
+
+/* Button hover state */
+.cursor-dot.button {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 255, 0, 0.1);
+    border: 1px solid var(--color-neon-green);
+}
+
+.cursor-outline.button {
+    opacity: 0;
+}
+
+/* Hidden state */
+.cursor-dot.hidden,
+.cursor-outline.hidden {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+}
+
+/* ========================================
+   Cursor Glow Effect
+   ======================================== */
+
+.cursor-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-neon-green);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(10px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* ========================================
+   Cursor Trail Effect (Optional)
+   ======================================== */
+
+.cursor-trail {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-neon-green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99997;
+    opacity: 0.3;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+}
+
+/* ========================================
+   Mobile - Show default cursor
+   ======================================== */
+
+@media (max-width: 768px) {
+    html, body, * {
+        cursor: auto !important;
+    }
+    
+    .cursor-dot,
+    .cursor-outline,
+    .cursor-trail {
+        display: none !important;
+    }
+}
+
+/* Also for touch devices */
+@media (hover: none) and (pointer: coarse) {
+    html, body, * {
+        cursor: auto !important;
+    }
+    
+    .cursor-dot,
+    .cursor-outline,
+    .cursor-trail {
+        display: none !important;
+    }
+}

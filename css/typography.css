@@ -1,0 +1,299 @@
+/* ========================================
+   TYPOGRAPHY STYLES - Dot Matrix & Neon Effects
+   ======================================== */
+
+/* Dot Matrix Heading Styles */
+.dot-matrix-heading {
+    font-family: var(--font-dot-matrix);
+    font-size: clamp(40px, 7vw, 150px); 
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: var(--color-white);
+}
+
+/* Specific Hero Text Style (Carlito) */
+.hero-carlito-text {
+    font-family: 'Carlito', sans-serif;
+    font-weight: 800; /* Extra Bold */
+    font-size: clamp(40px, 6.5vw, 200px);
+    color: transparent;
+    -webkit-text-stroke: 1px #fff;
+    line-height: 1.0;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.hero-carlito-text:hover {
+    color: #fff;
+}
+
+/* Small dot matrix text */
+.dot-matrix-text {
+    font-family: var(--font-dot-matrix);
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Monospace body text */
+.mono-text {
+    font-family: var(--font-mono);
+    font-size: 16px; /* Increased from 14px */
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+}
+
+/* ========================================
+   Neon Glow Effects
+   ======================================== */
+
+/* Static neon glow */
+.neon-glow {
+    text-shadow: 
+        0 0 5px var(--color-neon-green),
+        0 0 10px var(--color-neon-green),
+        0 0 20px var(--color-neon-green),
+        0 0 40px var(--color-neon-green);
+}
+
+/* Pulsing neon glow animation */
+.neon-glow-pulse {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        text-shadow: 
+            0 0 5px var(--color-neon-green),
+            0 0 10px var(--color-neon-green),
+            0 0 20px var(--color-neon-green);
+    }
+    50% {
+        text-shadow: 
+            0 0 10px var(--color-neon-green),
+            0 0 20px var(--color-neon-green),
+            0 0 40px var(--color-neon-green),
+            0 0 80px var(--color-neon-green);
+    }
+}
+
+/* Blue glow variant */
+.blue-glow {
+    text-shadow: 
+        0 0 5px var(--color-electric-blue),
+        0 0 10px var(--color-electric-blue),
+        0 0 20px var(--color-electric-blue);
+}
+
+/* ========================================
+   Text Animations
+   ======================================== */
+
+/* Fade in from bottom */
+.text-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.text-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Character by character reveal */
+.char-reveal span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: char-slide-up 0.5s ease forwards;
+}
+
+@keyframes char-slide-up {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Glitch effect */
+.glitch {
+    position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    animation: glitch-1 0.3s infinite linear alternate-reverse;
+    color: var(--color-neon-green);
+    z-index: -1;
+}
+
+.glitch::after {
+    animation: glitch-2 0.3s infinite linear alternate-reverse;
+    color: var(--color-electric-blue);
+    z-index: -2;
+}
+
+@keyframes glitch-1 {
+    0% {
+        clip-path: inset(20% 0 60% 0);
+        transform: translate(-2px, 2px);
+    }
+    20% {
+        clip-path: inset(80% 0 0% 0);
+        transform: translate(2px, -2px);
+    }
+    40% {
+        clip-path: inset(10% 0 70% 0);
+        transform: translate(-1px, 1px);
+    }
+    60% {
+        clip-path: inset(50% 0 30% 0);
+        transform: translate(1px, -1px);
+    }
+    80% {
+        clip-path: inset(30% 0 50% 0);
+        transform: translate(-2px, 2px);
+    }
+    100% {
+        clip-path: inset(70% 0 10% 0);
+        transform: translate(2px, -2px);
+    }
+}
+
+@keyframes glitch-2 {
+    0% {
+        clip-path: inset(60% 0 20% 0);
+        transform: translate(2px, -2px);
+    }
+    20% {
+        clip-path: inset(0% 0 80% 0);
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        clip-path: inset(70% 0 10% 0);
+        transform: translate(1px, -1px);
+    }
+    60% {
+        clip-path: inset(30% 0 50% 0);
+        transform: translate(-1px, 1px);
+    }
+    80% {
+        clip-path: inset(50% 0 30% 0);
+        transform: translate(2px, -2px);
+    }
+    100% {
+        clip-path: inset(10% 0 70% 0);
+        transform: translate(-2px, 2px);
+    }
+}
+
+/* Typewriter effect */
+.typewriter {
+    overflow: hidden;
+    border-right: 2px solid var(--color-neon-green);
+    white-space: nowrap;
+    animation: 
+        typing 3.5s steps(40, end),
+        blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--color-neon-green); }
+}
+
+/* ========================================
+   Highlighted Text Styles
+   ======================================== */
+
+/* Green highlight */
+.highlight-green {
+    color: var(--color-neon-green);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Blue highlight */
+.highlight-blue {
+    color: var(--color-electric-blue);
+    text-shadow: 0 0 10px rgba(0, 102, 255, 0.5);
+}
+
+/* Underline animation */
+.underline-hover {
+    position: relative;
+    display: inline-block;
+}
+
+.underline-hover::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--color-neon-green);
+    transition: width 0.3s ease;
+}
+
+.underline-hover:hover::after {
+    width: 100%;
+}
+
+/* ========================================
+   Label & Caption Styles
+   ======================================== */
+
+.label-text {
+    font-family: var(--font-mono);
+    font-size: clamp(13px, 1.3vw, 22px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.caption-text {
+    font-family: var(--font-mono);
+    font-size: 14px; /* Increased from 12px */
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted); /* Lighter gray */
+    line-height: 1.6;
+}
+
+/* ========================================
+   Coordinates / Blueprint Style
+   ======================================== */
+
+.coords {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--color-gray-mid);
+}
+
+.coords::before {
+    content: '[';
+    color: var(--color-neon-green);
+}
+
+.coords::after {
+    content: ']';
+    color: var(--color-neon-green);
+}

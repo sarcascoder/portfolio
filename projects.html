@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio - Projects & Case Studies">
+    <title>PROJECTS | Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/typography.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/cursor.css">
+    <script src="js/theme.js"></script>
+</head>
+<body>
+    <!-- Starfield Background -->
+    <canvas id="starfield-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Vignette Frame -->
+    <div class="vignette-frame"></div>
+
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo-image-link">
+                <img src="logo.png" alt="Logo" class="site-logo">
+            </a>
+        </div>
+        <div class="header-right">
+            <span class="header-text">CASE STUDIES</span>
+            <button id="theme-toggle" aria-label="Toggle Theme">
+                <span>☀️</span>
+            </button>
+            <button class="menu-toggle" id="menu-toggle">
+                <span>MENU</span>
+                <div class="menu-icon">
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Full Screen Navigation Menu -->
+    <nav class="nav-menu" id="nav-menu">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-preview="home">HOME</a>
+                <a href="projects.html" class="nav-link active" data-preview="projects">PROJECTS</a>
+                <a href="services.html" class="nav-link" data-preview="services">SERVICES</a>
+                <a href="about.html" class="nav-link" data-preview="about">ABOUT</a>
+                <a href="index.html#contact" class="nav-link" data-preview="contact">CONTACT</a>
+            </div>
+            <div class="nav-preview" id="nav-preview">
+                <img src="" alt="Preview" id="preview-image">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="page-hero-content">
+            <h1 class="dot-matrix-heading neon-glow">THINGS I'VE WORKED ON</h1>
+            <p class="page-subtitle">Due to confidentiality, I can only share a few points to give an overall idea.</p>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="filter-section">
+        <div class="filter-container">
+            <button class="filter-btn active" data-filter="all">ALL</button>
+            <button class="filter-btn" data-filter="branding">RAG and LLMs</button>
+            <button class="filter-btn" data-filter="digital">FULL STACK</button>
+            <button class="filter-btn" data-filter="design">VISUAL ML PIPELINES</button>
+            <button class="filter-btn" data-filter="motion">SMART PROBLEMS SOLUTION USING AI</button>
+        </div>
+    </section>
+
+    <!-- Projects Grid -->
+    <section class="projects-page-section">
+        <div class="projects-container">
+            
+            <article class="project-card large" data-category="branding">
+                <div class="project-image">
+<video src="project1.mov" class="project-media" autoplay loop muted playsinline></video>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">OLD-MONKEY</h3>
+                    <div class="project-meta">
+                        <span class="project-category">UPLOAD DOCUMENTS AND ASK QUESTIONS</span>
+                        <span class="project-year">2025</span>
+                    </div>
+                    <ul class="project-tags">
+                        <li>DOCUMENTATION RAG</li>
+                        <li>CAPABLE OF READING IMAGES AND GRAPHS</li>
+                        <li>FAST AND ACCURATE</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="project-card" data-category="digital">
+                <div class="project-image">
+<img src="authorisations_and_authentication_library.png" alt="Backend Library" class="project-media">
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">BACKEND AUTHORISATION AND AUTHENTICATION LIBRARY</h3>
+                    <div class="project-meta">
+                        <span class="project-category">BACKEND DEV</span>
+                        <span class="project-year">2025</span>
+                    </div>
+                    <ul class="project-tags">
+                        <li>BACKEND</li>
+                        <li>DEVELOPMENT</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="project-card" data-category="design">
+                <div class="project-image">
+<video src="cement_tracking.mov" class="project-media" autoplay loop muted playsinline></video>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">OBJECT TRACKING IN VIDEOS</h3>
+                    <div class="project-meta">
+                        <span class="project-category">ML PIPELINES</span>
+                        <span class="project-year">2025</span>
+                    </div>
+                    <ul class="project-tags">
+                        <li>OBJECT TRACKING</li>
+                        <li>VIDEO ANALYSIS</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="project-card" data-category="motion">
+                <div class="project-image">
+                    <div class="project-placeholder gradient-4">
+                        <span class="placeholder-text">CREATIVE SOLUTIONS</span>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">HOW TO USE WHICH TOOL</h3>
+                    <div class="project-meta">
+                        <span class="project-category">IOT</span>
+                        <span class="project-year">2025</span>
+                    </div>
+                    <ul class="project-tags">
+                        <li>ANIMATION</li>
+                        <li>3D</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="project-card large" data-category="digital">
+                <div class="project-image">
+                    <div class="project-placeholder gradient-5">
+                        <span class="placeholder-text">THIS PERSONAL PORTFOLIO WEBSITE</span>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">PERSONAL PORTFOLIO</h3>
+                    <div class="project-meta">
+                        <span class="project-category">INTERACTIVE AND 3D</span>
+                        <span class="project-year">2025</span>
+                    </div>
+                    <ul class="project-tags">
+                        <li>UI/UX</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="project-card" data-category="branding">
+                <div class="project-image">
+<img src="videoRAG.png" alt="Video RAG" class="project-media">
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">VIDEO RAG</h3>
+                    <div class="project-meta">
+                        <span class="project-category">UPLOAD VIDEO AND ASK QUESTIONS ABOUT IT</span>
+                        <span class="project-category">GET RELEVENT AND SPECIFIC ANSWERS ABOUT IT</span>
+                        <span class="project-year">2025</span>
+                    </div>
+                    <ul class="project-tags">
+                        <li>VIDEO RAG</li>
+                        <li>VLMs </li>
+                    </ul>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span class="footer-copyright">© 2026 PORTFOLIO</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-tagline">ALWAYS DELIVER</span>
+            </div>
+            <div class="footer-right">
+                <a href="https://wa.me/919335093547" class="footer-link" target="_blank">WHATSAPP</a>
+                <a href="https://www.instagram.com/the.tripathi.g/" class="footer-link" target="_blank">INSTAGRAM</a>
+                <a href="#" class="footer-link">TWITTER</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="js/cursor.js"></script>
+    <script src="js/starfield.js"></script>
+    <script src="js/parallax.js"></script>
+    <script src="js/hover-preview.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Project filter functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const projectCards = document.querySelectorAll('.project-card');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filter = btn.dataset.filter;
+                    
+                    // Update active button
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Filter projects
+                    projectCards.forEach(card => {
+                        const category = card.dataset.category;
+                        
+                        if (filter === 'all' || category === filter) {
+                            card.style.display = '';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        } else {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                if (card.style.opacity === '0') {
+                                    card.style.display = 'none';
+                                }
+                            }, 300);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <style>
+        /* Projects Page Specific Styles */
+        .page-hero {
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8vw 4vw 4vw;
+        }
+        
+        .page-hero-content {
+            text-align: center;
+        }
+        
+        .page-subtitle {
+            font-family: var(--font-mono);
+            font-size: clamp(14px, 1.3vw, 22px);
+            letter-spacing: 0.2em;
+            color: var(--color-text-muted);
+            margin-top: 1.5vw;
+        }
+        
+        .filter-section {
+            padding: 0 4vw 4vw;
+        }
+        
+        .filter-container {
+            display: flex;
+            gap: 1.5vw;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            font-family: var(--font-mono);
+            font-size: clamp(13px, 1.2vw, 20px);
+            letter-spacing: 0.1em;
+            letter-spacing: 0.1em;
+            color: var(--color-text-muted);
+            padding: 0.8vw 1.6vw;
+            border: 1px solid var(--color-gray-mid);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            color: var(--color-neon-green);
+            border-color: var(--color-neon-green);
+        }
+        
+        .projects-page-section {
+            padding: 0 4vw 8vw;
+        }
+        
+        .projects-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5vw;
+            max-width: 92vw;
+            margin: 0 auto;
+        }
+        
+        .project-card.large {
+            grid-column: span 2;
+        }
+        
+        .project-card {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+.project-image {
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+
+        .project-card.large .project-image {
+            aspect-ratio: 21/9;
+        }
+
+        .project-placeholder {
+            width: 100%;
+            height: 100%;
+        }
+
+        .project-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .project-card:hover .project-media {
+            transform: scale(1.05);
+        }
+        
+        .gradient-1 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .gradient-2 { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #2d2d2d 100%); }
+        .gradient-3 { background: linear-gradient(135deg, #1a0a0a 0%, #2d1a1a 50%, #3d2a2a 100%); }
+        .gradient-4 { background: linear-gradient(135deg, #0a1a0a 0%, #1a2d1a 50%, #2a3d2a 100%); }
+        .gradient-5 { background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2d 50%, #2a2a3d 100%); }
+        .gradient-6 { background: linear-gradient(135deg, #1a1a0a 0%, #2d2d1a 50%, #3d3d2a 100%); }
+        
+        .project-meta {
+            display: flex;
+            gap: 1.5vw;
+            margin-bottom: 1vw;
+        }
+        
+        .project-tags {
+            display: flex;
+            gap: 1vw;
+            flex-wrap: wrap;
+        }
+        
+        .project-tags li {
+            font-family: var(--font-mono);
+            font-size: clamp(12px, 1vw, 16px);
+            letter-spacing: 0.1em;
+            color: var(--color-text-muted);
+            padding: 0.4vw 0.8vw;
+            border: 1px solid var(--color-gray-light);
+        }
+        
+        @media (max-width: 768px) {
+            .projects-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-card.large {
+                grid-column: span 1;
+            }
+            
+            .filter-section,
+            .projects-page-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+    </style>
+    
+    <!-- Fixed Globe Logo with Contact Text -->
+    <div id="fixed-globe-container">
+        <div class="globe-wrapper">
+            <canvas id="logo-globe-canvas"></canvas>
+        </div>
+        <div class="rotating-text-ring">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+                <defs>
+                    <path id="circle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                </defs>
+                <text font-size="13.5" font-weight="bold" font-family="'Space Mono', monospace">
+                    <textPath href="#circle" textLength="230" lengthAdjust="spacing">
+                        CONTACT • CONTACT • CONTACT •
+                    </textPath>
+                </text>
+            </svg>
+        </div>
+        <a href="index.html#contact" class="globe-link-overlay" aria-label="Contact"></a>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal-overlay">
+        <div class="modal-container">
+            <button id="close-modal" class="close-modal-btn">&times;</button>
+            
+            <div class="modal-header">
+                <h2 class="modal-title dot-matrix-heading">GET IN <span class="neon-glow">TOUCH</span></h2>
+                <p class="modal-subtitle">Let's build something amazing together</p>
+            </div>
+            
+            <div class="modal-content">
+                <form id="contact-form" class="contact-form">
+                    <div class="form-group">
+                        <label for="name">NAME</label>
+                        <input type="text" id="name" required placeholder="Your Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">EMAIL</label>
+                        <input type="email" id="email" required placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">PHONE</label>
+                        <div class="phone-input-container" style="display: flex; gap: 10px;">
+                            <select id="country-code" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px; font-family: inherit;">
+                                <option value="+91">🇮🇳 +91</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="+44">🇬🇧 +44</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="">Other</option>
+                            </select>
+                            <input type="tel" id="phone" placeholder="Phone Number" style="flex: 1;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">MESSAGE</label>
+                        <textarea id="message" required rows="4" placeholder="Tell me about your project..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">SEND MESSAGE</button>
+                </form>
+                
+                <div class="modal-divider">
+                    <span>OR</span>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <script src="js/logo-globe.js"></script>
+    <script src="js/contact-modal.js"></script>
+</body>
+</html>

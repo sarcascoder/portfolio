@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio - Our Services">
+    <title>SERVICES | Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/typography.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/cursor.css">
+    <script src="js/theme.js"></script>
+</head>
+<body>
+    <!-- Starfield Background -->
+    <canvas id="starfield-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Vignette Frame -->
+    <div class="vignette-frame"></div>
+
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo-image-link">
+                <img src="logo.png" alt="Logo" class="site-logo">
+            </a>
+        </div>
+        <div class="header-right">
+            <span class="header-text">WHAT WE DO</span>
+            <button id="theme-toggle" aria-label="Toggle Theme">
+                <span>☀️</span>
+            </button>
+            <button class="menu-toggle" id="menu-toggle">
+                <span>MENU</span>
+                <div class="menu-icon">
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Full Screen Navigation Menu -->
+    <nav class="nav-menu" id="nav-menu">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-preview="home">HOME</a>
+                <a href="projects.html" class="nav-link" data-preview="projects">PROJECTS</a>
+                <a href="services.html" class="nav-link active" data-preview="services">SERVICES</a>
+                <a href="about.html" class="nav-link" data-preview="about">ABOUT</a>
+                <a href="index.html#contact" class="nav-link" data-preview="contact">CONTACT</a>
+            </div>
+            <div class="nav-preview" id="nav-preview">
+                <img src="" alt="Preview" id="preview-image">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="services-hero">
+        <div class="services-hero-content">
+            <p class="hero-label">WE SPECIALIZE IN</p>
+            <h1 class="dot-matrix-heading">
+                DOCUMENTS DATA RETRIEVAL, DEFECT DETECTION,<br>
+                WEB AND MOBILE APPS, AND<br>
+                <span class="neon-glow">INDUSTRIAL AI IMPLEMENTATION.</span> ✦
+            </h1>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section class="services-page-section">
+        <div class="services-container">
+            
+            <!-- Creative -->
+            <div class="service-block" data-service="creative">
+                <div class="service-header">
+                    <span class="service-icon">✦</span>
+                    <h2 class="service-name dot-matrix-heading">RAG</h2>
+                </div>
+                <div class="service-details">
+                    <div class="service-image">
+<img src="document_rag_service.jpg" alt="RAG Service" class="service-img-content">
+                    </div>
+                    <ul class="service-offerings">
+                        <li>COMPLIANCE CHECKING</li>
+                        <li>DRAFTING</li>
+                        <li>FINANCE DOCUMENTS</li>
+                        <li>LEGAL DOCUMENTS</li>
+                        <li>SPECIFIC INFO RETRIEVAL AND CALCULATION</li>
+                        <li>GENERAL Q/A</li>
+                        <li>RALATIONAL DATA ANALYSIS</li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Social -->
+            <div class="service-block" data-service="social">
+                <div class="service-header">
+                    <span class="service-icon">✦</span>
+                    <h2 class="service-name dot-matrix-heading">IMAGE AND VIDEO ANALYSIS</h2>
+                </div>
+                <div class="service-details">
+                    <div class="service-image">
+<video src="labour_carrying_bag.mp4" class="service-img-content" autoplay loop muted playsinline></video>
+                    </div>
+                    <ul class="service-offerings">
+                        <li>OBJECT DETECTION</li>
+                        <li>OBJECT TRACKING</li>
+                        <li>COUNTING</li>
+                        <li>SEGMENTATION</li>
+                        <li>CLASSIFICATION</li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Communications -->
+            <div class="service-block" data-service="communications">
+                <div class="service-header">
+                    <span class="service-icon">✦</span>
+                    <h2 class="service-name dot-matrix-heading">FULL STACK DEVELOPMENT</h2>
+                </div>
+                <div class="service-details">
+                    <div class="service-image">
+<img src="fullstack_service.png" alt="Full Stack Development" class="service-img-content">
+                    </div>
+                    <ul class="service-offerings">
+                        <li>FULL STACK WEBSITES</li>
+                        <li>SECURE SELF HOSTED AUTHENTICATION AND AUTHORIZATION</li>
+                        <li>ANDROID AND IOS APPS</li>
+                        <li>SERVERLESS BACKEND</li>
+                        <li>SCALABLE DATABASES</li>
+                        <li>3D MODELS</li>
+                        <li>CI/CD PIPELINES</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Studios -->
+            <div class="service-block" data-service="studios">
+                <div class="service-header">
+                    <span class="service-icon">✦</span>
+                    <h2 class="service-name dot-matrix-heading">INDUSTRIAL PROBLEMS SOLVING</h2>
+                </div>
+                <div class="service-details">
+                    <div class="service-image">
+<img src="industrial_hardware.png" alt="Industrial Problem Solving" class="service-img-content">
+                    </div>
+                    <ul class="service-offerings">
+                        <li>SPECIFIC HARDWARE AND SOFTWARE SOLUTIONS</li>
+                        <li>MACHINERIES</li>
+                        <li>MONITORING AND ANALYSIS</li>
+                        <li>DEFECT DETECTION</li>
+                        <li>3D GENERATIONS</li>
+                        <li>AI IMPLEMENTATION</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process-section">
+        <div class="process-content">
+            <div class="section-label">
+                <span class="label-number">✦</span>
+                <span class="label-text">OUR PROCESS</span>
+            </div>
+            
+            <div class="process-grid">
+                <div class="process-step">
+                    <span class="step-number">01</span>
+                    <h3 class="step-title">DISCOVER</h3>
+                    <p class="step-desc">Understanding your vision, goals, and requirements through in-depth consultation.</p>
+                </div>
+                <div class="process-step">
+                    <span class="step-number">02</span>
+                    <h3 class="step-title">DESIGN</h3>
+                    <p class="step-desc">Creating concepts and prototypes that align with your use case.</p>
+                </div>
+                <div class="process-step">
+                    <span class="step-number">03</span>
+                    <h3 class="step-title">DEVELOP</h3>
+                    <p class="step-desc">Building and refining solutions with attention to every detail.</p>
+                </div>
+                <div class="process-step">
+                    <span class="step-number">04</span>
+                    <h3 class="step-title">DELIVER</h3>
+                    <p class="step-desc">Launching your project with ongoing support and optimization.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-heading dot-matrix-heading">
+                READY TO<br>
+                <span class="neon-glow">START?</span>
+            </h2>
+            <a href="index.html#contact" class="cta-button">
+                <span>GET IN TOUCH</span>
+                <span class="arrow">→</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span class="footer-copyright">© 2026 PORTFOLIO</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-tagline">ALWAYS DELIVER</span>
+            </div>
+            <div class="footer-right">
+                <a href="https://wa.me/919335093547" class="footer-link" target="_blank">WHATSAPP</a>
+                <a href="https://www.instagram.com/the.tripathi.g/" class="footer-link" target="_blank">INSTAGRAM</a>
+                <a href="#" class="footer-link">TWITTER</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="js/cursor.js"></script>
+    <script src="js/starfield.js"></script>
+    <script src="js/parallax.js"></script>
+    <script src="js/hover-preview.js"></script>
+    <script src="js/main.js"></script>
+
+    <style>
+        /* Services Page Specific Styles */
+        .services-hero {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8vw 4vw;
+        }
+        
+        .services-hero-content {
+            max-width: 90vw;
+        }
+        
+        .hero-label {
+            font-family: var(--font-mono);
+            font-size: clamp(12px, 1vw, 16px);
+            letter-spacing: 0.2em;
+            color: var(--color-text-muted);
+            margin-bottom: 2vw;
+        }
+        
+        .services-page-section {
+            padding: 0 4vw 8vw;
+        }
+        
+        .services-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            max-width: 92vw;
+            margin: 0 auto;
+            background: rgba(51, 51, 51, 0.3); /* Transparent separator */
+        }
+        
+        .service-block {
+            background: rgba(0, 0, 0, 0.7); /* Transparent block */
+            padding: 4vw;
+            transition: background 0.3s ease;
+        }
+
+        [data-theme="light"] .service-block {
+             background: rgba(255, 255, 255, 0.5);
+             border: 1px solid var(--color-gray-mid);
+        }
+        
+        .service-block:hover {
+            background: rgba(17, 17, 17, 0.8);
+        }
+        
+        .service-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+            margin-bottom: 2.5vw;
+        }
+        
+        .service-icon {
+            font-size: clamp(20px, 1.8vw, 32px);
+            color: var(--color-neon-green);
+        }
+        
+        .service-name {
+            font-size: clamp(32px, 3.5vw, 56px);
+            transition: color 0.3s ease;
+        }
+        
+        .service-block:hover .service-name {
+            color: var(--color-neon-green);
+        }
+        
+        .service-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5vw;
+        }
+        
+        .service-image {
+            aspect-ratio: 4/3;
+            overflow: hidden;
+        }
+
+        .service-img-content {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .service-block:hover .service-img-content {
+            transform: scale(1.05);
+        }
+        
+        .service-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-gray-dark), var(--color-gray-mid));
+            border: 1px solid var(--color-gray-mid);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--color-gray-light);
+            transition: border-color 0.3s ease;
+        }
+        
+        .service-block:hover .service-placeholder {
+            border-color: var(--color-neon-green);
+        }
+        
+        .service-offerings {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .service-offerings li {
+            font-family: var(--font-mono);
+            font-size: clamp(12px, 1vw, 16px);
+            letter-spacing: 0.1em;
+            color: var(--color-text-muted);
+            transition: color 0.3s ease;
+        }
+        
+        .service-block:hover .service-offerings li {
+            color: var(--color-white);
+        }
+        
+        /* Process Section */
+        .process-section {
+            padding: 8vw 4vw;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(17,17,17,0.8));
+        }
+        
+        .process-content {
+            max-width: 92vw;
+            margin: 0 auto;
+        }
+        
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2.5vw;
+            margin-top: 4vw;
+        }
+        
+        .process-step {
+            padding: 2.5vw;
+            border: 1px solid var(--color-gray-mid);
+            transition: all 0.3s ease;
+        }
+        
+        .process-step:hover {
+            border-color: var(--color-neon-green);
+            transform: translateY(-10px);
+        }
+        
+        .step-number {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(32px, 3.3vw, 56px);
+            color: var(--color-neon-green);
+            opacity: 0.3;
+        }
+        
+        .step-title {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(18px, 1.6vw, 28px);
+            margin: 1.4vw 0;
+        }
+        
+        .step-desc {
+            font-family: var(--font-mono);
+            font-size: clamp(11px, 0.85vw, 14px);
+            color: var(--color-gray-light);
+            line-height: 1.6;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 8vw 4vw;
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 60vw;
+            margin: 0 auto;
+        }
+        
+        .cta-heading {
+            font-size: clamp(48px, 7vw, 150px);
+            margin-bottom: 4vw;
+        }
+        
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            font-family: var(--font-mono);
+            font-size: 16px;
+            letter-spacing: 0.1em;
+            color: var(--color-black);
+            background: var(--color-neon-green);
+            padding: 20px 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background: var(--color-white);
+            transform: scale(1.05);
+        }
+        
+        .cta-button .arrow {
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button:hover .arrow {
+            transform: translateX(10px);
+        }
+        
+        @media (max-width: 1024px) {
+            .services-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .process-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .services-hero,
+            .services-page-section,
+            .process-section,
+            .cta-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            
+            .service-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .process-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- Fixed Globe Logo with Contact Text -->
+    <div id="fixed-globe-container">
+        <div class="globe-wrapper">
+            <canvas id="logo-globe-canvas"></canvas>
+        </div>
+        <div class="rotating-text-ring">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+                <defs>
+                    <path id="circle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                </defs>
+                <text font-size="13.5" font-weight="bold" font-family="'Space Mono', monospace">
+                    <textPath href="#circle" textLength="230" lengthAdjust="spacing">
+                        CONTACT • CONTACT • CONTACT •
+                    </textPath>
+                </text>
+            </svg>
+        </div>
+        <a href="index.html#contact" class="globe-link-overlay" aria-label="Contact"></a>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal-overlay">
+        <div class="modal-container">
+            <button id="close-modal" class="close-modal-btn">&times;</button>
+            
+            <div class="modal-header">
+                <h2 class="modal-title dot-matrix-heading">GET IN <span class="neon-glow">TOUCH</span></h2>
+                <p class="modal-subtitle">Let's build something amazing together</p>
+            </div>
+            
+            <div class="modal-content">
+                <form id="contact-form" class="contact-form">
+                    <div class="form-group">
+                        <label for="name">NAME</label>
+                        <input type="text" id="name" required placeholder="Your Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">EMAIL</label>
+                        <input type="email" id="email" required placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">PHONE</label>
+                        <div class="phone-input-container" style="display: flex; gap: 10px;">
+                            <select id="country-code" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px; font-family: inherit;">
+                                <option value="+91">🇮🇳 +91</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="+44">🇬🇧 +44</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="">Other</option>
+                            </select>
+                            <input type="tel" id="phone" placeholder="Phone Number" style="flex: 1;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">MESSAGE</label>
+                        <textarea id="message" required rows="4" placeholder="Tell me about your project..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">SEND MESSAGE</button>
+                </form>
+                
+                <div class="modal-divider">
+                    <span>OR</span>
+                </div>
+                
+
+            </div>
+        </div>
+    </div>
+    <script src="js/logo-globe.js"></script>
+    <script src="js/contact-modal.js"></script>
+</body>
+</html>

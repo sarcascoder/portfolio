@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio - About Us">
+    <title>ABOUT | Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/typography.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/cursor.css">
+    <script src="js/theme.js"></script>
+</head>
+<body>
+    <!-- Starfield Background -->
+    <canvas id="starfield-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Vignette Frame -->
+    <div class="vignette-frame"></div>
+
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <svg class="logo-globe" viewBox="0 0 40 40" width="40" height="40">
+                    <circle cx="20" cy="20" r="18" fill="none" stroke="#00ff00" stroke-width="1"/>
+                    <ellipse cx="20" cy="20" rx="18" ry="8" fill="none" stroke="#00ff00" stroke-width="0.5"/>
+                    <ellipse cx="20" cy="20" rx="8" ry="18" fill="none" stroke="#00ff00" stroke-width="0.5"/>
+                    <line x1="2" y1="20" x2="38" y2="20" stroke="#00ff00" stroke-width="0.5"/>
+                </svg>
+            </a>
+        </div>
+        <div class="header-right">
+            <span class="header-text">WHO WE ARE</span>
+            <button id="theme-toggle" aria-label="Toggle Theme">
+                <span>☀️</span>
+            </button>
+            <button class="menu-toggle" id="menu-toggle">
+                <span>MENU</span>
+                <div class="menu-icon">
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Full Screen Navigation Menu -->
+    <nav class="nav-menu" id="nav-menu">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="index.html" class="nav-link" data-preview="home">HOME</a>
+                <a href="projects.html" class="nav-link" data-preview="projects">PROJECTS</a>
+                <a href="services.html" class="nav-link" data-preview="services">SERVICES</a>
+                <a href="about.html" class="nav-link active" data-preview="about">ABOUT</a>
+                <a href="index.html#contact" class="nav-link" data-preview="contact">CONTACT</a>
+            </div>
+            <div class="nav-preview" id="nav-preview">
+                <img src="" alt="Preview" id="preview-image">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="about-hero">
+        <div class="about-hero-content">
+            <h1 class="dot-matrix-heading">
+                <span class="neon-glow">CREATIVE</span><br>
+                MINDS<br>
+                <span class="highlight-blue">UNITED</span>
+            </h1>
+        </div>
+        
+        <!-- 3D Canvas Background -->
+        <canvas id="three-canvas" class="about-canvas"></canvas>
+    </section>
+
+    <!-- Mission Statement -->
+    <section class="about-section mission-section">
+        <div class="about-content">
+            <div class="section-label">
+                <span class="label-number">01</span>
+                <span class="label-text">OUR MISSION</span>
+            </div>
+            
+            <div class="mission-text">
+                <h2 class="large-text">
+                    WE BELIEVE THAT <span class="highlight">DIVERSITY AND INCLUSION</span> 
+                    ARE KEY TO CREATING IMPACTFUL AND INNOVATIVE DIGITAL EXPERIENCES. 
+                    OUR TEAM IS MADE UP OF INDIVIDUALS FROM A VARIETY OF BACKGROUNDS 
+                    AND PERSPECTIVES, WHICH ALLOWS US TO BRING 
+                    <span class="highlight">FRESH AND UNIQUE IDEAS</span> TO THE TABLE. 🎯
+                </h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="about-section values-section">
+        <div class="about-content">
+            <div class="section-label">
+                <span class="label-number">02</span>
+                <span class="label-text">OUR VALUES</span>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-item">
+                    <span class="value-number">01</span>
+                    <h3 class="value-title">INNOVATION</h3>
+                    <p class="value-desc">Pushing boundaries and exploring new possibilities in every project we undertake.</p>
+                </div>
+                
+                <div class="value-item">
+                    <span class="value-number">02</span>
+                    <h3 class="value-title">QUALITY</h3>
+                    <p class="value-desc">Delivering excellence in every pixel, line of code, and creative decision.</p>
+                </div>
+                
+                <div class="value-item">
+                    <span class="value-number">03</span>
+                    <h3 class="value-title">COLLABORATION</h3>
+                    <p class="value-desc">Working together with clients as partners to achieve extraordinary results.</p>
+                </div>
+                
+                <div class="value-item">
+                    <span class="value-number">04</span>
+                    <h3 class="value-title">INTEGRITY</h3>
+                    <p class="value-desc">Building trust through transparency, honesty, and ethical practices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="about-section stats-section">
+        <div class="about-content">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">PROJECTS COMPLETED</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">5+</span>
+                    <span class="stat-label">YEARS EXPERIENCE</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">30+</span>
+                    <span class="stat-label">HAPPY CLIENTS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">∞</span>
+                    <span class="stat-label">CREATIVE IDEAS</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Careers Section -->
+    <section class="about-section careers-section">
+        <div class="about-content">
+            <div class="section-label">
+                <span class="label-number">03</span>
+                <span class="label-text">CAREERS</span>
+            </div>
+            
+            <div class="careers-header">
+                <h2 class="careers-title">JOIN THE TEAM</h2>
+                <p class="careers-subtitle">We're always looking for talented individuals to join our crew.</p>
+            </div>
+            
+            <div class="jobs-list">
+                <a href="#" class="job-item">
+                    <div class="job-info">
+                        <h3 class="job-title">SENIOR UI/UX DESIGNER</h3>
+                        <div class="job-meta">
+                            <span>FULL TIME</span>
+                            <span>/</span>
+                            <span>REMOTE</span>
+                        </div>
+                    </div>
+                    <span class="job-arrow">→</span>
+                </a>
+                
+                <a href="#" class="job-item">
+                    <div class="job-info">
+                        <h3 class="job-title">CREATIVE DEVELOPER</h3>
+                        <div class="job-meta">
+                            <span>FULL TIME</span>
+                            <span>/</span>
+                            <span>REMOTE</span>
+                        </div>
+                    </div>
+                    <span class="job-arrow">→</span>
+                </a>
+                
+                <a href="#" class="job-item">
+                    <div class="job-info">
+                        <h3 class="job-title">MOTION DESIGNER</h3>
+                        <div class="job-meta">
+                            <span>CONTRACT</span>
+                            <span>/</span>
+                            <span>REMOTE</span>
+                        </div>
+                    </div>
+                    <span class="job-arrow">→</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span class="footer-copyright">© 2026 PORTFOLIO</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-tagline">ALWAYS DELIVER</span>
+            </div>
+            <div class="footer-right">
+                <a href="https://www.instagram.com/the.tripathi.g/" class="footer-link" target="_blank">INSTAGRAM</a>
+                <a href="#" class="footer-link">TWITTER</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="js/cursor.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/starfield.js"></script>
+    <script src="js/parallax.js"></script>
+    <script src="js/hover-preview.js"></script>
+    <script src="js/main.js"></script>
+
+    <style>
+        /* About Page Specific Styles */
+        .about-hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .about-hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 4vw;
+        }
+        
+        .about-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .highlight-blue {
+            color: var(--color-electric-blue);
+            text-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+        }
+        
+        .about-section {
+            padding: 8vw 4vw;
+        }
+        
+        .about-content {
+            max-width: 92vw;
+            margin: 0 auto;
+        }
+        
+        /* Mission Section */
+        .mission-text {
+            margin-top: 4vw;
+        }
+        
+        .large-text {
+            font-family: var(--font-mono);
+            font-size: clamp(20px, 2.5vw, 42px);
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--color-white);
+        }
+        
+        /* Values Section */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3vw;
+            margin-top: 4vw;
+        }
+        
+        .value-item {
+            padding: 3vw;
+            border: 1px solid var(--color-gray-mid);
+            transition: border-color 0.3s ease;
+        }
+        
+        .value-item:hover {
+            border-color: var(--color-neon-green);
+        }
+        
+        .value-number {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(36px, 3.5vw, 64px);
+            color: var(--color-neon-green);
+            opacity: 0.3;
+        }
+        
+        .value-title {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(24px, 2.2vw, 40px);
+            margin: 1.5vw 0;
+        }
+        
+        .value-desc {
+            font-family: var(--font-mono);
+            font-size: clamp(14px, 1.2vw, 20px);
+            color: var(--color-gray-light);
+            line-height: 1.6;
+        }
+        
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(to bottom, var(--color-black), var(--color-gray-dark));
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2.5vw;
+            text-align: center;
+        }
+        
+        .stat-item {
+            padding: 2.5vw;
+        }
+        
+        .stat-number {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(48px, 5.5vw, 100px);
+            color: var(--color-neon-green);
+            display: block;
+            text-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+        
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: clamp(12px, 1.1vw, 18px);
+            letter-spacing: 0.1em;
+            color: var(--color-gray-light);
+            margin-top: 0.7vw;
+            display: block;
+        }
+        
+        /* Careers Section */
+        .careers-header {
+            margin: 4vw 0;
+        }
+        
+        .careers-title {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(32px, 4.5vw, 80px);
+            margin-bottom: 1.5vw;
+        }
+        
+        .careers-subtitle {
+            font-family: var(--font-mono);
+            font-size: clamp(14px, 1.3vw, 22px);
+            color: var(--color-gray-light);
+        }
+        
+        .jobs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .job-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2vw 3vw;
+            background: var(--color-gray-dark);
+            border: 1px solid var(--color-gray-mid);
+            transition: all 0.3s ease;
+        }
+        
+        .job-item:hover {
+            background: var(--color-gray-mid);
+            border-color: var(--color-neon-green);
+        }
+        
+        .job-title {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(20px, 1.8vw, 32px);
+            margin-bottom: 0.7vw;
+            transition: color 0.3s ease;
+        }
+        
+        .job-item:hover .job-title {
+            color: var(--color-neon-green);
+        }
+        
+        .job-meta {
+            display: flex;
+            gap: 0.8vw;
+            font-family: var(--font-mono);
+            font-size: clamp(12px, 1vw, 16px);
+            color: var(--color-gray-light);
+            letter-spacing: 0.1em;
+        }
+        
+        .job-arrow {
+            font-family: var(--font-dot-matrix);
+            font-size: clamp(20px, 1.8vw, 32px);
+            color: var(--color-gray-light);
+            transition: all 0.3s ease;
+        }
+        
+        .job-item:hover .job-arrow {
+            color: var(--color-neon-green);
+            transform: translateX(10px);
+        }
+        
+        @media (max-width: 768px) {
+            .about-section {
+                padding: 60px 20px;
+            }
+            
+            .about-content {
+                max-width: 100%;
+            }
+            
+            .values-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .value-item {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .job-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 20px;
+            }
+        }
+    </style>
+</body>
+</html>
