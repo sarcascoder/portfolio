@@ -303,6 +303,12 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
 }
 
+[data-theme="light"] .nav-menu {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-left-color: var(--color-gray-light);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+}
+
 .nav-menu.active {
   opacity: 1;
   visibility: visible;
@@ -357,6 +363,10 @@ body.menu-open .header-right > *:not(.menu-toggle) {
     transform 0.3s ease;
   display: inline-block;
   text-transform: uppercase;
+}
+
+[data-theme="light"] .nav-link {
+    color: var(--color-white);
 }
 
 .nav-link:hover,
@@ -523,7 +533,10 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 
 .about-preview {
   background-color: #413f3f; /* Dark grey */
-  
+}
+
+[data-theme="light"] .about-preview {
+  background-color: var(--color-gray-dark);
 }
 
 .section-content {
@@ -788,6 +801,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   transition:
     border-color 0.3s ease,
     transform 0.3s ease;
+}
+
+[data-theme="light"] .service-item {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: var(--color-gray-light);
 }
 
 .service-item:hover {
@@ -1285,9 +1303,48 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 .modal-divider::after {
     content: '';
     flex: 1;
-    height: 1px;
-    background-color: var(--color-gray-mid);
+    border-bottom: 1px solid var(--color-gray-mid);
 }
+
+.modal-divider span {
+    padding: 0 10px;
+}
+
+.call-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: transparent;
+    color: var(--color-white);
+    border: 1px solid var(--color-white);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    box-sizing: border-box;
+}
+
+.call-btn:hover {
+    background-color: var(--color-white);
+    color: var(--color-black);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="light"] .call-btn {
+    color: var(--color-black);
+    border-color: var(--color-black);
+}
+
+[data-theme="light"] .call-btn:hover {
+    background-color: var(--color-black);
+    color: var(--color-white);
+}
+
+
 
 .modal-divider span {
     padding: 0 15px;
