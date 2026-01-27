@@ -152,6 +152,10 @@ img {
     inset 0 0 300px 100px rgba(0, 0, 0, 0.4);
 }
 
+[data-theme="light"] .vignette-frame {
+    box-shadow: none;
+}
+
 /* ========================================
    Header Styles
    ======================================== */
