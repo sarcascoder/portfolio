@@ -81,37 +81,37 @@ class SmileyFace {
         const neonColor = isDark ? 0x00ff00 : 0x008f00;
 
         // Toggle face expressions
-        // Left eye - slightly shorter in dark/wink mode
-        this.leftEye.scale.y = isDark ? 0.82 : 1.0;
+        // Left eye - slightly shorter in wink mode (now light mode)
+        this.leftEye.scale.y = !isDark ? 0.82 : 1.0;
         
-        // Normal face (light mode)
-        this.rightEye.visible = !isDark;
-        this.rightEyebrow.visible = !isDark;
-        this.rightBrowCapL.visible = !isDark;
-        this.rightBrowCapR.visible = !isDark;
-        this.smile.visible = !isDark;
-        this.leftHook.visible = !isDark;
-        this.rightHook.visible = !isDark;
-        this.lightCapL.visible = !isDark;
-        this.lightCapLInner.visible = !isDark;
-        this.lightCapR.visible = !isDark;
-        this.lightCapRInner.visible = !isDark;
+        // Normal face (now dark mode)
+        this.rightEye.visible = isDark;
+        this.rightEyebrow.visible = isDark;
+        this.rightBrowCapL.visible = isDark;
+        this.rightBrowCapR.visible = isDark;
+        this.smile.visible = isDark;
+        this.leftHook.visible = isDark;
+        this.rightHook.visible = isDark;
+        this.lightCapL.visible = isDark;
+        this.lightCapLInner.visible = isDark;
+        this.lightCapR.visible = isDark;
+        this.lightCapRInner.visible = isDark;
         
-        // Wink/naughty face (dark mode)
-        this.winkRightEye.visible = isDark;
-        this.winkRightEyebrow.visible = isDark;
-        this.smirkSmile.visible = isDark;
-        this.smirkLeftHook.visible = isDark;
-        this.smirkRightHook.visible = isDark;
-        this.tongue.visible = isDark;
-        if (this.tongueLine) this.tongueLine.visible = isDark;
-        this.winkCapBottom.visible = isDark;
-        this.winkCapCenter.visible = isDark;
-        this.winkCapTop.visible = isDark;
-        this.smirkCapL.visible = isDark;
-        this.smirkCapLInner.visible = isDark;
-        this.smirkCapR.visible = isDark;
-        this.smirkCapRInner.visible = isDark;
+        // Wink/naughty face (now light mode)
+        this.winkRightEye.visible = !isDark;
+        this.winkRightEyebrow.visible = !isDark;
+        this.smirkSmile.visible = !isDark;
+        this.smirkLeftHook.visible = !isDark;
+        this.smirkRightHook.visible = !isDark;
+        this.tongue.visible = !isDark;
+        if (this.tongueLine) this.tongueLine.visible = !isDark;
+        this.winkCapBottom.visible = !isDark;
+        this.winkCapCenter.visible = !isDark;
+        this.winkCapTop.visible = !isDark;
+        this.smirkCapL.visible = !isDark;
+        this.smirkCapLInner.visible = !isDark;
+        this.smirkCapR.visible = !isDark;
+        this.smirkCapRInner.visible = !isDark;
 
         this.smileyGroup.traverse((child) => {
             if (child.isLine || child.isMesh) {
@@ -197,13 +197,13 @@ class SmileyFace {
         // Left eye - closer to center (slightly shorter in dark/wink mode)
         this.leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
         this.leftEye.position.set(-0.42, 0.15, 1.7);
-        this.leftEye.scale.y = isDark ? 0.82 : 1.0;
+        this.leftEye.scale.y = !isDark ? 0.82 : 1.0;
         this.smileyGroup.add(this.leftEye);
         
         // Right eye - closer to center (visible in light mode / normal face)
         this.rightEye = new THREE.Mesh(eyeGeometry.clone(), eyeMaterial.clone());
         this.rightEye.position.set(0.42, 0.15, 1.7);
-        this.rightEye.visible = !isDark;
+        this.rightEye.visible = isDark;
         this.smileyGroup.add(this.rightEye);
         
         // === WINK RIGHT EYE (dark mode) - Bottom stroke of "<" chevron ===
@@ -220,7 +220,7 @@ class SmileyFace {
             name: 'faceMaterial'
         });
         this.winkRightEye = new THREE.Mesh(winkBottomGeometry, winkEyeMaterial);
-        this.winkRightEye.visible = isDark;
+        this.winkRightEye.visible = !isDark;
         this.smileyGroup.add(this.winkRightEye);
         
         // Round caps for wink chevron (spheres at endpoints for smooth corners)
@@ -230,19 +230,19 @@ class SmileyFace {
         // Cap at bottom stroke outer end
         this.winkCapBottom = new THREE.Mesh(capGeometry, capMaterial);
         this.winkCapBottom.position.set(0.92, 0.05, 1.62);
-        this.winkCapBottom.visible = isDark;
+        this.winkCapBottom.visible = !isDark;
         this.smileyGroup.add(this.winkCapBottom);
         
         // Cap at convergence point
         this.winkCapCenter = new THREE.Mesh(capGeometry.clone(), capMaterial.clone());
         this.winkCapCenter.position.set(0.24, 0.20, 1.62);
-        this.winkCapCenter.visible = isDark;
+        this.winkCapCenter.visible = !isDark;
         this.smileyGroup.add(this.winkCapCenter);
         
         // Cap at top stroke outer end
         this.winkCapTop = new THREE.Mesh(capGeometry.clone(), capMaterial.clone());
         this.winkCapTop.position.set(0.63, 0.63, 1.62);
-        this.winkCapTop.visible = isDark;
+        this.winkCapTop.visible = !isDark;
         this.smileyGroup.add(this.winkCapTop);
         
         // === LEFT EYEBROW - Simple arc shape ===
@@ -281,18 +281,18 @@ class SmileyFace {
         const rightBrowGeometry = new THREE.TubeGeometry(rightBrowCurve, 20, 0.04, 8, false);
         
         this.rightEyebrow = new THREE.Mesh(rightBrowGeometry, browMaterial.clone());
-        this.rightEyebrow.visible = !isDark;
+        this.rightEyebrow.visible = isDark;
         this.smileyGroup.add(this.rightEyebrow);
         
         // Round caps on right eyebrow (light mode only)
         this.rightBrowCapL = new THREE.Mesh(browCapGeo.clone(), browCapMat.clone());
         this.rightBrowCapL.position.set(0.2, 0.85, 1.55);
-        this.rightBrowCapL.visible = !isDark;
+        this.rightBrowCapL.visible = isDark;
         this.smileyGroup.add(this.rightBrowCapL);
         
         this.rightBrowCapR = new THREE.Mesh(browCapGeo.clone(), browCapMat.clone());
         this.rightBrowCapR.position.set(0.75, 0.85, 1.55);
-        this.rightBrowCapR.visible = !isDark;
+        this.rightBrowCapR.visible = isDark;
         this.smileyGroup.add(this.rightBrowCapR);
         
         // === WINK RIGHT EYEBROW (dark mode) - Top stroke of "<" chevron ===
@@ -304,7 +304,7 @@ class SmileyFace {
         );
         const winkTopGeometry = new THREE.TubeGeometry(winkTopCurve, 32, 0.065, 12, false);
         this.winkRightEyebrow = new THREE.Mesh(winkTopGeometry, browMaterial.clone());
-        this.winkRightEyebrow.visible = isDark;
+        this.winkRightEyebrow.visible = !isDark;
         this.smileyGroup.add(this.winkRightEyebrow);
         
         // === SMILE - Wide curve (normal / light mode) ===
@@ -320,7 +320,7 @@ class SmileyFace {
         });
         
         this.smile = new THREE.Mesh(smileGeometry, smileMaterial);
-        this.smile.visible = !isDark;
+        this.smile.visible = isDark;
         this.smileyGroup.add(this.smile);
         
         // === LEFT HOOK - Curved arc (normal / light mode) ===
@@ -331,7 +331,7 @@ class SmileyFace {
         );
         const leftHookGeometry = new THREE.TubeGeometry(leftHookCurve, 16, 0.055, 10, false);
         this.leftHook = new THREE.Mesh(leftHookGeometry, smileMaterial.clone());
-        this.leftHook.visible = !isDark;
+        this.leftHook.visible = isDark;
         this.smileyGroup.add(this.leftHook);
         
         // === RIGHT HOOK - Curved arc (normal / light mode) ===
@@ -342,7 +342,7 @@ class SmileyFace {
         );
         const rightHookGeometry = new THREE.TubeGeometry(rightHookCurve, 16, 0.055, 10, false);
         this.rightHook = new THREE.Mesh(rightHookGeometry, smileMaterial.clone());
-        this.rightHook.visible = !isDark;
+        this.rightHook.visible = isDark;
         this.smileyGroup.add(this.rightHook);
         
         // Round caps on light-mode smile hooks
@@ -351,22 +351,22 @@ class SmileyFace {
         
         this.lightCapL = new THREE.Mesh(lightHookCapGeo, lightHookCapMat);
         this.lightCapL.position.set(-1.2, -0.5, 1.4);
-        this.lightCapL.visible = !isDark;
+        this.lightCapL.visible = isDark;
         this.smileyGroup.add(this.lightCapL);
         
         this.lightCapLInner = new THREE.Mesh(lightHookCapGeo.clone(), lightHookCapMat.clone());
         this.lightCapLInner.position.set(-0.9, -0.35, 1.38);
-        this.lightCapLInner.visible = !isDark;
+        this.lightCapLInner.visible = isDark;
         this.smileyGroup.add(this.lightCapLInner);
         
         this.lightCapR = new THREE.Mesh(lightHookCapGeo.clone(), lightHookCapMat.clone());
         this.lightCapR.position.set(1.2, -0.5, 1.4);
-        this.lightCapR.visible = !isDark;
+        this.lightCapR.visible = isDark;
         this.smileyGroup.add(this.lightCapR);
         
         this.lightCapRInner = new THREE.Mesh(lightHookCapGeo.clone(), lightHookCapMat.clone());
         this.lightCapRInner.position.set(0.9, -0.35, 1.38);
-        this.lightCapRInner.visible = !isDark;
+        this.lightCapRInner.visible = isDark;
         this.smileyGroup.add(this.lightCapRInner);
         
         // === DARK MODE SMILE - Symmetrical (same shape as normal smile) ===
@@ -381,7 +381,7 @@ class SmileyFace {
             name: 'faceMaterial'
         });
         this.smirkSmile = new THREE.Mesh(smirkGeometry, smirkMaterial);
-        this.smirkSmile.visible = isDark;
+        this.smirkSmile.visible = !isDark;
         this.smileyGroup.add(this.smirkSmile);
         
         // Left hook - curved arc
@@ -392,7 +392,7 @@ class SmileyFace {
         );
         const smirkLeftHookGeometry = new THREE.TubeGeometry(smirkLeftHookCurve, 16, 0.055, 10, false);
         this.smirkLeftHook = new THREE.Mesh(smirkLeftHookGeometry, smirkMaterial.clone());
-        this.smirkLeftHook.visible = isDark;
+        this.smirkLeftHook.visible = !isDark;
         this.smileyGroup.add(this.smirkLeftHook);
         
         // Right hook - curved arc (mirrors left)
@@ -403,7 +403,7 @@ class SmileyFace {
         );
         const smirkRightHookGeometry = new THREE.TubeGeometry(smirkRightHookCurve, 16, 0.055, 10, false);
         this.smirkRightHook = new THREE.Mesh(smirkRightHookGeometry, smirkMaterial.clone());
-        this.smirkRightHook.visible = isDark;
+        this.smirkRightHook.visible = !isDark;
         this.smileyGroup.add(this.smirkRightHook);
         
         // Round caps on dark-mode smile hook endpoints
@@ -412,22 +412,22 @@ class SmileyFace {
         
         this.smirkCapL = new THREE.Mesh(hookCapGeo, hookCapMat);
         this.smirkCapL.position.set(-1.2, -0.5, 1.4);
-        this.smirkCapL.visible = isDark;
+        this.smirkCapL.visible = !isDark;
         this.smileyGroup.add(this.smirkCapL);
         
         this.smirkCapLInner = new THREE.Mesh(hookCapGeo.clone(), hookCapMat.clone());
         this.smirkCapLInner.position.set(-0.9, -0.35, 1.38);
-        this.smirkCapLInner.visible = isDark;
+        this.smirkCapLInner.visible = !isDark;
         this.smileyGroup.add(this.smirkCapLInner);
         
         this.smirkCapR = new THREE.Mesh(hookCapGeo.clone(), hookCapMat.clone());
         this.smirkCapR.position.set(1.2, -0.5, 1.4);
-        this.smirkCapR.visible = isDark;
+        this.smirkCapR.visible = !isDark;
         this.smileyGroup.add(this.smirkCapR);
         
         this.smirkCapRInner = new THREE.Mesh(hookCapGeo.clone(), hookCapMat.clone());
         this.smirkCapRInner.position.set(0.9, -0.35, 1.38);
-        this.smirkCapRInner.visible = isDark;
+        this.smirkCapRInner.visible = !isDark;
         this.smileyGroup.add(this.smirkCapRInner);
         
         // === TONGUE (dark mode) - Filled solid half-ellipse ===
@@ -454,7 +454,7 @@ class SmileyFace {
         this.tongue = new THREE.Mesh(tongueGeometry, tongueMaterial);
         // Position: top edge at smile's lowest point (y≈-1.0, x≈-0.13)
         this.tongue.position.set(0, -1.05, 1.68);
-        this.tongue.visible = isDark;
+        this.tongue.visible = !isDark;
         this.smileyGroup.add(this.tongue);
         
         // No separate tongue line needed
