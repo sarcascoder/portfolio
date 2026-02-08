@@ -11,11 +11,11 @@ class HoverPreview {
         
         // Preview images (can be updated dynamically)
         this.previewImages = {
-            home: 'logo.png',
-            projects: 'logo.png',
-            services: 'logo.png',
-            about: 'logo.png',
-            contact: 'logo.png'
+            home: 'at_logo.png',
+            projects: 'at_logo.png',
+            services: 'at_logo.png',
+            about: 'at_logo.png',
+            contact: 'at_logo.png'
         };
         
         this.currentPreview = null;
