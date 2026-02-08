@@ -80,48 +80,120 @@ class SmileyFace {
         const gridColor = isDark ? 0x555555 : 0xaaaaaa;
         const neonColor = isDark ? 0x00ff00 : 0x008f00;
 
-        // Toggle face expressions
-        // Left eye - slightly shorter in wink mode (now light mode)
-        this.leftEye.scale.y = !isDark ? 0.82 : 1.0;
-        
-        // Normal face (now dark mode)
-        this.rightEye.visible = isDark;
-        this.rightEyebrow.visible = isDark;
-        this.rightBrowCapL.visible = isDark;
-        this.rightBrowCapR.visible = isDark;
-        this.smile.visible = isDark;
-        this.leftHook.visible = isDark;
-        this.rightHook.visible = isDark;
-        this.lightCapL.visible = isDark;
-        this.lightCapLInner.visible = isDark;
-        this.lightCapR.visible = isDark;
-        this.lightCapRInner.visible = isDark;
-        
-        // Wink/naughty face (now light mode)
-        this.winkRightEye.visible = !isDark;
-        this.winkRightEyebrow.visible = !isDark;
-        this.smirkSmile.visible = !isDark;
-        this.smirkLeftHook.visible = !isDark;
-        this.smirkRightHook.visible = !isDark;
-        this.tongue.visible = !isDark;
-        if (this.tongueLine) this.tongueLine.visible = !isDark;
-        this.winkCapBottom.visible = !isDark;
-        this.winkCapCenter.visible = !isDark;
-        this.winkCapTop.visible = !isDark;
-        this.smirkCapL.visible = !isDark;
-        this.smirkCapLInner.visible = !isDark;
-        this.smirkCapR.visible = !isDark;
-        this.smirkCapRInner.visible = !isDark;
+        // Smooth fade out
+        this.fadeOut(() => {
+            // Toggle face expressions after fade out
+            // Left eye - slightly shorter in wink mode (now light mode)
+            this.leftEye.scale.y = !isDark ? 0.82 : 1.0;
+            
+            // Normal face (now dark mode)
+            this.rightEye.visible = isDark;
+            this.rightEyebrow.visible = isDark;
+            this.rightBrowCapL.visible = isDark;
+            this.rightBrowCapR.visible = isDark;
+            this.smile.visible = isDark;
+            this.leftHook.visible = isDark;
+            this.rightHook.visible = isDark;
+            this.lightCapL.visible = isDark;
+            this.lightCapLInner.visible = isDark;
+            this.lightCapR.visible = isDark;
+            this.lightCapRInner.visible = isDark;
+            
+            // Wink/naughty face (now light mode)
+            this.winkRightEye.visible = !isDark;
+            this.winkRightEyebrow.visible = !isDark;
+            this.smirkSmile.visible = !isDark;
+            this.smirkLeftHook.visible = !isDark;
+            this.smirkRightHook.visible = !isDark;
+            this.tongue.visible = !isDark;
+            if (this.tongueLine) this.tongueLine.visible = !isDark;
+            this.winkCapBottom.visible = !isDark;
+            this.winkCapCenter.visible = !isDark;
+            this.winkCapTop.visible = !isDark;
+            this.smirkCapL.visible = !isDark;
+            this.smirkCapLInner.visible = !isDark;
+            this.smirkCapR.visible = !isDark;
+            this.smirkCapRInner.visible = !isDark;
 
-        this.smileyGroup.traverse((child) => {
-            if (child.isLine || child.isMesh) {
-                if (child.material.name === 'gridMaterial') {
-                    child.material.color.setHex(gridColor);
-                } else if (child.material.name === 'faceMaterial') {
-                    child.material.color.setHex(neonColor);
+            this.smileyGroup.traverse((child) => {
+                if (child.isLine || child.isMesh) {
+                    if (child.material.name === 'gridMaterial') {
+                        child.material.color.setHex(gridColor);
+                    } else if (child.material.name === 'faceMaterial') {
+                        child.material.color.setHex(neonColor);
+                    }
                 }
-            }
+            });
+            
+            // Smooth fade in
+            this.fadeIn();
         });
+    }
+    
+    fadeOut(callback) {
+        const duration = 500; // ms - slower transition
+        const startTime = Date.now();
+        const startScale = this.smileyGroup.scale.x;
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // Ease out
+            
+            // Scale down and fade
+            const scale = startScale * (1 - eased * 0.15);
+            this.smileyGroup.scale.set(scale, scale, scale);
+            
+            // Fade opacity on all materials
+            this.smileyGroup.traverse((child) => {
+                if (child.material) {
+                    child.material.opacity = 1 - eased * 0.7;
+                    child.material.transparent = true;
+                }
+            });
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                callback();
+            }
+        };
+        animate();
+    }
+    
+    fadeIn() {
+        const duration = 700; // ms - slower transition
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // Ease out
+            
+            // Scale back up
+            const scale = 0.85 + eased * 0.15;
+            this.smileyGroup.scale.set(scale, scale, scale);
+            
+            // Fade opacity back in
+            this.smileyGroup.traverse((child) => {
+                if (child.material) {
+                    child.material.opacity = 0.3 + eased * 0.7;
+                }
+            });
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Reset to full opacity
+                this.smileyGroup.traverse((child) => {
+                    if (child.material && child.material.name !== 'gridMaterial') {
+                        child.material.opacity = 1;
+                        child.material.transparent = false;
+                    }
+                });
+            }
+        };
+        animate();
     }
 
     createGlobeWithFace() {

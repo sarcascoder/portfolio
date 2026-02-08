@@ -36,7 +36,75 @@ const ThemeManager = {
     toggle() {
         const current = document.documentElement.getAttribute('data-theme') || 'dark';
         const next = current === 'dark' ? 'light' : 'dark';
-        this.applyTheme(next);
+        
+        // Create glitch overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'theme-glitch-overlay';
+        document.body.appendChild(overlay);
+        
+        // Create TV static canvas
+        const staticCanvas = document.createElement('canvas');
+        staticCanvas.className = 'tv-static-overlay';
+        staticCanvas.width = window.innerWidth;
+        staticCanvas.height = window.innerHeight;
+        document.body.appendChild(staticCanvas);
+        
+        const ctx = staticCanvas.getContext('2d');
+        let staticFrame = 0;
+        const maxStaticFrames = 8;
+        
+        // Animate static noise
+        const animateStatic = () => {
+            if (staticFrame >= maxStaticFrames) {
+                staticCanvas.remove();
+                return;
+            }
+            
+            // Draw random static noise
+            const imageData = ctx.createImageData(staticCanvas.width, staticCanvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = Math.random() * 255;
+                data[i] = noise;     // R
+                data[i + 1] = noise; // G
+                data[i + 2] = noise; // B
+                data[i + 3] = 200;   // A (semi-transparent)
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            staticFrame++;
+            
+            setTimeout(() => requestAnimationFrame(animateStatic), 25);
+        };
+        
+        // Start static animation
+        animateStatic();
+        
+        // Trigger glitch animation
+        let flickerCount = 0;
+        const maxFlickers = 6;
+        const flickerInterval = setInterval(() => {
+            // Rapid theme flicker
+            if (flickerCount % 2 === 0) {
+                document.documentElement.setAttribute('data-theme', next);
+            } else {
+                document.documentElement.setAttribute('data-theme', current);
+            }
+            flickerCount++;
+            
+            if (flickerCount >= maxFlickers) {
+                clearInterval(flickerInterval);
+                // Final theme application
+                this.applyTheme(next);
+                
+                // Remove overlay after animation
+                setTimeout(() => {
+                    overlay.classList.add('fade-out');
+                    setTimeout(() => overlay.remove(), 200);
+                }, 100);
+            }
+        }, 50);
     },
     
     setupButton() {
