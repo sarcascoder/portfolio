@@ -567,7 +567,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   font-size: clamp(20px, 3.5vw, 48px);
   font-weight: 400;
   line-height: 1.4;
-  max-width: 85vw;
+  max-width: calc(95% - 80px); /* Account for marquee width */
 }
 
 /* Vertical Marquee Styles */
@@ -946,6 +946,19 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 
 .footer-link:hover {
   color: var(--color-neon-green);
+}
+
+/* Footer Social Icons */
+.footer-icon {
+  color: rgba(255, 255, 255, 0.5); /* Subtle contrast */
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.footer-icon:hover {
+  color: var(--color-neon-green);
+  transform: translateY(-3px);
 }
 
 /* ========================================
@@ -1459,6 +1472,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
         width: 100%;
         max-width: 100%;
         padding: 0 15px;
+        margin-top: 30vh; /* Push text down */
     }
 
     .hero-title {
