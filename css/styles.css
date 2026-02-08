@@ -1155,10 +1155,12 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 }
 
 .site-logo {
-    height: clamp(60px, 5.5vw, 100px);
+    height: clamp(40px, 4vw, 60px); /* Smaller logo */
     width: auto;
     object-fit: contain;
     transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0.5; /* Even less bright */
+    filter: brightness(0.6);
 }
 
 .logo-image-link:hover .site-logo {
