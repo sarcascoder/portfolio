@@ -54,6 +54,7 @@ class MercuryGlobe {
         this.createLighting();
         this.loadMercuryModel();
         this.createSmileyFace();
+        this.setupScrollAnimation();
         this.bindEvents();
         this.animate();
     }
@@ -185,6 +186,135 @@ class MercuryGlobe {
         this.mesh = new THREE.Mesh(geometry, material);
         this.spinGroup.add(this.mesh);
         this.mercurySurface = this.mesh;
+    }
+
+    setupScrollAnimation() {
+        // Ensure GSAP is loaded
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+            console.warn('GSAP or ScrollTrigger not loaded');
+            return;
+        }
+
+        // Safety Trigger: Force reset when at very top to prevent "stuck on right"
+        ScrollTrigger.create({
+            trigger: "body",
+            start: "top top",
+            end: "100px",  // Small range at top
+            onEnter: () => {
+                // Ensure we are in hero state
+                gsap.to(this.container, {
+                    left: "4vw",
+                    top: "50%",
+                    scale: 1,
+                    yPercent: -50,
+                    overwrite: "auto",
+                    duration: 0.5
+                });
+            },
+            onLeaveBack: () => {
+                 // Ensure we are in hero state when hitting top from bottom
+                 gsap.to(this.container, {
+                    left: "4vw",
+                    top: "50%",
+                    scale: 1,
+                    yPercent: -50,
+                    overwrite: "auto",
+                    duration: 0.5
+                });
+            }
+        });
+
+        // --- Transition to About Section ---
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#about-section",
+                start: "top bottom", // When top of about section hits bottom of viewport
+                end: "center center",   // When top of about section hits center
+                scrub: 0.5, // Reduced for tighter response
+                toggleActions: "play reverse play reverse"
+            }
+        });
+
+        // Step 1: First scale down to 85% and dip down slightly (before moving right)
+        // Use fromTo to explicitly enforce the initial state so fast scrolling up always returns here
+        tl.fromTo(this.container, {
+            left: "4vw",
+            top: "50%",
+            scale: 1,
+            yPercent: -50
+        }, {
+            scale: 0.85,
+            top: "60%",       // Dip down a bit
+            duration: 1,
+            ease: "power1.inOut"
+        });
+
+        // Step 2: Then move right and scale down to 50%
+        tl.to(this.container, {
+            left: "60%",      // Move next to marquee 
+            top: "50%",       // Return to center
+            scale: 0.5,       // Final size for About section
+            duration: 2,
+            ease: "power2.inOut"
+        });
+
+        // --- Transition to Featured/Projects Section ---
+        const tlProjects = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#projects-section",
+                start: "top bottom", // When top of projects hits bottom of viewport
+                end: "center center", // When center of projects hits center
+                scrub: 0.5,
+                toggleActions: "play reverse play reverse"
+            }
+        });
+        // Move to left most part of the screen (Scale stays 0.5)
+        tlProjects.to(this.container, {
+            left: "0%",       // Fully left
+            top: "50%",       // Keep centered vertically
+            scale: 0.5,       // Maintain size
+            ease: "power2.inOut"
+        });
+
+        // --- Transition to Services Section ---
+        const tlServices = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#services-section",
+                start: "top bottom", // When top of services hits bottom of viewport
+                end: "center center", // When center of services hits center
+                scrub: 0.5,
+                toggleActions: "play reverse play reverse"
+            }
+        });
+
+        // Move back to right (same position as about section)
+        tlServices.to(this.container, {
+            left: "60%",      // Move back to right
+            top: "50%",       // Keep centered vertically
+            scale: 0.5,       // Maintain size
+            ease: "power2.inOut"
+        });
+
+        // --- Transition to Contact Section ---
+        const tlContact = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#contact",
+                start: "top bottom", // When top of contact hits bottom of viewport
+                end: "center center", // When center of contact hits center
+                scrub: 0.5,
+                toggleActions: "play reverse play reverse"
+            }
+        });
+
+        // Scale up to 90% and move slightly left (to leave 10vw gap from right)
+        tlContact.to(this.container, {
+            scale: 0.9,       // Scale up to 90%
+            left: "50%",      // Move to 50% so visual right edge is ~90% (10vw gap)
+            ease: "power2.inOut"
+        });
+        
+        // Optional: slight rotation or other effects on the globe itself
+        // But the container animation handles position/size
     }
     
     createSmileyFace() {
@@ -791,8 +921,15 @@ class MercuryGlobe {
         this.mouse.x = this.lerp(this.mouse.x, this.targetMouse.x, 0.1);
         this.mouse.y = this.lerp(this.mouse.y, this.targetMouse.y, 0.1);
         
-        const offsetX = (this.mouse.x - this.centerX) / this.centerX;
-        const offsetY = (this.mouse.y - this.centerY) / this.centerY;
+        // Calculate center based on current container position
+        const rect = this.container.getBoundingClientRect();
+        const globeCenterX = rect.left + rect.width / 2;
+        const globeCenterY = rect.top + rect.height / 2;
+
+        // Calculate offset relative to the globe's center
+        // We use window dimensions for normalization to keep sensitivity consistent
+        const offsetX = (this.mouse.x - globeCenterX) / (window.innerWidth / 2);
+        const offsetY = (this.mouse.y - globeCenterY) / (window.innerHeight / 2);
         
         this.targetRotation.y = offsetX * this.config.maxRotation;
         this.targetRotation.x = offsetY * this.config.maxRotation;

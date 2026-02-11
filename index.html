@@ -424,22 +424,22 @@
     <!-- Globes self-initialize from their module scripts -->
 
     <style>
-      /* Smiley Globe Container - Left aligned, scales with viewport width */
+      /* Smiley Globe Container - Fixed position, moves with scroll */
       .smiley-globe-container {
-        position: absolute;
+        position: fixed;
         top: 50%;
         left: 4vw;
         transform: translateY(-50%);
         width: 42vw;
         height: 42vw;
-        z-index: 0;
+        z-index: 10; /* Ensure it's above background but below text initially */
         pointer-events: none;
       }
 
       /* Make hero content sit above the smiley */
       .hero-content {
         position: relative;
-        z-index: 3;
+        z-index: 20;
       }
 
       @media (max-width: 1024px) {
