@@ -56,8 +56,8 @@ class SmileyFace {
     createEarth() {
         this.earthGroup = new THREE.Group();
         
-        // Reduced radius: 1.8 (was 2.2)
-        const earthRadius = 1.8;
+        // Reduced radius: 1.4 (was 1.8)
+        const earthRadius = 1.4;
         const earthGeometry = new THREE.SphereGeometry(earthRadius, 64, 64);
         
         const textureLoader = new THREE.TextureLoader();

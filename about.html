@@ -242,6 +242,7 @@
     <script type="module" src="js/starfield.js"></script>
     <script type="module" src="js/parallax.js"></script>
     <script type="module" src="js/hover-preview.js"></script>
+    <script type="module" src="js/smiley-face.js"></script>
     <script type="module" src="js/main.js"></script>
 
     <style>
@@ -470,5 +471,28 @@
             }
         }
     </style>
+    <!-- Fixed Globe Logo with Contact Text -->
+    <!-- MODIFIED: Now contains the Smiley Earth -->
+    <div id="contact-earth-wrapper" style="position: fixed; bottom: 10px; right: 10px; z-index: 100;">
+        <div id="contact-earth-container" style="width: 100%; height: 100%;">
+            <!-- SmileyFace will inject canvas here -->
+        </div>
+        
+        <!-- Rotating Text Ring Overlay -->
+        <div class="rotating-text-ring" style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; pointer-events: none;">
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+                <defs>
+                    <path id="circle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                </defs>
+                <text font-size="10" font-weight="bold" font-family="'Space Mono', monospace" fill="var(--color-text)">
+                    <textPath href="#circle" textLength="225" lengthAdjust="spacing">
+                        CONTACT • CONTACT • CONTACT • CONTACT • 
+                    </textPath>
+                </text>
+            </svg>
+        </div>
+        <a href="index.html#contact" class="globe-link-overlay" aria-label="Contact" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:10;"></a>
+    </div>
+
 </body>
 </html>

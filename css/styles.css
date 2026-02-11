@@ -1086,11 +1086,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 /* Fixed Bottom Right Globe */
 #contact-earth-wrapper {
     position: fixed;
-  bottom: 10px;
-  right: 10px;
-  /* Smaller by default (was 64px) */
-  width: 52px;
-  height: 52px;
+  bottom: 20px;
+  right: 20px;
+  /* Responsive sizing: min 70px, pref 10vw, max 150px */
+  width: clamp(70px, 10vw, 150px);
+  height: clamp(70px, 10vw, 150px);
     z-index: 9999;
     display: flex;
     justify-content: center;
@@ -1098,30 +1098,18 @@ body.menu-open .header-right > *:not(.menu-toggle) {
     pointer-events: auto;
 }
 
-/* Scale the fixed contact globe down further on smaller screens */
+/* Scale the fixed contact globe down further on smaller screens - Adjusted for clamp */
 @media (max-width: 768px) {
   #contact-earth-wrapper {
-    width: 44px;
-    height: 44px;
-    bottom: 8px;
-    right: 8px;
-  }
-
-  .rotating-text-ring text {
-    font-size: 7px;
+    bottom: 15px;
+    right: 15px;
   }
 }
 
 @media (max-width: 480px) {
   #contact-earth-wrapper {
-    width: 38px;
-    height: 38px;
-    bottom: 6px;
-    right: 6px;
-  }
-
-  .rotating-text-ring text {
-    font-size: 6px;
+    bottom: 10px;
+    right: 10px;
   }
 }
 
