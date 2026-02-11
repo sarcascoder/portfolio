@@ -1053,6 +1053,17 @@ body.menu-open .header-right > *:not(.menu-toggle) {
     mix-blend-mode: difference;
 }
 
+/* Hero Mercury globe: hard-disable any debug border/outline/box highlight */
+.smiley-globe-container,
+#mercury-container,
+#mercury-container canvas,
+#mercury-canvas {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
 /* Home Icon Styles */
 .home-icon-link {
     color: var(--color-white);
@@ -1073,32 +1084,59 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 }
 
 /* Fixed Bottom Right Globe */
-#fixed-globe-container {
+#contact-earth-wrapper {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 140px;
-    height: 140px;
+  bottom: 10px;
+  right: 10px;
+  /* Smaller by default (was 64px) */
+  width: 52px;
+  height: 52px;
     z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: auto; /* Ensure it's clickable */
+    pointer-events: auto;
 }
 
-.globe-wrapper {
+/* Scale the fixed contact globe down further on smaller screens */
+@media (max-width: 768px) {
+  #contact-earth-wrapper {
+    width: 44px;
+    height: 44px;
+    bottom: 8px;
+    right: 8px;
+  }
+
+  .rotating-text-ring text {
+    font-size: 7px;
+  }
+}
+
+@media (max-width: 480px) {
+  #contact-earth-wrapper {
+    width: 38px;
+    height: 38px;
+    bottom: 6px;
+    right: 6px;
+  }
+
+  .rotating-text-ring text {
+    font-size: 6px;
+  }
+}
+
+#contact-earth-container {
     position: absolute;
-    width: 100px;
-    height: 100px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
     border-radius: 50%;
     overflow: hidden;
     z-index: 2;
 }
 
-#logo-globe-canvas {
+#contact-earth-container canvas {
     width: 100% !important;
     height: 100% !important;
 }
@@ -1107,7 +1145,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
     position: absolute;
     width: 100%;
     height: 100%;
-    animation: spin-text 10s linear infinite;
+  animation: spin-text 13s linear infinite;
     z-index: 1;
 }
 
@@ -1139,12 +1177,12 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 }
 
 /* Hover effect */
-#fixed-globe-container:hover .rotating-text-ring text {
+#contact-earth-wrapper:hover .rotating-text-ring text {
     fill: var(--color-white);
     text-shadow: 0 0 5px var(--color-neon-green);
 }
-#fixed-globe-container:hover .globe-wrapper {
-    transform: translate(-50%, -50%) scale(1.1);
+#contact-earth-wrapper:hover #contact-earth-container {
+  transform: scale(1.03);
     transition: transform 0.3s ease;
 }
 
@@ -1437,16 +1475,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    #fixed-globe-container {
-        width: 100px;
-        height: 100px;
-        bottom: 20px;
-        right: 20px;
-    }
-
-    .globe-wrapper {
-        width: 70px;
-        height: 70px;
+    #contact-earth-wrapper {
+  width: 60px;
+  height: 60px;
+  bottom: 10px;
+  right: 10px;
     }
 }
 
@@ -1513,16 +1546,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
         grid-template-columns: 1fr; /* Stack projects */
     }
 
-    #fixed-globe-container {
-        width: 80px;
-        height: 80px;
-        bottom: 15px;
-        right: 15px;
-    }
-    
-    .globe-wrapper {
-        width: 50px;
-        height: 50px;
+    #contact-earth-wrapper {
+  width: 52px;
+  height: 52px;
+  bottom: 8px;
+  right: 8px;
     }
     
     /* Ensure modal fits on mobile screen */

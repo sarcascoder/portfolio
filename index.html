@@ -107,7 +107,7 @@
 
 
       <!-- Smiley Face with Eye Tracking -->
-      <div class="smiley-globe-container" id="smiley-container"></div>
+      <div class="smiley-globe-container" id="mercury-container"></div>
 
       <!-- Scroll Indicator -->
       <div class="scroll-indicator">
@@ -337,26 +337,24 @@
     <script type="module" src="js/starfield.js"></script>
     <script type="module" src="js/hover-preview.js"></script>
     <script type="module" src="js/smiley-face.js"></script>
-    <script type="module" src="js/logo-globe.js"></script>
+    <script type="module" src="js/mercury-globe.js"></script>
     <script type="module" src="js/portal-effect.js"></script>
-    <!-- Fixed Globe Logo with Contact Text -->
-    <div id="fixed-globe-container">
-        <div class="globe-wrapper">
-            <canvas id="logo-globe-canvas"></canvas>
-        </div>
-        <div class="rotating-text-ring">
-            <svg viewBox="0 0 100 100" width="100" height="100">
+    <!-- Fixed Earth Globe with Contact Text -->
+    <div id="contact-earth-wrapper" style="position: fixed; bottom: 30px; right: 30px; width: 140px; height: 140px; z-index: 100;">
+        <div id="contact-earth-container" style="width: 100%; height: 100%;"></div>
+        <div class="rotating-text-ring" style="position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; pointer-events: none;">
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
                 <defs>
                     <path id="circle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
                 </defs>
-                <text font-size="13.5" font-weight="bold" font-family="'Space Mono', monospace">
+                <text font-size="13.5" font-weight="bold" font-family="'Space Mono', monospace" fill="var(--color-text)">
                     <textPath href="#circle" textLength="230" lengthAdjust="spacing">
                         CONTACT • CONTACT • CONTACT •
                     </textPath>
                 </text>
             </svg>
         </div>
-        <a href="#contact" class="globe-link-overlay" aria-label="Contact"></a>
+        <a href="#contact" class="globe-link-overlay" aria-label="Contact" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:10;"></a>
     </div>
 
     <!-- Contact Modal -->
@@ -417,15 +415,7 @@
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/contact-modal.js"></script>
 
-    <!-- Initialize Smiley Face -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        // Initialize eye-tracking smiley
-        window.smileyFace = new SmileyFace(
-          document.getElementById('smiley-container')
-        );
-      });
-    </script>
+    <!-- Globes self-initialize from their module scripts -->
 
     <style>
       /* Smiley Globe Container - Left aligned, scales with viewport width */
