@@ -532,11 +532,13 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 }
 
 .about-preview {
-  background-color: #413f3f; /* Dark grey */
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 [data-theme="light"] .about-preview {
-  background-color: var(--color-gray-dark);
+  background-color: transparent;
 }
 
 .section-content {
@@ -586,6 +588,8 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   overflow: hidden;
   z-index: 5;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
 }
 
 .marquee-track {

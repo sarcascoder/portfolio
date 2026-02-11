@@ -51,7 +51,7 @@ const ThemeManager = {
         
         const ctx = staticCanvas.getContext('2d');
         let staticFrame = 0;
-        const maxStaticFrames = 4;
+        const maxStaticFrames = 6;
         
         // Animate static noise
         const animateStatic = () => {
@@ -83,7 +83,7 @@ const ThemeManager = {
         
         // Trigger glitch animation
         let flickerCount = 0;
-        const maxFlickers = 3;
+        const maxFlickers = 4;
         const flickerInterval = setInterval(() => {
             // Rapid theme flicker
             if (flickerCount % 2 === 0) {
@@ -102,7 +102,7 @@ const ThemeManager = {
                 setTimeout(() => {
                     overlay.classList.add('fade-out');
                     setTimeout(() => overlay.remove(), 100);
-                }, 50);
+                }, 70);
             }
         }, 40);
     },
