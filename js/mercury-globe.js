@@ -37,6 +37,14 @@ class MercuryGlobe {
         // Bigger Mercury globe
         this.targetRadius = 2.5;
 
+        // Theme Transition State
+        this.themeProgress = 0; // 0 = Light, 1 = Dark
+        this.targetThemeProgress = 1; // Default target
+
+        // Eyebrow Animation State
+        this.eyebrowOffset = 0;
+        this.targetEyebrowOffset = 0;
+
         this.init();
     }
     
@@ -207,14 +215,13 @@ class MercuryGlobe {
         eyeGeometry.scale(0.7, 1.6, 0.35);
         const eyeMaterial = new THREE.MeshBasicMaterial({
             color: faceFill,
-            transparent: true,
-            opacity: 0.98,
-            depthWrite: false
+            transparent: true, opacity: 1
         });
         const eyeGlowMaterial = new THREE.MeshBasicMaterial({
             color: faceGlow,
             transparent: true,
             opacity: 0.55,
+            side: THREE.BackSide,
             depthWrite: false
         });
         
@@ -251,12 +258,13 @@ class MercuryGlobe {
         );
         const winkEyeMaterial = new THREE.MeshBasicMaterial({
             color: faceFill,
-            transparent: true, opacity: 0.65, depthWrite: false
+            transparent: true, opacity: 1
         });
         const winkGlowMaterial = new THREE.MeshBasicMaterial({
             color: faceGlow,
             transparent: true,
             opacity: 0.38,
+            side: THREE.BackSide,
             depthWrite: false
         });
         this.winkRightEye = new THREE.Mesh(
@@ -275,12 +283,13 @@ class MercuryGlobe {
         const capGeometry = new THREE.SphereGeometry(0.065 * s, 12, 12);
         const capMaterial = new THREE.MeshBasicMaterial({
             color: faceFill,
-            transparent: true, opacity: 0.95, depthWrite: false
+            transparent: true, opacity: 1
         });
         const capGlowMaterial = new THREE.MeshBasicMaterial({
             color: faceGlow,
             transparent: true,
             opacity: 0.45,
+            side: THREE.BackSide,
             depthWrite: false
         });
         
@@ -323,19 +332,20 @@ class MercuryGlobe {
         // === EYEBROWS ===
         const browMaterial = new THREE.MeshBasicMaterial({
             color: faceFill,
-            transparent: true, opacity: 0.95, depthWrite: false
+            transparent: true, opacity: 1
         });
         const browGlowMaterial = new THREE.MeshBasicMaterial({
             color: faceGlow,
             transparent: true,
             opacity: 0.38,
+            side: THREE.BackSide,
             depthWrite: false
         });
 
         const leftBrowCurve = new THREE.QuadraticBezierCurve3(
-            new THREE.Vector3(-0.75 * s, 0.85 * s, faceZ - 0.15 * s),
-            new THREE.Vector3(-0.42 * s, 1.1 * s, faceZ - 0.05 * s),
-            new THREE.Vector3(-0.2 * s, 0.85 * s, faceZ - 0.15 * s)
+            new THREE.Vector3(-0.75 * s, 0.95 * s, faceZ - 0.15 * s),
+            new THREE.Vector3(-0.42 * s, 1.2 * s, faceZ - 0.05 * s),
+            new THREE.Vector3(-0.2 * s, 0.95 * s, faceZ - 0.15 * s)
         );
         this.leftEyebrow = new THREE.Mesh(
             new THREE.TubeGeometry(leftBrowCurve, 20, 0.04 * s, 8, false), browMaterial
@@ -350,7 +360,7 @@ class MercuryGlobe {
 
         const browCapGeo = new THREE.SphereGeometry(0.04 * s, 10, 10);
         this.leftBrowCapL = new THREE.Mesh(browCapGeo, capMaterial);
-        this.leftBrowCapL.position.set(-0.75 * s, 0.85 * s, faceZ - 0.15 * s);
+        this.leftBrowCapL.position.set(-0.75 * s, 0.95 * s, faceZ - 0.15 * s);
         this.spinGroup.add(this.leftBrowCapL);
 
     this.leftBrowCapLGlow = new THREE.Mesh(browCapGeo.clone(), capGlowMaterial.clone());
@@ -360,7 +370,7 @@ class MercuryGlobe {
     this.spinGroup.add(this.leftBrowCapLGlow);
 
         this.leftBrowCapR = new THREE.Mesh(browCapGeo.clone(), capMaterial.clone());
-        this.leftBrowCapR.position.set(-0.2 * s, 0.85 * s, faceZ - 0.15 * s);
+        this.leftBrowCapR.position.set(-0.2 * s, 0.95 * s, faceZ - 0.15 * s);
         this.spinGroup.add(this.leftBrowCapR);
 
     this.leftBrowCapRGlow = new THREE.Mesh(browCapGeo.clone(), capGlowMaterial.clone());
@@ -370,9 +380,9 @@ class MercuryGlobe {
     this.spinGroup.add(this.leftBrowCapRGlow);
 
         const rightBrowCurve = new THREE.QuadraticBezierCurve3(
-            new THREE.Vector3(0.2 * s, 0.85 * s, faceZ - 0.15 * s),
-            new THREE.Vector3(0.42 * s, 1.1 * s, faceZ - 0.05 * s),
-            new THREE.Vector3(0.75 * s, 0.85 * s, faceZ - 0.15 * s)
+            new THREE.Vector3(0.2 * s, 0.95 * s, faceZ - 0.15 * s),
+            new THREE.Vector3(0.42 * s, 1.2 * s, faceZ - 0.05 * s),
+            new THREE.Vector3(0.75 * s, 0.95 * s, faceZ - 0.15 * s)
         );
         this.rightEyebrow = new THREE.Mesh(
             new THREE.TubeGeometry(rightBrowCurve, 20, 0.04 * s, 8, false), browMaterial.clone()
@@ -388,7 +398,7 @@ class MercuryGlobe {
         this.spinGroup.add(this.rightEyebrowGlow);
 
         this.rightBrowCapL = new THREE.Mesh(browCapGeo.clone(), capMaterial.clone());
-        this.rightBrowCapL.position.set(0.2 * s, 0.85 * s, faceZ - 0.15 * s);
+        this.rightBrowCapL.position.set(0.2 * s, 0.95 * s, faceZ - 0.15 * s);
         this.rightBrowCapL.visible = isDark;
         this.spinGroup.add(this.rightBrowCapL);
 
@@ -400,7 +410,7 @@ class MercuryGlobe {
     this.spinGroup.add(this.rightBrowCapLGlow);
 
         this.rightBrowCapR = new THREE.Mesh(browCapGeo.clone(), capMaterial.clone());
-        this.rightBrowCapR.position.set(0.75 * s, 0.85 * s, faceZ - 0.15 * s);
+        this.rightBrowCapR.position.set(0.75 * s, 0.95 * s, faceZ - 0.15 * s);
         this.rightBrowCapR.visible = isDark;
         this.spinGroup.add(this.rightBrowCapR);
 
@@ -432,12 +442,13 @@ class MercuryGlobe {
         // === SMILE ===
         const smileMaterial = new THREE.MeshBasicMaterial({
             color: faceFill,
-            transparent: true, opacity: 0.65, depthWrite: false
+            transparent: true, opacity: 1
         });
         const smileGlowMaterial = new THREE.MeshBasicMaterial({
             color: faceGlow,
             transparent: true,
             opacity: 0.30,
+            side: THREE.BackSide,
             depthWrite: false
         });
 
@@ -608,9 +619,60 @@ class MercuryGlobe {
         this.smileyParts.forEach(part => {
             if (part) {
                 part.renderOrder = 1;
-                if (part.material) part.material.depthTest = false;
+                if (part.material) part.material.depthTest = true;
+                
+                // Store initial max opacity for transition
+                if (part.material) {
+                    part.userData.maxOpacity = part.material.opacity;
+                }
             }
         });
+
+        // Group parts for transition logic
+        this.darkParts = [
+            this.rightEye, this.rightEyeGlow,
+            this.rightEyebrow, this.rightEyebrowGlow,
+            this.rightBrowCapL, this.rightBrowCapLGlow,
+            this.rightBrowCapR, this.rightBrowCapRGlow,
+            this.smile, this.smileGlow,
+            this.leftHook, this.leftHookGlow,
+            this.rightHook, this.rightHookGlow,
+            this.lightCapL, this.lightCapLInner,
+            this.lightCapR, this.lightCapRInner
+        ];
+
+        this.lightParts = [
+            this.winkRightEye, this.winkRightEyeGlow,
+            this.winkRightEyebrow, this.winkRightEyebrowGlow,
+            this.winkCapBottom, this.winkCapBottomGlow,
+            this.winkCapCenter, this.winkCapCenterGlow,
+            this.winkCapTop, this.winkCapTopGlow,
+            this.smirkSmile, this.smirkLeftHook, this.smirkRightHook,
+            this.smirkCapL, this.smirkCapLInner,
+            this.smirkCapR, this.smirkCapRInner,
+            this.tongue
+        ];
+
+        // Group eyebrow parts for interaction
+        this.eyebrowParts = [
+            this.leftEyebrow, this.leftEyebrowGlow,
+            this.leftBrowCapL, this.leftBrowCapLGlow,
+            this.leftBrowCapR, this.leftBrowCapRGlow,
+            this.rightEyebrow, this.rightEyebrowGlow,
+            this.rightBrowCapL, this.rightBrowCapLGlow,
+            this.rightBrowCapR, this.rightBrowCapRGlow
+        ];
+        
+        // Store base Y position
+        this.eyebrowParts.forEach(part => {
+             if (part) part.userData.baseY = part.position.y;
+        });
+
+        // Initialize theme state
+        const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        this.themeProgress = initialTheme === 'dark' ? 1 : 0;
+        this.targetThemeProgress = this.themeProgress;
+        this.updateTheme(initialTheme === 'dark');
     }
     
     bindEvents() {
@@ -626,6 +688,16 @@ class MercuryGlobe {
         });
         
         window.addEventListener('themeChanged', (e) => this.updateTheme(e.detail.isDark));
+
+        window.addEventListener('mousedown', () => {
+            if (!this.isVisible) return;
+            // Trigger eyebrow jump
+            const s = 0.99; // Scale factor used in creation
+            this.targetEyebrowOffset = 0.15 * s;
+            setTimeout(() => {
+                this.targetEyebrowOffset = 0;
+            }, 150);
+        });
 
         this.isVisible = true;
 
@@ -643,47 +715,7 @@ class MercuryGlobe {
     
     updateTheme(isDark) {
         if (!this.mercuryGroup) return;
-        
-        if (this.leftEye) this.leftEye.scale.y = !isDark ? 0.82 : 1.0;
-        if (this.leftEyeGlow) this.leftEyeGlow.scale.y = !isDark ? 0.82 * 1.12 : 1.12;
-        
-        if (this.rightEye) this.rightEye.visible = isDark;
-        if (this.rightEyeGlow) this.rightEyeGlow.visible = isDark;
-        if (this.rightEyebrow) this.rightEyebrow.visible = isDark;
-        if (this.rightEyebrowGlow) this.rightEyebrowGlow.visible = isDark;
-        if (this.rightBrowCapL) this.rightBrowCapL.visible = isDark;
-        if (this.rightBrowCapLGlow) this.rightBrowCapLGlow.visible = isDark;
-        if (this.rightBrowCapR) this.rightBrowCapR.visible = isDark;
-        if (this.rightBrowCapRGlow) this.rightBrowCapRGlow.visible = isDark;
-        if (this.smile) this.smile.visible = isDark;
-        if (this.smileGlow) this.smileGlow.visible = isDark;
-        if (this.leftHook) this.leftHook.visible = isDark;
-        if (this.leftHookGlow) this.leftHookGlow.visible = isDark;
-        if (this.rightHook) this.rightHook.visible = isDark;
-        if (this.rightHookGlow) this.rightHookGlow.visible = isDark;
-        if (this.lightCapL) this.lightCapL.visible = isDark;
-        if (this.lightCapLInner) this.lightCapLInner.visible = isDark;
-        if (this.lightCapR) this.lightCapR.visible = isDark;
-        if (this.lightCapRInner) this.lightCapRInner.visible = isDark;
-        
-        if (this.winkRightEye) this.winkRightEye.visible = !isDark;
-        if (this.winkRightEyeGlow) this.winkRightEyeGlow.visible = !isDark;
-        if (this.winkRightEyebrow) this.winkRightEyebrow.visible = !isDark;
-        if (this.winkRightEyebrowGlow) this.winkRightEyebrowGlow.visible = !isDark;
-        if (this.smirkSmile) this.smirkSmile.visible = !isDark;
-        if (this.smirkLeftHook) this.smirkLeftHook.visible = !isDark;
-        if (this.smirkRightHook) this.smirkRightHook.visible = !isDark;
-        if (this.tongue) this.tongue.visible = !isDark;
-        if (this.winkCapBottom) this.winkCapBottom.visible = !isDark;
-        if (this.winkCapBottomGlow) this.winkCapBottomGlow.visible = !isDark;
-        if (this.winkCapCenter) this.winkCapCenter.visible = !isDark;
-        if (this.winkCapCenterGlow) this.winkCapCenterGlow.visible = !isDark;
-        if (this.winkCapTop) this.winkCapTop.visible = !isDark;
-        if (this.winkCapTopGlow) this.winkCapTopGlow.visible = !isDark;
-        if (this.smirkCapL) this.smirkCapL.visible = !isDark;
-        if (this.smirkCapLInner) this.smirkCapLInner.visible = !isDark;
-        if (this.smirkCapR) this.smirkCapR.visible = !isDark;
-        if (this.smirkCapRInner) this.smirkCapRInner.visible = !isDark;
+        this.targetThemeProgress = isDark ? 1 : 0;
     }
     
     onResize() {
@@ -703,7 +735,58 @@ class MercuryGlobe {
     animate() {
         requestAnimationFrame(() => this.animate());
         
+        
         if (!this.isVisible) return;
+
+        // Theme Transition Logic
+        this.themeProgress = this.lerp(this.themeProgress, this.targetThemeProgress, 0.06);
+        
+        // Update Opacities
+        if (this.darkParts) {
+            this.darkParts.forEach(part => {
+                if (part && part.material) {
+                    const maxOp = part.userData.maxOpacity || 1;
+                    part.material.opacity = maxOp * this.themeProgress;
+                    part.visible = part.material.opacity > 0.01;
+                }
+            });
+        }
+        
+        if (this.lightParts) {
+            this.lightParts.forEach(part => {
+                if (part && part.material) {
+                    const maxOp = part.userData.maxOpacity || 1;
+                    part.material.opacity = maxOp * (1 - this.themeProgress);
+                    part.visible = part.material.opacity > 0.01;
+                }
+            });
+        }
+
+        // Interpolate Left Eye Scale
+        if (this.leftEye) {
+             // Dark mode: 1.0, Light mode: 0.82
+             const s = this.lerp(0.82, 1.0, this.themeProgress);
+             this.leftEye.scale.y = s;
+        }
+        if (this.leftEyeGlow) {
+            // Dark mode: 1.12, Light mode: 0.82 * 1.12
+            const s = this.lerp(0.82 * 1.12, 1.12, this.themeProgress);
+            this.leftEyeGlow.scale.y = s;
+        }
+
+        // Animate Eyebrows
+        this.eyebrowOffset = this.lerp(this.eyebrowOffset, this.targetEyebrowOffset, 0.2);
+        if (Math.abs(this.eyebrowOffset - this.targetEyebrowOffset) < 0.001) {
+            this.eyebrowOffset = this.targetEyebrowOffset;
+        }
+
+        if (this.eyebrowParts && this.eyebrowOffset > 0.0001 || this.targetEyebrowOffset > 0) {
+            this.eyebrowParts.forEach(part => {
+                if (part && part.userData.baseY !== undefined) {
+                    part.position.y = part.userData.baseY + this.eyebrowOffset;
+                }
+            });
+        }
 
         this.mouse.x = this.lerp(this.mouse.x, this.targetMouse.x, 0.1);
         this.mouse.y = this.lerp(this.mouse.y, this.targetMouse.y, 0.1);
