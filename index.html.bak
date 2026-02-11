@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Portfolio - Creative Digital Agency" />
+    <title>PORTFOLIO | Creative Digital Agency</title>
+
+    <!-- Google Fonts - Dot Matrix Style -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700;800&family=Caveat:wght@400;700&family=VT323&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/typography.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/cursor.css" />
+    <script type="module" src="js/theme.js"></script>
+  </head>
+  <body>
+    <!-- Starfield Background -->
+    <canvas id="starfield-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Vignette Frame -->
+    <div class="vignette-frame"></div>
+
+    <!-- Navigation Header -->
+    <header class="header">
+      <div class="header-left">
+        <a href="index.html" class="logo-image-link">
+          <img src="at_logo.png" alt="Logo" class="site-logo">
+        </a>
+      </div>
+      <div class="header-right">
+        <button id="theme-toggle" aria-label="Toggle Theme">
+          <span>☀️</span>
+        </button>
+        <a href="index.html" class="home-icon-link" aria-label="Home">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="home-icon">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </a>
+        <button class="menu-toggle" id="menu-toggle">
+          <span>MENU</span>
+          <div class="menu-icon">
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </header>
+
+    <!-- Full Screen Navigation Menu -->
+    <nav class="nav-menu" id="nav-menu">
+      <div class="nav-content">
+        <div class="nav-links">
+          <a href="index.html" class="nav-link active" data-preview="home"
+            >HOME</a
+          >
+          <a href="projects.html" class="nav-link" data-preview="projects"
+            >PROJECTS</a
+          >
+          <a href="services.html" class="nav-link" data-preview="services"
+            >SERVICES</a
+          >
+          <a href="about.html" class="nav-link" data-preview="about">ABOUT</a>
+          <a href="#contact" class="nav-link" data-preview="contact">CONTACT</a>
+        </div>
+        <div class="nav-preview" id="nav-preview">
+          <img src="" alt="Preview" id="preview-image" />
+        </div>
+      </div>
+      <div class="nav-footer">
+        <div class="nav-social">
+          <a href="https://wa.me/919335093547" class="social-link" target="_blank">WHATSAPP</a>
+          <a href="https://www.instagram.com/the.tripathi.g/" class="social-link" target="_blank">INSTAGRAM</a>
+          <a href="#" class="social-link">TWITTER</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <div class="hero-content">
+        <div class="hero-tagline">
+          <p class="tagline-text">
+            HI! I'M ANUPAM <span class="evil-face">🤝</span>
+          </p>
+        </div>
+        <div class="hero-title">
+          <h1 class="hero-carlito-text neon-glow">
+            <span class="title-line">DESIGNER,</span>
+            <span class="title-line">DEVELOPER &</span>
+            <span class="title-line">AI SOLUTIONS ARCHITECT</span>
+          </h1>
+        </div>
+      </div>
+
+
+      <!-- Smiley Face with Eye Tracking -->
+      <div class="smiley-globe-container" id="smiley-container"></div>
+
+      <!-- Scroll Indicator -->
+      <div class="scroll-indicator">
+        <div class="scroll-arrows">
+          <span>↓</span>
+          <span>↓</span>
+          <span>↓</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Preview Section -->
+    <section class="section about-preview" id="about-section">
+      <div class="section-content">
+        <div class="section-label">
+          <span class="label-number">01</span>
+          <span class="label-text">ABOUT</span>
+        </div>
+        <div class="about-text">
+          <h2 class="section-heading">
+            I AM A <span class="highlight">CREATIVE FREELANCER</span> SPECIALIZING
+            IN DESIGNING CONSUMER, ENTERPRISE AND INDUSTRIAL SOLUTIONS
+            <span class="highlight"> WITH AI</span>.
+          </h2>
+        </div>
+      </div>
+      
+      <!-- Vertical Marquee -->
+      <div class="vertical-marquee">
+        <div class="marquee-track">
+          <span class="marquee-text">WE ALWAYS DELIVER <span class="separator">•</span></span>
+          <span class="marquee-text">WE ALWAYS DELIVER <span class="separator">•</span></span>
+          <span class="marquee-text">WE ALWAYS DELIVER <span class="separator">•</span></span>
+          <span class="marquee-text">WE ALWAYS DELIVER <span class="separator">•</span></span>
+          <span class="marquee-text">WE ALWAYS DELIVER <span class="separator">•</span></span>
+          <span class="marquee-text">WE ALWAYS DELIVER <span class="separator">•</span></span>
+        </div>
+      </div>
+      <div class="parallax-bg" data-speed="0.3">
+        <div class="wireframe-element wireframe-1"></div>
+        <div class="wireframe-element wireframe-2"></div>
+      </div>
+    </section>
+
+    <!-- Featured Projects Section -->
+    <section class="section projects-section" id="projects-section">
+      <div class="section-content">
+        <div class="section-label">
+          <span class="label-number">02</span>
+          <span class="label-text">FEATURED WORK</span>
+        </div>
+
+        <div class="projects-grid">
+          <article class="project-card" data-category="branding">
+            <div class="project-image">
+              <video class="project-video" autoplay loop muted playsinline>
+                <source src="project1.mov" type="video/quicktime">
+                <source src="project1.mov" type="video/mp4"> <!-- Fallback -->
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div class="project-info">
+              <h3 class="project-title">Documentation RAG</h3>
+              <p class="project-category">Context Awared Information Extraction with VLMs</p>
+              <p class="project-year">2025</p>
+            </div>
+          </article>
+
+          <article class="project-card" data-category="digital">
+            <div class="project-image">
+              <video class="project-video" autoplay loop muted playsinline>
+                <source src="project2.mov" type="video/quicktime">
+                <source src="project2.mov" type="video/mp4"> <!-- Fallback -->
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div class="project-info">
+              <h3 class="project-title">Automated Industrial Workflow</h3>
+              <p class="project-category">Web and App Developement with AI Integration</p>
+              <p class="project-year">2025</p>
+            </div>
+          </article>
+
+          <article class="project-card" data-category="design">
+            <div class="project-image">
+              <video class="project-video" autoplay loop muted playsinline>
+                <source src="project3.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div class="project-info">
+              <h3 class="project-title">Visual Defect Detection</h3>
+              <p class="project-category">Image Processing and AI</p>
+              <p class="project-year">2025</p>
+            </div>
+          </article>
+        </div>
+
+        <a href="projects.html" class="view-all-link">
+          <span>VIEW ALL WORKS</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="section services-section" id="services-section">
+      <div class="section-content">
+        <div class="section-label">
+          <span class="label-number">03</span>
+          <span class="label-text">SERVICES</span>
+        </div>
+
+        <div class="services-grid">
+          <div class="service-item" data-service="creative">
+            <div class="service-icon">✦</div>
+            <h3 class="service-title">Complex Documents Reading and Retrieving Relevent Information on Your Local Device</h3>
+            <ul class="service-list">
+              <li>Finance RAG</li>
+              <li>Enterprise RAG</li>
+              <li>General RAG</li>
+              <li>Specific Information Calculation and Extraction from Documents</li>
+              <li>Compliance Checking and Reviewing</li>
+            </ul>
+          </div>
+
+          <div class="service-item" data-service="digital">
+            <div class="service-icon">✦</div>
+            <h3 class="service-title">Full Stack Web Development</h3>
+            <ul class="service-list">
+              <li>UI/UX Design</li>
+              <li>Full Stack App</li>
+              <li>Full Stack Interactive Web Sites</li>
+              <li>3D Web Sites</li>
+            </ul>
+          </div>
+
+          <div class="service-item" data-service="strategy">
+            <div class="service-icon">✦</div>
+            <h3 class="service-title">Visual Detections from Image and Videos</h3>
+            <ul class="service-list">
+              <li>Surface Defect Detections</li>
+              <li>Object Detection</li>
+              <li>Image Processing</li>
+              <li>Object Segmentation</li>
+              <li>Video Object Tracking</li>
+            </ul>
+          </div>
+
+          <div class="service-item" data-service="strategy">
+            <div class="service-icon">✦</div>
+            <h3 class="service-title">Creative Smart Solutioning</h3>
+            <ul class="service-list">
+              <li>Finding Smart Solutions for Specific Cases</li>
+              <li>Hardware Solutioning</li>
+              <li>Specific Lightining</li>
+            </ul>
+          </div>
+          <div class="service-item" data-service="strategy">
+            <div class="service-icon">✦</div>
+            <h3 class="service-title">LLMs Finetuning & System Design</h3>
+            <ul class="service-list">
+              <li>Can work for you to Fine tune LLMs</li>
+              <li>Selection of Relevent Models and Tech Stack for your case</li>
+              <li>Consulting</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section contact-section" id="contact">
+      <div class="section-content">
+        <div class="section-label">
+          <span class="label-number">04</span>
+          <span class="label-text">CONTACT</span>
+        </div>
+
+        <div class="contact-content">
+          <h2 class="contact-heading dot-matrix-heading">
+            LET'S CREATE<br />
+            <span class="neon-glow">SOMETHING</span><br />
+            AMAZING
+          </h2>
+          <div class="contact-info">
+            <a href="mailto:tanupam760@gmail.com" class="contact-email"
+              >Drop an email</a
+            >
+
+            <p class="contact-location">WORLDWIDE</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <span class="footer-copyright">© 2026 PORTFOLIO</span>
+        </div>
+        <div class="footer-center">
+          <span class="footer-tagline">ALWAYS DELIVER</span>
+        </div>
+        <div class="footer-right">
+          <a href="https://wa.me/919335093547" class="footer-link footer-icon" target="_blank" aria-label="WhatsApp">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/the.tripathi.g/" class="footer-link footer-icon" target="_blank" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="#" class="footer-link footer-icon" aria-label="Twitter">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script type="module" src="js/cursor.js"></script>
+    <script type="module" src="js/parallax.js"></script>
+
+    <script type="module" src="js/starfield.js"></script>
+    <script type="module" src="js/hover-preview.js"></script>
+    <script type="module" src="js/smiley-face.js"></script>
+    <script type="module" src="js/logo-globe.js"></script>
+    <script type="module" src="js/portal-effect.js"></script>
+    <!-- Fixed Globe Logo with Contact Text -->
+    <div id="fixed-globe-container">
+        <div class="globe-wrapper">
+            <canvas id="logo-globe-canvas"></canvas>
+        </div>
+        <div class="rotating-text-ring">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+                <defs>
+                    <path id="circle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                </defs>
+                <text font-size="13.5" font-weight="bold" font-family="'Space Mono', monospace">
+                    <textPath href="#circle" textLength="230" lengthAdjust="spacing">
+                        CONTACT • CONTACT • CONTACT •
+                    </textPath>
+                </text>
+            </svg>
+        </div>
+        <a href="#contact" class="globe-link-overlay" aria-label="Contact"></a>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal-overlay">
+        <div class="modal-container">
+            <button id="close-modal" class="close-modal-btn">&times;</button>
+            
+            <div class="modal-header">
+                <h2 class="modal-title dot-matrix-heading">GET IN <span class="neon-glow">TOUCH</span></h2>
+                <p class="modal-subtitle">Let's build something amazing together</p>
+            </div>
+            
+            <div class="modal-content">
+                <form id="contact-form" class="contact-form">
+                    <div class="form-group">
+                        <label for="name">NAME</label>
+                        <input type="text" id="name" required placeholder="Your Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">EMAIL</label>
+                        <input type="email" id="email" required placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">PHONE</label>
+                        <div class="phone-input-container" style="display: flex; gap: 10px;">
+                            <select id="country-code" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px; font-family: inherit;">
+                                <option value="+91">🇮🇳 +91</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="+44">🇬🇧 +44</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="">Other</option>
+                            </select>
+                            <input type="tel" id="phone" placeholder="Phone Number" style="flex: 1;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">MESSAGE</label>
+                        <textarea id="message" required rows="4" placeholder="Tell me about your project..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">SEND MESSAGE</button>
+                </form>
+                
+                <div class="modal-divider">
+                    <span>OR</span>
+                </div>
+                
+                <a href="tel:+919335093547" class="call-btn">CALL</a>
+                
+
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/contact-modal.js"></script>
+
+    <!-- Initialize Smiley Face -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Initialize eye-tracking smiley
+        window.smileyFace = new SmileyFace(
+          document.getElementById('smiley-container')
+        );
+      });
+    </script>
+
+    <style>
+      /* Smiley Globe Container - Left aligned, scales with viewport width */
+      .smiley-globe-container {
+        position: absolute;
+        top: 50%;
+        left: 4vw;
+        transform: translateY(-50%);
+        width: 42vw;
+        height: 42vw;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Make hero content sit above the smiley */
+      .hero-content {
+        position: relative;
+        z-index: 3;
+      }
+
+      @media (max-width: 1024px) {
+        .smiley-globe-container {
+          width: 80vmin;
+          height: 80vmin;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          opacity: 0.4;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .smiley-globe-container {
+          width: 100vmin;
+          height: 100vmin;
+          left: 50%;
+          top: 35%; /* Moved lower */
+          transform: translate(-50%, -50%);
+          opacity: 0.3;
+        }
+      }
+    </style>
+  </body>
+</html>

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const modal = document.getElementById('contact-modal');
     const closeBtn = document.getElementById('close-modal');
-    const globeContainer = document.getElementById('fixed-globe-container');
+    const globeContainer = document.getElementById('contact-earth-wrapper');
     const globeLink = document.querySelector('.globe-link-overlay');
     const contactForm = document.getElementById('contact-form');
     // Select contact link in the nav menu (matches href ending in #contact)

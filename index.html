@@ -106,7 +106,7 @@
       </div>
 
 
-      <!-- Smiley Face with Eye Tracking -->
+      <!-- Mercury Globe (Replce Smiley) -->
       <div class="smiley-globe-container" id="mercury-container"></div>
 
       <!-- Scroll Indicator -->
@@ -328,7 +328,7 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script type="module" src="js/cursor.js"></script>
@@ -338,17 +338,24 @@
     <script type="module" src="js/hover-preview.js"></script>
     <script type="module" src="js/smiley-face.js"></script>
     <script type="module" src="js/mercury-globe.js"></script>
+    <!-- logo-globe.js removed -->
     <script type="module" src="js/portal-effect.js"></script>
-    <!-- Fixed Earth Globe with Contact Text -->
-    <div id="contact-earth-wrapper" style="position: fixed; bottom: 30px; right: 30px; width: 140px; height: 140px; z-index: 100;">
-        <div id="contact-earth-container" style="width: 100%; height: 100%;"></div>
-        <div class="rotating-text-ring" style="position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; pointer-events: none;">
+    
+    <!-- Fixed Globe Logo with Contact Text -->
+    <!-- MODIFIED: Now contains the Smiley Earth -->
+  <div id="contact-earth-wrapper" style="position: fixed; bottom: 10px; right: 10px; z-index: 100;">
+        <div id="contact-earth-container" style="width: 100%; height: 100%;">
+            <!-- SmileyFace will inject canvas here -->
+        </div>
+        
+        <!-- Rotating Text Ring Overlay -->
+  <div class="rotating-text-ring" style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; pointer-events: none;">
             <svg viewBox="0 0 100 100" width="100%" height="100%">
                 <defs>
                     <path id="circle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
                 </defs>
-                <text font-size="13.5" font-weight="bold" font-family="'Space Mono', monospace" fill="var(--color-text)">
-                    <textPath href="#circle" textLength="230" lengthAdjust="spacing">
+        <text font-size="8" font-weight="bold" font-family="'Space Mono', monospace" fill="var(--color-text)">
+          <textPath href="#circle" textLength="180" lengthAdjust="spacing">
                         CONTACT • CONTACT • CONTACT •
                     </textPath>
                 </text>
@@ -407,7 +414,6 @@
                 
                 <a href="tel:+919335093547" class="call-btn">CALL</a>
                 
-
             </div>
         </div>
     </div>
