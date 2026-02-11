@@ -4,10 +4,10 @@
 
 /* CSS Variables - Color Palette */
 :root {
-  --color-black: #000000;
+  --color-black: #1e1d02; /* Very subtle dark blue tint (was #000000) */
   --color-white: #ffffff;
-  --color-neon-green: #00ff00;
-  --color-neon-green-dim: #00cc00;
+  --color-neon-green: #00e1ff; /* Bright Neon Blue (was Green) */
+  --color-neon-green-dim: #00b3cc;
   --color-electric-blue: #0066ff;
   --color-blue-glow: rgba(0, 102, 255, 0.3);
   --color-gray-dark: #111111;
@@ -28,8 +28,8 @@
 [data-theme="light"] {
   --color-black: #f0f2f5;
   --color-white: #1a1a1a;
-  --color-neon-green: #008f00; /* Darker green for contrast */
-  --color-neon-green-dim: #006600;
+  --color-neon-green: #0077aa; /* Darker Blue for contrast (was Green) */
+  --color-neon-green-dim: #005580;
   --color-electric-blue: #0044cc;
   --color-blue-glow: rgba(0, 68, 204, 0.1);
   --color-gray-dark: #e0e0e0;

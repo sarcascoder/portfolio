@@ -78,7 +78,7 @@ class SmileyFace {
         if (!this.smileyGroup) return;
         
         const gridColor = isDark ? 0x555555 : 0xaaaaaa;
-        const neonColor = isDark ? 0x00ff00 : 0x008f00;
+        const neonColor = 0xffffff; // Always white for clouds
 
         // Smooth fade out
         this.fadeOut(() => {
@@ -184,11 +184,19 @@ class SmileyFace {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Reset to full opacity
+                // Reset to full opacity (restore original values)
                 this.smileyGroup.traverse((child) => {
-                    if (child.material && child.material.name !== 'gridMaterial') {
-                        child.material.opacity = 1;
-                        child.material.transparent = false;
+                    if (child.material) {
+                        if (child.material.name === 'faceMaterial' || child.material.name === 'tongueMaterial') {
+                            child.material.opacity = 0.95;
+                            child.material.transparent = true;
+                        } else if (child.material.name === 'cloudMaterial') {
+                            child.material.opacity = 0.8;
+                            child.material.transparent = true;
+                        } else if (child.material.name === 'earthMaterial') {
+                            child.material.opacity = 1.0;
+                            child.material.transparent = false;
+                        }
                     }
                 });
             }
@@ -196,65 +204,122 @@ class SmileyFace {
         animate();
     }
 
+    generateCloudTexture() {
+        const size = 128;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        // Fill transparent
+        ctx.clearRect(0, 0, size, size);
+        
+        // Draw puffy clouds
+        const centerX = size / 2;
+        const centerY = size / 2;
+        
+        // Create radial gradient for soft puff
+        const drawPuff = (x, y, rad) => {
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, rad);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)'); // Center white
+            gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.5)');
+            gradient.addColorStop(0.8, 'rgba(255, 255, 255, 0.1)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, rad, 0, Math.PI * 2);
+            ctx.fill();
+        };
+        
+        // Draw multiple puffs to create noise
+        for (let i = 0; i < 30; i++) {
+            const x = Math.random() * size;
+            const y = Math.random() * size;
+            const rad = 10 + Math.random() * 20;
+            drawPuff(x, y, rad);
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        return texture;
+    }
+
     createGlobeWithFace() {
         this.smileyGroup = new THREE.Group();
         
         const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-        const neonGreen = isDark ? 0x00ff00 : 0x008f00;
-        const gridGray = isDark ? 0x555555 : 0xaaaaaa;
+        // User requested "cloud" look -> White color
+        const neonGreen = 0xffffff;
         
-        // === GLOBE WITH ONLY VERTICAL LINES (longitude) ===
-        const globeGroup = new THREE.Group();
-        const globeRadius = 2.3;
-        const linesMaterial = new THREE.LineBasicMaterial({
-            color: gridGray,
+        // Generate cloud texture
+        const cloudFaceTexture = this.generateCloudTexture();
+        this.cloudFaceTexture = cloudFaceTexture; // Store for later
+        
+        // === REALISTIC 3D EARTH TO REPLACE WIREFRAME ===
+        const earthRadius = 2.2; // Decreased from 2.6 to 2.2 based on user feedback
+        const earthGeometry = new THREE.SphereGeometry(earthRadius, 64, 64);
+        
+        // Load textures
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Using high-res textures from public URLs (reliable GitHub pages hosted sources)
+        // Base color map
+        const earthMap = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
+        // Specular map for oceans
+        const earthSpecular = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg');
+        // Normal map for relief
+        const earthNormal = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg');
+        
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            map: earthMap,
+            specularMap: earthSpecular,
+            normalMap: earthNormal,
+            specular: new THREE.Color(0x333333),
+            shininess: 15,
+            name: 'earthMaterial'
+        });
+        
+        this.earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+        
+        // Add cloud layer
+        const cloudGeometry = new THREE.SphereGeometry(earthRadius + 0.02, 64, 64);
+        const cloudTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png');
+        const cloudMaterial = new THREE.MeshPhongMaterial({
+            map: cloudTexture,
             transparent: true,
-            opacity: 0.7,
-            name: 'gridMaterial'
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide,
+            name: 'cloudMaterial'
         });
+        this.cloudsMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+        this.earthMesh.add(this.cloudsMesh);
         
-        // Create vertical longitude lines (circles around the globe)
-        const numLongitudeLines = 12;
-        for (let i = 0; i < numLongitudeLines; i++) {
-            const angle = (i / numLongitudeLines) * Math.PI;
-            const curve = new THREE.EllipseCurve(
-                0, 0,
-                globeRadius, globeRadius,
-                0, 2 * Math.PI,
-                false,
-                0
-            );
-            const points = curve.getPoints(50);
-            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            const ellipse = new THREE.Line(geometry, linesMaterial);
-            ellipse.rotation.y = angle;
-            globeGroup.add(ellipse);
-        }
+        // Position Earth behind smiley faces
+        // Radius 2.2, Position Z -0.6 => Front Surface Z = 1.6
+        // This keeps the surface close to features (Z ~ 1.65 - 1.7)
+        this.earthMesh.position.z = -0.6;
+        this.earthMesh.rotation.y = -Math.PI / 2; // Show Americas/Atlantic initially
+
         
-        // Add 4 horizontal latitude lines
-        const latitudes = [-0.6, -0.2, 0.2, 0.6];  // Y positions (normalized -1 to 1)
-        latitudes.forEach(lat => {
-            const y = lat * globeRadius;
-            const radius = Math.sqrt(globeRadius * globeRadius - y * y);
-            const curve = new THREE.EllipseCurve(
-                0, 0,
-                radius, radius,
-                0, 2 * Math.PI,
-                false,
-                0
-            );
-            const points = curve.getPoints(50);
-            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            const circle = new THREE.Line(geometry, linesMaterial);
-            circle.rotation.x = Math.PI / 2;  // Rotate to horizontal
-            circle.position.y = y;
-            globeGroup.add(circle);
-        });
+        // Add Earth to main group
+        this.smileyGroup.add(this.earthMesh);
+        this.globe = this.earthMesh; // Keep reference for rotation
         
-        globeGroup.position.z = -0.5;
-        globeGroup.renderOrder = -1;
-        this.globe = globeGroup;
-        this.smileyGroup.add(this.globe);
+        // === LIGHTING FOR 3D EARTH ===
+        // We need lights since we're using MeshPhongMaterial now
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        this.scene.add(ambientLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(5, 3, 5);
+        this.scene.add(dirLight);
+
+        // Add a rim light for extra pop
+        const rimLight = new THREE.DirectionalLight(0x4444ff, 0.5);
+        rimLight.position.set(-5, 5, -5);
+        this.scene.add(rimLight);
+
         
         // === EYES - Shorter ovals, closer together ===
         const eyeGeometry = new THREE.SphereGeometry(0.32, 25, 25);
@@ -262,8 +327,11 @@ class SmileyFace {
         
         const eyeMaterial = new THREE.MeshBasicMaterial({
             color: neonGreen,
-            transparent: false,
-            name: 'faceMaterial'
+            map: cloudFaceTexture, // Apply generated cloud texture
+            transparent: true,
+            opacity: 0.95, // Higher opacity because texture has transparency
+            name: 'faceMaterial',
+            depthWrite: false // Helps with transparency render order
         });
         
         // Left eye - closer to center (slightly shorter in dark/wink mode)
@@ -286,10 +354,15 @@ class SmileyFace {
             new THREE.Vector3(0.56, 0.30, 1.68),     // Control
             new THREE.Vector3(0.24, 0.20, 1.62)      // Convergence point
         );
+        // Tube geometry needs more segments for smooth texture mapping
         const winkBottomGeometry = new THREE.TubeGeometry(winkBottomCurve, 32, 0.065, 12, false);
         const winkEyeMaterial = new THREE.MeshBasicMaterial({
             color: neonGreen,
-            name: 'faceMaterial'
+            map: cloudFaceTexture,
+            transparent: true,
+            opacity: 0.65,
+            name: 'faceMaterial',
+            depthWrite: false
         });
         this.winkRightEye = new THREE.Mesh(winkBottomGeometry, winkEyeMaterial);
         this.winkRightEye.visible = !isDark;
@@ -297,7 +370,14 @@ class SmileyFace {
         
         // Round caps for wink chevron (spheres at endpoints for smooth corners)
         const capGeometry = new THREE.SphereGeometry(0.065, 12, 12);
-        const capMaterial = new THREE.MeshBasicMaterial({ color: neonGreen, name: 'faceMaterial' });
+        const capMaterial = new THREE.MeshBasicMaterial({ 
+            color: neonGreen, 
+            map: cloudFaceTexture,
+            transparent: true, 
+            opacity: 0.95, 
+            name: 'faceMaterial',
+            depthWrite: false
+        });
         
         // Cap at bottom stroke outer end
         this.winkCapBottom = new THREE.Mesh(capGeometry, capMaterial);
@@ -326,7 +406,11 @@ class SmileyFace {
         const leftBrowGeometry = new THREE.TubeGeometry(leftBrowCurve, 20, 0.04, 8, false);
         const browMaterial = new THREE.MeshBasicMaterial({ 
             color: neonGreen,
-            name: 'faceMaterial'
+            map: cloudFaceTexture,
+            transparent: true,
+            opacity: 0.95,
+            name: 'faceMaterial',
+            depthWrite: false
         });
         
         this.leftEyebrow = new THREE.Mesh(leftBrowGeometry, browMaterial);
@@ -334,7 +418,14 @@ class SmileyFace {
         
         // Round caps on left eyebrow
         const browCapGeo = new THREE.SphereGeometry(0.04, 10, 10);
-        const browCapMat = new THREE.MeshBasicMaterial({ color: neonGreen, name: 'faceMaterial' });
+        const browCapMat = new THREE.MeshBasicMaterial({ 
+            color: neonGreen, 
+            map: cloudFaceTexture,
+            transparent: true, 
+            opacity: 0.95, 
+            name: 'faceMaterial',
+            depthWrite: false
+        });
         
         this.leftBrowCapL = new THREE.Mesh(browCapGeo, browCapMat);
         this.leftBrowCapL.position.set(-0.75, 0.85, 1.55);
@@ -388,7 +479,11 @@ class SmileyFace {
         const smileGeometry = new THREE.TubeGeometry(smileCurve, 40, 0.06, 10, false);
         const smileMaterial = new THREE.MeshBasicMaterial({ 
             color: neonGreen,
-            name: 'faceMaterial'
+            map: cloudFaceTexture,
+            transparent: true,
+            opacity: 0.65,
+            name: 'faceMaterial',
+            depthWrite: false
         });
         
         this.smile = new THREE.Mesh(smileGeometry, smileMaterial);
@@ -419,7 +514,14 @@ class SmileyFace {
         
         // Round caps on light-mode smile hooks
         const lightHookCapGeo = new THREE.SphereGeometry(0.055, 10, 10);
-        const lightHookCapMat = new THREE.MeshBasicMaterial({ color: neonGreen, name: 'faceMaterial' });
+        const lightHookCapMat = new THREE.MeshBasicMaterial({ 
+            color: neonGreen, 
+            map: cloudFaceTexture,
+            transparent: true, 
+            opacity: 0.95, 
+            name: 'faceMaterial',
+            depthWrite: false
+        });
         
         this.lightCapL = new THREE.Mesh(lightHookCapGeo, lightHookCapMat);
         this.lightCapL.position.set(-1.2, -0.5, 1.4);
@@ -450,7 +552,11 @@ class SmileyFace {
         const smirkGeometry = new THREE.TubeGeometry(smirkCurve, 40, 0.06, 10, false);
         const smirkMaterial = new THREE.MeshBasicMaterial({
             color: neonGreen,
-            name: 'faceMaterial'
+            map: cloudFaceTexture,
+            transparent: true,
+            opacity: 0.65,
+            name: 'faceMaterial',
+            depthWrite: false
         });
         this.smirkSmile = new THREE.Mesh(smirkGeometry, smirkMaterial);
         this.smirkSmile.visible = !isDark;
@@ -480,7 +586,14 @@ class SmileyFace {
         
         // Round caps on dark-mode smile hook endpoints
         const hookCapGeo = new THREE.SphereGeometry(0.055, 10, 10);
-        const hookCapMat = new THREE.MeshBasicMaterial({ color: neonGreen, name: 'faceMaterial' });
+        const hookCapMat = new THREE.MeshBasicMaterial({ 
+            color: neonGreen, 
+            map: cloudFaceTexture,
+            transparent: true, 
+            opacity: 0.95, 
+            name: 'faceMaterial',
+            depthWrite: false
+        });
         
         this.smirkCapL = new THREE.Mesh(hookCapGeo, hookCapMat);
         this.smirkCapL.position.set(-1.2, -0.5, 1.4);
@@ -521,7 +634,10 @@ class SmileyFace {
         const tongueMaterial = new THREE.MeshBasicMaterial({
             color: 0xff3366,
             name: 'tongueMaterial',
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.95,
+            depthWrite: false
         });
         this.tongue = new THREE.Mesh(tongueGeometry, tongueMaterial);
         // Position: top edge at smile's lowest point (y≈-1.0, x≈-0.13)
@@ -612,6 +728,15 @@ class SmileyFace {
         if (this.smileyGroup) {
             this.smileyGroup.rotation.x = this.currentRotation.x;
             this.smileyGroup.rotation.y = this.currentRotation.y;
+            
+            // Auto-rotate Earth
+            if (this.earthMesh) {
+                this.earthMesh.rotation.y += 0.001;
+            }
+            // Auto-rotate Clouds (slightly faster)
+            if (this.cloudsMesh) {
+                this.cloudsMesh.rotation.y += 0.0013;
+            }
         }
         
         this.renderer.render(this.scene, this.camera);
