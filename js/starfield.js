@@ -275,7 +275,9 @@ class Starfield {
         });
         
         document.addEventListener('wheel', (e) => {
-            this.targetVelocity.z += e.deltaY * 0.05;
+            // Sync with Lenis scroll speed (0.35)
+            // Original factor was 0.05. New factor: 0.05 * 0.35 = 0.0175
+            this.targetVelocity.z += e.deltaY * 0.00075;
         }, { passive: true });
     }
 

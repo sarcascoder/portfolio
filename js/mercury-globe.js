@@ -236,13 +236,8 @@ class MercuryGlobe {
         });
 
         // Step 1: First scale down to 85% and dip down slightly (before moving right)
-        // Use fromTo to explicitly enforce the initial state so fast scrolling up always returns here
-        tl.fromTo(this.container, {
-            left: "4vw",
-            top: "50%",
-            scale: 1,
-            yPercent: -50
-        }, {
+        // CHANGED: Use .to() instead of .fromTo() to avoid forcing top-state on refresh
+        tl.to(this.container, {
             scale: 0.85,
             top: "60%",       // Dip down a bit
             duration: 1,
@@ -281,17 +276,17 @@ class MercuryGlobe {
             scrollTrigger: {
                 trigger: "#services-section",
                 start: "top bottom", // When top of services hits bottom of viewport
-                end: "center center", // When center of services hits center
+                end: "center center", // When center of services hits center (Middle part)
                 scrub: 0.5,
                 toggleActions: "play reverse play reverse"
             }
         });
 
-        // Move back to right (same position as about section)
+        // Move back to right and scale to 75% at the middle
         tlServices.to(this.container, {
             left: "60%",      // Move back to right
             top: "50%",       // Keep centered vertically
-            scale: 0.5,       // Maintain size
+            scale: 0.75,      // Scale to 75% at middle of services
             ease: "power2.inOut"
         });
 
@@ -300,21 +295,26 @@ class MercuryGlobe {
             scrollTrigger: {
                 trigger: "#contact",
                 start: "top bottom", // When top of contact hits bottom of viewport
-                end: "center center", // When center of contact hits center
+                end: "bottom bottom", // When bottom of contact hits bottom of viewport (Bottom most part)
                 scrub: 0.5,
                 toggleActions: "play reverse play reverse"
             }
         });
 
-        // Scale up to 90% and move slightly left (to leave 10vw gap from right)
+        // Scale up to 90% ONLY when reaching the bottom most part
         tlContact.to(this.container, {
             scale: 0.9,       // Scale up to 90%
-            left: "50%",      // Move to 50% so visual right edge is ~90% (10vw gap)
+            left: "50%",      // Move to 50%
             ease: "power2.inOut"
         });
         
         // Optional: slight rotation or other effects on the globe itself
         // But the container animation handles position/size
+
+        // Force a refresh to ensure start positions are calculated correctly if starting mid-page
+        setTimeout(() => {
+            ScrollTrigger.refresh();
+        }, 100);
     }
     
     createSmileyFace() {

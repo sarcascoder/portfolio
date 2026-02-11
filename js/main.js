@@ -15,18 +15,68 @@ class App {
     init() {
         // Menu toggle
         this.initMenu();
+
+        // Initialize Lenis for custom scroll control
+        this.initLenis();
         
         // Smooth scroll for anchor links
         this.initSmoothScroll();
         
         // Page load animation
         this.initPageLoad();
+
+        // Force scroll to top on refresh/unload to ensure animations sync correctly
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        
+        // Reset scroll on load
+        window.scrollTo(0, 0);
+        
+        // Reset scroll before unload (refresh)
+        window.onbeforeunload = function () {
+            window.scrollTo(0, 0);
+        }
         
         // Active nav link tracking
         this.initActiveNavTracking();
         
         // Keyboard navigation
         this.initKeyboardNav();
+    }
+
+    initLenis() {
+        // Initialize Lenis
+        this.lenis = new Lenis({
+            duration: 0, // 0 duration = no smoothing (immediate)
+            easing: (t) => t, // Linear easing
+            orientation: 'vertical',
+            gestureOrientation: 'vertical',
+            smoothWheel: true,
+            wheelMultiplier: 0.35, // 55% scroll speed (slower/heavier)
+            touchMultiplier: 0.35,
+            normalizeWheel: true // Fix inconsistencies across devices
+        });
+
+        // Frame loop
+        const raf = (time) => {
+            this.lenis.raf(time);
+            requestAnimationFrame(raf);
+        };
+        requestAnimationFrame(raf);
+        
+        // Connect GSAP ScrollTrigger if available
+        if (typeof ScrollTrigger !== 'undefined') {
+            this.lenis.on('scroll', ScrollTrigger.update);
+            
+            // Add Lenis's ticker to GSAP's ticker for sync
+            gsap.ticker.add((time) => {
+                this.lenis.raf(time * 1000);
+            });
+            
+            // Disable GSAP's own lag smoothing to let Lenis handle it or keep it separate
+            gsap.ticker.lagSmoothing(0);
+        }
     }
     
     // ==========================================
@@ -229,6 +279,12 @@ class App {
         });
     }
 }
+
+// ==========================================
+// SCROLL CONTROLLER (Lenis)
+// ==========================================
+// Lenis is initialized in App.init()
+
 
 // ==========================================
 // UTILITY FUNCTIONS

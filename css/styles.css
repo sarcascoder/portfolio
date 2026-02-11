@@ -84,7 +84,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Let Lenis handle smoothing */
   cursor: none;
   background-color: transparent; /* Transparent to show starfield canvas behind */
 }
@@ -541,6 +541,19 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   background-color: transparent;
 }
 
+.about-text {
+  max-width: 70vw;
+  position: relative;
+  z-index: 25;
+}
+
+@media (max-width: 1024px) {
+  .about-text {
+    max-width: 100%;
+    text-align: center;
+  }
+}
+
 .section-content {
   position: relative;
   z-index: 20; /* Higher than globe (10) to ensure text is readable */
@@ -689,11 +702,48 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 /* ========================================
    Projects Grid
    ======================================== */
+.projects-section .section-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align content to right */
+  margin-left: auto;
+  margin-right: 0;
+  max-width: 60vw; /* Limit width to keep left side clear for globe */
+}
+
+.projects-section .section-label {
+  flex-direction: row-reverse; /* Swap number and text */
+  width: 100%;
+  justify-content: flex-start; /* Because of row-reverse, this aligns to right */
+}
+
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: 1fr 1fr; /* Force 2 columns */
+  width: 100%;
   gap: 2.5vw;
   margin-bottom: 4vw;
+}
+
+/* Ensure first item is on the right (2nd column) */
+.projects-grid .project-card:nth-child(1) {
+  grid-column: 2;
+}
+
+/* Ensure 2nd and 3rd items fill the next row naturally */
+.projects-grid .project-card:nth-child(2),
+.projects-grid .project-card:nth-child(3) {
+  grid-column: auto;
+}
+
+/* Adjust view all link alignment */
+.projects-section .view-all-link {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.projects-section .view-all-link .arrow {
+  transform: rotate(180deg);
 }
 
 .project-card {
@@ -807,10 +857,35 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 /* ========================================
    Services Grid
    ======================================== */
+.services-section .section-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align content to left */
+  margin-right: auto;
+  margin-left: 0;
+  max-width: 50vw; /* Limit width to keep right side clear for globe */
+}
+
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 2.5vw;
+  width: 100%;
+}
+
+/* 1st item on first row, left column */
+.services-grid .service-item:nth-child(1) {
+    grid-column: 1;
+}
+
+/* Force 2nd item to start new row (left column), so 3rd item goes to right column */
+.services-grid .service-item:nth-child(2) {
+    grid-column: 1;
+}
+
+/* 4th item starts new row (left column), 5th item goes to right column naturally */
+.services-grid .service-item:nth-child(4) {
+    grid-column: 1;
 }
 
 .service-item {
@@ -1551,6 +1626,28 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 
     .projects-grid {
         grid-template-columns: 1fr; /* Stack projects */
+    }
+
+    .projects-section .section-content {
+        align-items: center;
+        margin-left: 0;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .projects-section .section-label {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .projects-grid .project-card:nth-child(1),
+    .projects-grid .project-card:nth-child(3) {
+        grid-column: auto;
+    }
+
+    .services-grid .service-item:nth-child(2),
+    .services-grid .service-item:nth-child(4) {
+        grid-column: auto;
     }
 
     #contact-earth-wrapper {
