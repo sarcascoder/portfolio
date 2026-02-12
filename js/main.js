@@ -45,9 +45,14 @@ class App {
         this._loadingSafetyTimer = setTimeout(() => {
             const ls = document.getElementById('loading-screen');
             if (ls && ls.style.display !== 'none') {
-                document.body.classList.remove('loading-active');
                 ls.style.opacity = '0';
-                setTimeout(() => { ls.style.display = 'none'; }, 600);
+                setTimeout(() => {
+                    ls.style.display = 'none';
+                    document.body.classList.remove('loading-active');
+                    if (typeof ScrollTrigger !== 'undefined') {
+                        ScrollTrigger.refresh(true);
+                    }
+                }, 600);
             }
         }, 8000);
         

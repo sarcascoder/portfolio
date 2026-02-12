@@ -20,6 +20,7 @@ class MercuryGlobe {
             this.container = fallback;
         }
         
+        // Mouse will be initialized to screen center in init()
         this.mouse = { x: 0, y: 0 };
         this.targetMouse = { x: 0, y: 0 };
         
@@ -55,6 +56,14 @@ class MercuryGlobe {
         // Track model loading state
         this.modelLoaded = false;
         this._scrollAnimSetup = false;
+        
+        // Warm-up phase: suppress all motion until everything is stable
+        this._warmupComplete = false;
+        this._warmupFrames = 0;
+
+        // Initialize mouse to screen center so first frames don't snap
+        this.mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        this.targetMouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
         this.setupCanvas();
         this.createScene();
@@ -194,30 +203,90 @@ class MercuryGlobe {
 
     /**
      * Called after the mercury model (or fallback) is ready.
-     * Sets up scroll animations and dismisses the loading screen.
+     * Runs a multi-step warm-up sequence so everything is stable before the user can interact.
      */
     _onModelReady() {
-        // Render one frame so the globe is visible before we unlock
+        // Render one frame so the globe is visible
         this.renderer.render(this.scene, this.camera);
 
-        // Now set up scroll animations (needs model in place for correct bounds)
+        // Step 1: Set explicit GSAP initial state on the container BEFORE creating ScrollTriggers.
+        // This eliminates the "GSAP doesn't know the starting position" problem.
+        if (typeof gsap !== 'undefined') {
+            if (window.innerWidth > 768) {
+                gsap.set(this.container, {
+                    left: "4vw",
+                    top: "50%",
+                    yPercent: -50,
+                    scale: 1,
+                    opacity: 1,
+                    clearProps: "" // don't clear — keep these as the known state
+                });
+            } else {
+                gsap.set(this.container, {
+                    left: "50%",
+                    top: "35%",
+                    xPercent: -50,
+                    yPercent: -50,
+                    scale: 1,
+                    opacity: 1
+                });
+            }
+        }
+
+        // Step 2: Set up scroll animations now that the container has a known GSAP state
         if (!this._scrollAnimSetup) {
             this._scrollAnimSetup = true;
             this.setupScrollAnimation();
         }
 
-        // Dismiss loading screen
+        // Step 3: Wait for layout to fully settle, then refresh ScrollTrigger,
+        // THEN dismiss loading screen — so positions are 100% correct before user can scroll.
+        // Use double-rAF to guarantee the browser has painted the layout.
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (typeof ScrollTrigger !== 'undefined') {
+                    ScrollTrigger.refresh(true);
+                }
+
+                // Step 4: Start warm-up phase (a few rendered frames with correct positions
+                // before we reveal to the user)
+                this._warmupFrames = 0;
+                this._warmupComplete = false;
+
+                const warmupTick = () => {
+                    this._warmupFrames++;
+                    if (this._warmupFrames < 10) {
+                        // Render a few frames to let lerps converge
+                        requestAnimationFrame(warmupTick);
+                    } else {
+                        // Everything is stable — dismiss loading screen
+                        this._warmupComplete = true;
+                        this._dismissLoadingScreen();
+                    }
+                };
+                requestAnimationFrame(warmupTick);
+            });
+        });
+    }
+
+    /**
+     * Smoothly dismisses the loading screen and unlocks scrolling.
+     */
+    _dismissLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
-            document.body.classList.remove('loading-active');
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
-                // Final ScrollTrigger refresh after loading screen is gone
+                document.body.classList.remove('loading-active');
+
+                // One final ScrollTrigger refresh after loading screen is removed from layout
                 if (typeof ScrollTrigger !== 'undefined') {
                     ScrollTrigger.refresh(true);
                 }
             }, 600);
+        } else {
+            document.body.classList.remove('loading-active');
         }
     }
 
@@ -243,60 +312,29 @@ class MercuryGlobe {
 
         // === DESKTOP ANIMATION (> 768px) ===
         mm.add("(min-width: 769px)", () => {
-             // Safety Trigger: Force reset when at very top to prevent "stuck on right"
-            ScrollTrigger.create({
-                trigger: "body",
-                start: "top top",
-                end: "100px",  // Small range at top
-                onEnter: () => {
-                    // Ensure we are in hero state
-                    gsap.to(this.container, {
-                        left: "4vw",
-                        top: "50%",
-                        scale: 1,
-                        yPercent: -50,
-                        overwrite: "auto",
-                        duration: 0.5
-                    });
-                },
-                onLeaveBack: () => {
-                    // Ensure we are in hero state when hitting top from bottom
-                    gsap.to(this.container, {
-                        left: "4vw",
-                        top: "50%",
-                        scale: 1,
-                        yPercent: -50,
-                        overwrite: "auto",
-                        duration: 0.5
-                    });
-                }
-            });
 
             // --- Transition to About Section ---
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#about-section",
-                    start: "top bottom", // When top of about section hits bottom of viewport
-                    end: "center center",   // When top of about section hits center
-                    scrub: 0.5, // Reduced for tighter response
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: 1,
                     toggleActions: "play reverse play reverse"
                 }
             });
 
-            // Step 1: First scale down to 85% and dip down slightly (before moving right)
-            // CHANGED: Use .to() instead of .fromTo() to avoid forcing top-state on refresh
             tl.to(this.container, {
                 scale: 0.85,
-                top: "60%",       // Dip down a bit
+                top: "60%",
                 duration: 1,
                 ease: "power1.inOut"
             });
 
-            // Step 2: Then move right and scale down to 50%
             tl.to(this.container, {
-                left: "60%",      // Move next to marquee 
-                top: "50%",       // Return to center
-                scale: 0.5,       // Final size for About section
+                left: "60%",
+                top: "50%",
+                scale: 0.5,
                 duration: 2,
                 ease: "power2.inOut"
             });
@@ -305,17 +343,16 @@ class MercuryGlobe {
             const tlProjects = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#projects-section",
-                    start: "top bottom", // When top of projects hits bottom of viewport
-                    end: "center center", // When center of projects hits center
-                    scrub: 0.5,
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: 1,
                     toggleActions: "play reverse play reverse"
                 }
             });
-            // Move to left most part of the screen (Scale stays 0.5)
             tlProjects.to(this.container, {
-                left: "0%",       // Fully left
-                top: "50%",       // Keep centered vertically
-                scale: 0.5,       // Maintain size
+                left: "0%",
+                top: "50%",
+                scale: 0.5,
                 ease: "power2.inOut"
             });
 
@@ -323,18 +360,17 @@ class MercuryGlobe {
             const tlServices = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#services-section",
-                    start: "top bottom", // When top of services hits bottom of viewport
-                    end: "center center", // When center of services hits center (Middle part)
-                    scrub: 0.5,
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: 1,
                     toggleActions: "play reverse play reverse"
                 }
             });
 
-            // Move back to right and scale to 75% at the middle
             tlServices.to(this.container, {
-                left: "60%",      // Move back to right
-                top: "50%",       // Keep centered vertically
-                scale: 0.75,      // Scale to 75% at middle of services
+                left: "60%",
+                top: "50%",
+                scale: 0.75,
                 ease: "power2.inOut"
             });
 
@@ -342,58 +378,38 @@ class MercuryGlobe {
             const tlContact = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#contact",
-                    start: "top bottom", // When top of contact hits bottom of viewport
-                    end: "bottom bottom", // When bottom of contact hits bottom of viewport (Bottom most part)
-                    scrub: 0.5,
+                    start: "top bottom",
+                    end: "bottom bottom",
+                    scrub: 1,
                     toggleActions: "play reverse play reverse"
                 }
             });
 
-            // Scale up to 90% ONLY when reaching the bottom most part
             tlContact.to(this.container, {
-                scale: 0.9,       // Scale up to 90%
-                left: "50%",      // Move to 50%
+                scale: 0.9,
+                left: "50%",
                 ease: "power2.inOut"
             });
         });
 
         // === MOBILE ANIMATION (<= 768px) ===
         mm.add("(max-width: 768px)", () => {
-            // Initial State Check
-            gsap.set(this.container, {
-                left: "50%",
-                top: "35%", // Start a bit higher (Hero position)
-                xPercent: -50,
-                yPercent: -50,
-                scale: 1, // Full size initially
-                opacity: 1
-            });
 
-            // Simple Background Scroll Effect
-            // It just stays in background, slightly scaling down/fading maybe, but NO horizontal movement
-            
             const tlMobile = gsap.timeline({
                 scrollTrigger: {
                     trigger: "body",
                     start: "top top",
                     end: "bottom bottom",
-                    scrub: 0.5
+                    scrub: 1
                 }
             });
 
-            // Move slightly to "background" position (center screen) and stay there
             tlMobile.to(this.container, {
-                top: "50%", // Move to true center
-                scale: 0.6, // Scale down to be a background element
-                opacity: 0.3, // Fade out slightly to not interfere with text
+                top: "50%",
+                scale: 0.6,
+                opacity: 0.3,
                 ease: "none"
             });
-        });
-
-        // Force a refresh to ensure start positions are calculated correctly
-        // Use requestAnimationFrame to wait for the browser to settle layout
-        requestAnimationFrame(() => {
-            ScrollTrigger.refresh(true);
         });
     }
     
@@ -945,8 +961,26 @@ class MercuryGlobe {
     animate() {
         requestAnimationFrame(() => this.animate());
         
-        
         if (!this.isVisible) return;
+
+        // During warm-up: render the scene but clamp all motion to avoid jumps.
+        // The globe just sits still at its initial rotation until everything is stable.
+        if (!this._warmupComplete) {
+            // Still render the globe so loading screen frames show it
+            if (this.mercuryGroup) {
+                this.mercuryGroup.rotation.x = 0;
+                this.mercuryGroup.rotation.y = 0;
+            }
+            // Reset lerp states to current mouse so there's no snap when warm-up ends
+            this.mouse.x = this.targetMouse.x;
+            this.mouse.y = this.targetMouse.y;
+            this.currentRotation.x = 0;
+            this.currentRotation.y = 0;
+            this.targetRotation.x = 0;
+            this.targetRotation.y = 0;
+            this.renderer.render(this.scene, this.camera);
+            return;
+        }
 
         // Theme Transition Logic
         this.themeProgress = this.lerp(this.themeProgress, this.targetThemeProgress, 0.06);
