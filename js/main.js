@@ -13,6 +13,9 @@ class App {
     }
     
     init() {
+        // Lock scrolling until 3D assets load
+        document.body.classList.add('loading-active');
+
         // Menu toggle
         this.initMenu();
 
@@ -37,6 +40,16 @@ class App {
         window.onbeforeunload = function () {
             window.scrollTo(0, 0);
         }
+
+        // Safety timeout: dismiss loading screen even if model fails to signal
+        this._loadingSafetyTimer = setTimeout(() => {
+            const ls = document.getElementById('loading-screen');
+            if (ls && ls.style.display !== 'none') {
+                document.body.classList.remove('loading-active');
+                ls.style.opacity = '0';
+                setTimeout(() => { ls.style.display = 'none'; }, 600);
+            }
+        }, 8000);
         
         // Active nav link tracking
         this.initActiveNavTracking();
@@ -57,6 +70,18 @@ class App {
             touchMultiplier: 0.35,
             normalizeWheel: true // Fix inconsistencies across devices
         });
+
+        // Stop Lenis immediately — it will be started when loading is done
+        this.lenis.stop();
+
+        // Watch for loading screen dismissal to re-enable Lenis
+        const loadingObserver = new MutationObserver(() => {
+            if (!document.body.classList.contains('loading-active')) {
+                this.lenis.start();
+                loadingObserver.disconnect();
+            }
+        });
+        loadingObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
         // Frame loop
         const raf = (time) => {
@@ -185,14 +210,27 @@ class App {
     // ==========================================
     
     initPageLoad() {
-        // Add loaded class to body after a short delay
+        // Add loaded class to body after loading screen is dismissed
+        // Wait for both window.load AND loading-active to be removed
+        const startAnimations = () => {
+            document.body.classList.add('loaded');
+            this.animateHeroContent();
+        };
+
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.body.classList.add('loaded');
-                
-                // Animate hero content
-                this.animateHeroContent();
-            }, 100);
+            // If loading screen is already dismissed, animate immediately
+            if (!document.body.classList.contains('loading-active')) {
+                setTimeout(startAnimations, 100);
+            } else {
+                // Wait for loading-active to be removed
+                const observer = new MutationObserver(() => {
+                    if (!document.body.classList.contains('loading-active')) {
+                        observer.disconnect();
+                        setTimeout(startAnimations, 100);
+                    }
+                });
+                observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+            }
         });
     }
     

@@ -52,12 +52,16 @@ class MercuryGlobe {
         // Mobile Detection
         this.isMobile = window.innerWidth <= 768;
 
+        // Track model loading state
+        this.modelLoaded = false;
+        this._scrollAnimSetup = false;
+
         this.setupCanvas();
         this.createScene();
         this.createLighting();
         this.loadMercuryModel();
         this.createSmileyFace();
-        this.setupScrollAnimation();
+        // NOTE: setupScrollAnimation is now deferred until model is loaded
         this.bindEvents();
         this.animate();
     }
@@ -171,13 +175,50 @@ class MercuryGlobe {
 
                 this.spinGroup.add(this.mercuryPivot);
                 this.mercurySurface = this.mercuryModel;
+
+                // Model loaded — now set up scroll animations
+                this.modelLoaded = true;
+                this._onModelReady();
             },
             undefined,
             (err) => {
                 console.error('Failed to load mercury.glb, creating fallback sphere:', err);
                 this.createFallbackSphere();
+
+                // Fallback also counts as ready
+                this.modelLoaded = true;
+                this._onModelReady();
             }
         );
+    }
+
+    /**
+     * Called after the mercury model (or fallback) is ready.
+     * Sets up scroll animations and dismisses the loading screen.
+     */
+    _onModelReady() {
+        // Render one frame so the globe is visible before we unlock
+        this.renderer.render(this.scene, this.camera);
+
+        // Now set up scroll animations (needs model in place for correct bounds)
+        if (!this._scrollAnimSetup) {
+            this._scrollAnimSetup = true;
+            this.setupScrollAnimation();
+        }
+
+        // Dismiss loading screen
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            document.body.classList.remove('loading-active');
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                // Final ScrollTrigger refresh after loading screen is gone
+                if (typeof ScrollTrigger !== 'undefined') {
+                    ScrollTrigger.refresh(true);
+                }
+            }, 600);
+        }
     }
 
     createFallbackSphere() {
@@ -349,10 +390,11 @@ class MercuryGlobe {
             });
         });
 
-        // Force a refresh to ensure start positions are calculated correctly if starting mid-page
-        setTimeout(() => {
-            ScrollTrigger.refresh();
-        }, 100);
+        // Force a refresh to ensure start positions are calculated correctly
+        // Use requestAnimationFrame to wait for the browser to settle layout
+        requestAnimationFrame(() => {
+            ScrollTrigger.refresh(true);
+        });
     }
     
     createSmileyFace() {
