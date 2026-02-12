@@ -1667,3 +1667,81 @@ body.menu-open .header-right > *:not(.menu-toggle) {
         font-size: 24px;
     }
 }
+
+/* ========================================
+   Mobile Alignment & Layout Overrides
+   ======================================== */
+@media (max-width: 768px) {
+    /* General Section Content Centering */
+    .section-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* About Section */
+    .about-text {
+        text-align: center;
+        margin: 0 auto;
+        max-width: 100%;
+    }
+    
+    /* Services Section */
+    .services-section .section-content {
+        align-items: center;
+        text-align: center;
+        max-width: 100%;
+    }
+    
+    .services-section .section-label {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .service-item {
+        text-align: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .service-list {
+        text-align: center;
+        padding-left: 0;
+    }
+    
+    /* Contact Section */
+    #contact .section-content {
+        align-items: center;
+        text-align: center;
+        margin-left: 0;
+        margin-right: 0;
+        max-width: 100%;
+    }
+    
+    #contact .section-label {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .contact-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .contact-heading {
+        text-align: center;
+    }
+
+    /* Projects Label Fix */
+    .projects-section .section-label {
+        width: 100%;
+        justify-content: center !important;
+        flex-direction: row !important;
+    }
+}

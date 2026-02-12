@@ -49,6 +49,9 @@ class MercuryGlobe {
     }
     
     init() {
+        // Mobile Detection
+        this.isMobile = window.innerWidth <= 768;
+
         this.setupCanvas();
         this.createScene();
         this.createLighting();
@@ -195,121 +198,156 @@ class MercuryGlobe {
             return;
         }
 
-        // Safety Trigger: Force reset when at very top to prevent "stuck on right"
-        ScrollTrigger.create({
-            trigger: "body",
-            start: "top top",
-            end: "100px",  // Small range at top
-            onEnter: () => {
-                // Ensure we are in hero state
-                gsap.to(this.container, {
-                    left: "4vw",
-                    top: "50%",
-                    scale: 1,
-                    yPercent: -50,
-                    overwrite: "auto",
-                    duration: 0.5
-                });
-            },
-            onLeaveBack: () => {
-                 // Ensure we are in hero state when hitting top from bottom
-                 gsap.to(this.container, {
-                    left: "4vw",
-                    top: "50%",
-                    scale: 1,
-                    yPercent: -50,
-                    overwrite: "auto",
-                    duration: 0.5
-                });
-            }
+        let mm = gsap.matchMedia();
+
+        // === DESKTOP ANIMATION (> 768px) ===
+        mm.add("(min-width: 769px)", () => {
+             // Safety Trigger: Force reset when at very top to prevent "stuck on right"
+            ScrollTrigger.create({
+                trigger: "body",
+                start: "top top",
+                end: "100px",  // Small range at top
+                onEnter: () => {
+                    // Ensure we are in hero state
+                    gsap.to(this.container, {
+                        left: "4vw",
+                        top: "50%",
+                        scale: 1,
+                        yPercent: -50,
+                        overwrite: "auto",
+                        duration: 0.5
+                    });
+                },
+                onLeaveBack: () => {
+                    // Ensure we are in hero state when hitting top from bottom
+                    gsap.to(this.container, {
+                        left: "4vw",
+                        top: "50%",
+                        scale: 1,
+                        yPercent: -50,
+                        overwrite: "auto",
+                        duration: 0.5
+                    });
+                }
+            });
+
+            // --- Transition to About Section ---
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#about-section",
+                    start: "top bottom", // When top of about section hits bottom of viewport
+                    end: "center center",   // When top of about section hits center
+                    scrub: 0.5, // Reduced for tighter response
+                    toggleActions: "play reverse play reverse"
+                }
+            });
+
+            // Step 1: First scale down to 85% and dip down slightly (before moving right)
+            // CHANGED: Use .to() instead of .fromTo() to avoid forcing top-state on refresh
+            tl.to(this.container, {
+                scale: 0.85,
+                top: "60%",       // Dip down a bit
+                duration: 1,
+                ease: "power1.inOut"
+            });
+
+            // Step 2: Then move right and scale down to 50%
+            tl.to(this.container, {
+                left: "60%",      // Move next to marquee 
+                top: "50%",       // Return to center
+                scale: 0.5,       // Final size for About section
+                duration: 2,
+                ease: "power2.inOut"
+            });
+
+            // --- Transition to Featured/Projects Section ---
+            const tlProjects = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#projects-section",
+                    start: "top bottom", // When top of projects hits bottom of viewport
+                    end: "center center", // When center of projects hits center
+                    scrub: 0.5,
+                    toggleActions: "play reverse play reverse"
+                }
+            });
+            // Move to left most part of the screen (Scale stays 0.5)
+            tlProjects.to(this.container, {
+                left: "0%",       // Fully left
+                top: "50%",       // Keep centered vertically
+                scale: 0.5,       // Maintain size
+                ease: "power2.inOut"
+            });
+
+            // --- Transition to Services Section ---
+            const tlServices = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#services-section",
+                    start: "top bottom", // When top of services hits bottom of viewport
+                    end: "center center", // When center of services hits center (Middle part)
+                    scrub: 0.5,
+                    toggleActions: "play reverse play reverse"
+                }
+            });
+
+            // Move back to right and scale to 75% at the middle
+            tlServices.to(this.container, {
+                left: "60%",      // Move back to right
+                top: "50%",       // Keep centered vertically
+                scale: 0.75,      // Scale to 75% at middle of services
+                ease: "power2.inOut"
+            });
+
+            // --- Transition to Contact Section ---
+            const tlContact = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#contact",
+                    start: "top bottom", // When top of contact hits bottom of viewport
+                    end: "bottom bottom", // When bottom of contact hits bottom of viewport (Bottom most part)
+                    scrub: 0.5,
+                    toggleActions: "play reverse play reverse"
+                }
+            });
+
+            // Scale up to 90% ONLY when reaching the bottom most part
+            tlContact.to(this.container, {
+                scale: 0.9,       // Scale up to 90%
+                left: "50%",      // Move to 50%
+                ease: "power2.inOut"
+            });
         });
 
-        // --- Transition to About Section ---
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#about-section",
-                start: "top bottom", // When top of about section hits bottom of viewport
-                end: "center center",   // When top of about section hits center
-                scrub: 0.5, // Reduced for tighter response
-                toggleActions: "play reverse play reverse"
-            }
-        });
+        // === MOBILE ANIMATION (<= 768px) ===
+        mm.add("(max-width: 768px)", () => {
+            // Initial State Check
+            gsap.set(this.container, {
+                left: "50%",
+                top: "35%", // Start a bit higher (Hero position)
+                xPercent: -50,
+                yPercent: -50,
+                scale: 1, // Full size initially
+                opacity: 1
+            });
 
-        // Step 1: First scale down to 85% and dip down slightly (before moving right)
-        // CHANGED: Use .to() instead of .fromTo() to avoid forcing top-state on refresh
-        tl.to(this.container, {
-            scale: 0.85,
-            top: "60%",       // Dip down a bit
-            duration: 1,
-            ease: "power1.inOut"
-        });
+            // Simple Background Scroll Effect
+            // It just stays in background, slightly scaling down/fading maybe, but NO horizontal movement
+            
+            const tlMobile = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 0.5
+                }
+            });
 
-        // Step 2: Then move right and scale down to 50%
-        tl.to(this.container, {
-            left: "60%",      // Move next to marquee 
-            top: "50%",       // Return to center
-            scale: 0.5,       // Final size for About section
-            duration: 2,
-            ease: "power2.inOut"
+            // Move slightly to "background" position (center screen) and stay there
+            tlMobile.to(this.container, {
+                top: "50%", // Move to true center
+                scale: 0.6, // Scale down to be a background element
+                opacity: 0.3, // Fade out slightly to not interfere with text
+                ease: "none"
+            });
         });
-
-        // --- Transition to Featured/Projects Section ---
-        const tlProjects = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#projects-section",
-                start: "top bottom", // When top of projects hits bottom of viewport
-                end: "center center", // When center of projects hits center
-                scrub: 0.5,
-                toggleActions: "play reverse play reverse"
-            }
-        });
-        // Move to left most part of the screen (Scale stays 0.5)
-        tlProjects.to(this.container, {
-            left: "0%",       // Fully left
-            top: "50%",       // Keep centered vertically
-            scale: 0.5,       // Maintain size
-            ease: "power2.inOut"
-        });
-
-        // --- Transition to Services Section ---
-        const tlServices = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#services-section",
-                start: "top bottom", // When top of services hits bottom of viewport
-                end: "center center", // When center of services hits center (Middle part)
-                scrub: 0.5,
-                toggleActions: "play reverse play reverse"
-            }
-        });
-
-        // Move back to right and scale to 75% at the middle
-        tlServices.to(this.container, {
-            left: "60%",      // Move back to right
-            top: "50%",       // Keep centered vertically
-            scale: 0.75,      // Scale to 75% at middle of services
-            ease: "power2.inOut"
-        });
-
-        // --- Transition to Contact Section ---
-        const tlContact = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#contact",
-                start: "top bottom", // When top of contact hits bottom of viewport
-                end: "bottom bottom", // When bottom of contact hits bottom of viewport (Bottom most part)
-                scrub: 0.5,
-                toggleActions: "play reverse play reverse"
-            }
-        });
-
-        // Scale up to 90% ONLY when reaching the bottom most part
-        tlContact.to(this.container, {
-            scale: 0.9,       // Scale up to 90%
-            left: "50%",      // Move to 50%
-            ease: "power2.inOut"
-        });
-        
-        // Optional: slight rotation or other effects on the globe itself
-        // But the container animation handles position/size
 
         // Force a refresh to ensure start positions are calculated correctly if starting mid-page
         setTimeout(() => {
