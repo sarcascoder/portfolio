@@ -342,6 +342,11 @@
     transform: scale(1);
 }
 
+/* GSAP ScrollTrigger reveal - initial hidden state */
+.scroll-reveal-init {
+    opacity: 0;
+}
+
 /* ========================================
    Page Transition
    ======================================== */
