@@ -313,13 +313,22 @@ class MercuryGlobe {
         // === DESKTOP ANIMATION (> 768px) ===
         mm.add("(min-width: 769px)", () => {
 
+            // Initial State Check (desktop) — keep consistent with the original movement
+            gsap.set(this.container, {
+                left: "4vw",
+                top: "50%",
+                yPercent: -50,
+                scale: 1,
+                opacity: 1
+            });
+
             // --- Transition to About Section ---
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#about-section",
                     start: "top bottom",
                     end: "center center",
-                    scrub: 1,
+                    scrub: 0.5,
                     toggleActions: "play reverse play reverse"
                 }
             });
@@ -345,7 +354,7 @@ class MercuryGlobe {
                     trigger: "#projects-section",
                     start: "top bottom",
                     end: "center center",
-                    scrub: 1,
+                    scrub: 0.5,
                     toggleActions: "play reverse play reverse"
                 }
             });
@@ -362,7 +371,7 @@ class MercuryGlobe {
                     trigger: "#services-section",
                     start: "top bottom",
                     end: "center center",
-                    scrub: 1,
+                    scrub: 0.5,
                     toggleActions: "play reverse play reverse"
                 }
             });
@@ -380,7 +389,7 @@ class MercuryGlobe {
                     trigger: "#contact",
                     start: "top bottom",
                     end: "bottom bottom",
-                    scrub: 1,
+                    scrub: 0.5,
                     toggleActions: "play reverse play reverse"
                 }
             });
@@ -395,12 +404,22 @@ class MercuryGlobe {
         // === MOBILE ANIMATION (<= 768px) ===
         mm.add("(max-width: 768px)", () => {
 
+            // Initial State Check (mobile) — matches the original working behavior
+            gsap.set(this.container, {
+                left: "50%",
+                top: "35%",
+                xPercent: -50,
+                yPercent: -50,
+                scale: 1,
+                opacity: 1
+            });
+
             const tlMobile = gsap.timeline({
                 scrollTrigger: {
                     trigger: "body",
                     start: "top top",
                     end: "bottom bottom",
-                    scrub: 1
+                    scrub: 0.5
                 }
             });
 
@@ -411,6 +430,11 @@ class MercuryGlobe {
                 ease: "none"
             });
         });
+
+        // Force a refresh to ensure start positions are calculated correctly if starting mid-page
+        setTimeout(() => {
+            ScrollTrigger.refresh();
+        }, 100);
     }
     
     createSmileyFace() {
