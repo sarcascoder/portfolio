@@ -125,11 +125,11 @@
 }
 
 /* Character by character reveal */
-.char-reveal span {
+.char-reveal {
     display: inline-block;
     opacity: 0;
-    transform: translateY(100%);
-    animation: char-slide-up 0.5s ease forwards;
+    min-width: 4px; /* Preserve space width */
+    white-space: pre;
 }
 
 @keyframes char-slide-up {

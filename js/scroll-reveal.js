@@ -1,12 +1,10 @@
 /**
- * SCROLL-REVEAL.JS - Scroll-triggered text reveal animations
- * Uses GSAP ScrollTrigger to fade-in-up text elements as they enter the viewport
+ * SCROLL-REVEAL.JS - Scroll-triggered typewriter animations
  */
 
 (function initScrollReveal() {
-    // Wait for GSAP and ScrollTrigger to be available
+    // Wait for GSAP and ScrollTrigger
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-        // Retry after a short delay if GSAP isn't loaded yet
         setTimeout(initScrollReveal, 100);
         return;
     }
@@ -18,168 +16,172 @@
     // ==========================================
 
     const CONFIG = {
-        y: 40,                    // Starting Y offset (px)
-        duration: 0.8,            // Animation duration (s)
-        ease: 'power2.out',       // Easing function
-        stagger: 0.12,            // Stagger delay between siblings (s)
-        triggerStart: 'top 88%',  // When to trigger (element top hits 88% of viewport)
+        scrollStart: 'top 85%', // Trigger when top of element hits 85% of viewport
+        typeSpeed: 0.03,        // Moderate typing speed (seconds per character)
+        staggerBatch: 0.01,     // Slightly faster for long blocks
     };
 
-    // Elements to animate
-    const TEXT_SELECTORS = [
-        // Headings
-        'h1', 'h2', 'h3',
-        // Paragraphs and text
+    // Elements to apply typewriter effect to
+    const TYPEWRITER_SELECTORS = [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'p',
-        // Section labels
         '.section-label',
-        // Links and buttons
-        '.view-all-link',
+        '.service-title',
+        '.project-title',
+        '.project-category',
+        '.project-year',
+        '.stat-number',
+        '.stat-label',
+        '.view-all-link span', // Target text inside links
         '.contact-email',
         '.contact-location',
-        // Service items
-        '.service-item',
-        // Project cards
-        '.project-card',
-        // Value items
-        '.value-item',
-        // Stat items
-        '.stat-item',
-        // Job items
-        '.job-item',
-        // Process steps
-        '.process-step',
-        // Service blocks
-        '.service-block',
-        // Filter buttons
-        '.filter-section',
-        // Lists (animate the whole list, not each li)
-        '.service-list',
-        '.service-offerings',
-        '.project-tags',
-        // Careers
-        '.careers-header',
-        // Misc text containers
-        '.about-text',
-        '.contact-content',
-        '.page-subtitle',
+        '.nav-link',
+        'li', // List items
+        '.tagline-text' // Hero tagline
     ];
 
-    // Containers to exclude (elements inside these won't be animated)
-    const EXCLUDE_CONTAINERS = [
-        '.header',
-        '.nav-menu',
-        '#contact-modal',
-        '#mercury-container',
-        '#contact-earth-wrapper',
-        '.hero',              // Hero has its own entrance animation
-        '.rotating-text-ring',
+    // Exclude complete containers or specific elements
+    const EXCLUDE_SELECTORS = [
+        '.hero-title',         // Has its own custom animation
+        '.rotating-text-ring', // SVG text
+        '.marquee-text',       // Marquee needs to stay intact
+        '#contact-modal *',    // Modal content
+        '.no-typewriter',      // Utility class to opt-out
+        'script', 'style', 'svg', 'img', 'br'
     ];
 
-    // Build the exclude selector
-    const excludeSelector = EXCLUDE_CONTAINERS.map(c => `${c} *`).join(', ');
 
     // ==========================================
-    // SELECT & FILTER ELEMENTS
+    // UTILITIES
     // ==========================================
 
-    const allSelector = TEXT_SELECTORS.join(', ');
-    const allElements = document.querySelectorAll(allSelector);
+    // Helper: Split text into spans without breaking HTML structure
+    // Wraps words to prevent character-level line breaks
+    function splitTextToChars(element) {
+        // If element has no children (just text), simpler split but with word wrapping
+        if (element.children.length === 0) {
+            const text = element.textContent;
+            if (!text.trim()) return false;
+            
+            // Split by spaces to preserve words
+            const words = text.split(/(\s+)/);
+            
+            element.innerHTML = words.map(word => {
+                if (word.match(/^\s+$/)) return word; // Return spaces/newlines as is (text node effectively)
+                // Wrap word in a nowrap span
+                return `<span style="display: inline-block; white-space: nowrap;">${
+                    word.split('').map(char => `<span class="char-reveal">${char}</span>`).join('')
+                }</span>`;
+            }).join('');
+            return true;
+        } 
+        
+        // Traverse child nodes for mixed content
+        let nodes = Array.from(element.childNodes);
+        let modified = false;
 
-    // Filter out excluded elements and already-processed ones
-    const elements = [];
-    const seen = new Set();
+        nodes.forEach(node => {
+            if (node.nodeType === 3) { // Text node
+                const text = node.textContent;
+                // Only process if it has non-whitespace content (or is meaningful space)
+                if (text.length > 0) {
+                     // Check if it's just whitespace (preserve it as text node)
+                    if (text.match(/^\s+$/)) {
+                        // Do nothing, leave whitespace node
+                        return;
+                    }
 
-    allElements.forEach(el => {
-        // Skip if already processed
-        if (seen.has(el)) return;
-
-        // Skip if inside an excluded container
-        if (el.closest(EXCLUDE_CONTAINERS.join(', '))) return;
-
-        // Skip if it's a child of another element we're already animating
-        // (e.g., an h3 inside a .service-item — we animate the service-item)
-        let dominated = false;
-        for (const parent of seen) {
-            if (parent.contains(el) && parent !== el) {
-                dominated = true;
-                break;
-            }
-        }
-        if (dominated) return;
-
-        // Remove any already-added children that this element contains
-        for (let i = elements.length - 1; i >= 0; i--) {
-            if (el.contains(elements[i]) && el !== elements[i]) {
-                seen.delete(elements[i]);
-                elements.splice(i, 1);
-            }
-        }
-
-        elements.push(el);
-        seen.add(el);
-    });
-
-    // ==========================================
-    // GROUP SIBLINGS FOR STAGGER
-    // ==========================================
-
-    // Group elements by their parent to apply staggered animations
-    const parentGroups = new Map();
-
-    elements.forEach(el => {
-        const parent = el.parentElement;
-        if (!parentGroups.has(parent)) {
-            parentGroups.set(parent, []);
-        }
-        parentGroups.get(parent).push(el);
-    });
-
-    // ==========================================
-    // APPLY ANIMATIONS
-    // ==========================================
-
-    parentGroups.forEach((group, parent) => {
-        if (group.length > 1) {
-            // Staggered animation for sibling groups
-            gsap.set(group, { opacity: 0, y: CONFIG.y });
-
-            ScrollTrigger.batch(group, {
-                onEnter: (batch) => {
-                    gsap.to(batch, {
-                        opacity: 1,
-                        y: 0,
-                        duration: CONFIG.duration,
-                        ease: CONFIG.ease,
-                        stagger: CONFIG.stagger,
-                        overwrite: true,
+                    const words = text.split(/(\s+)/);
+                    const frag = document.createDocumentFragment();
+                    
+                    words.forEach(word => {
+                        if (word.match(/^\s+$/)) {
+                             frag.appendChild(document.createTextNode(word));
+                        } else if (word.length > 0) {
+                             const wordSpan = document.createElement('span');
+                             wordSpan.style.display = 'inline-block';
+                             wordSpan.style.whiteSpace = 'nowrap';
+                             wordSpan.innerHTML = word.split('').map(char => {
+                                 return `<span class="char-reveal">${char}</span>`;
+                             }).join('');
+                             frag.appendChild(wordSpan);
+                        }
                     });
-                },
-                start: CONFIG.triggerStart,
-                once: true, // Only animate once
-            });
-        } else {
-            // Single element animation
-            const el = group[0];
-            gsap.set(el, { opacity: 0, y: CONFIG.y });
+                    
+                    element.replaceChild(frag, node);
+                    modified = true;
+                }
+            } else if (node.nodeType === 1 && !EXCLUDE_SELECTORS.some(s => node.matches(s))) { // Element node
+                // Recursively split children elements if they aren't excluded
+                 if (['SPAN', 'STRONG', 'EM', 'B', 'I', 'A'].includes(node.tagName)) {
+                     if (splitTextToChars(node)) {
+                         modified = true;
+                     }
+                 }
+            }
+        });
+        return modified;
+    }
 
-            gsap.to(el, {
-                opacity: 1,
-                y: 0,
-                duration: CONFIG.duration,
-                ease: CONFIG.ease,
-                overwrite: true,
-                scrollTrigger: {
-                    trigger: el,
-                    start: CONFIG.triggerStart,
-                    once: true,
-                },
-            });
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+
+    const allElements = document.querySelectorAll(TYPEWRITER_SELECTORS.join(', '));
+    const animatableElements = [];
+
+    // Filter and prepare elements
+    allElements.forEach(el => {
+        // Validation: Check exclusions
+        if (el.closest(EXCLUDE_SELECTORS.join(', '))) return;
+        if (el.closest('.hero')) return; // General hero exclusion (except explicitly grouped items if any)
+        
+        // Skip if already processed or has too much HTML (e.g. strict interactive components)
+        if (el.getAttribute('data-typewriter-init') === 'true') return;
+
+        // Attempt split
+        if (splitTextToChars(el)) {
+            el.setAttribute('data-typewriter-init', 'true');
+            // Ensure parent is visible to prevent FOUC, chars will be hidden by CSS
+            el.style.opacity = '1'; 
+            animatableElements.push(el);
         }
     });
 
-    // Force a ScrollTrigger refresh after setup to catch already-visible elements
+    // ==========================================
+    // ANIMATION
+    // ==========================================
+
+    animatableElements.forEach(el => {
+        // Select all the newly created chars inside this element
+        const chars = el.querySelectorAll('.char-reveal');
+        if (chars.length === 0) return;
+
+        // Set initial state via GSAP (opacity 0)
+        gsap.set(chars, { opacity: 0 });
+
+        // Create ScrollTrigger
+        ScrollTrigger.create({
+            trigger: el,
+            start: CONFIG.scrollStart,
+            once: true,
+            onEnter: () => {
+                gsap.to(chars, {
+                    opacity: 1,
+                    duration: 0.1, // Sudden appearance per char (typing feel)
+                    stagger: {
+                        each: CONFIG.typeSpeed,
+                        from: "start"
+                    },
+                    ease: "none"
+                });
+            }
+        });
+    });
+
+    console.log(`%c⌨️ Typewriter: Initialized on ${animatableElements.length} elements`, 'color: #00ff88; font-weight: bold;');
+
+    // Refresh to calculate positions
     ScrollTrigger.refresh();
 
-    console.log(`%c✨ Scroll Reveal: ${elements.length} elements initialized`, 'color: #00ff88; font-size: 11px;');
 })();
