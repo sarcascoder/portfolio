@@ -5,7 +5,7 @@
 /* Dot Matrix Heading Styles */
 .dot-matrix-heading {
     font-family: var(--font-dot-matrix);
-    font-size: clamp(40px, 7vw, 150px); 
+    font-size: clamp(32px, 6vw, 120px); 
     font-weight: 400;
     letter-spacing: 0.05em;
     line-height: 0.95;
@@ -13,11 +13,21 @@
     color: var(--color-white);
 }
 
+/* Custom Fonts */
+@font-face {
+    font-family: 'Neofolia';
+    src: url('../fonts/Neofolia-Regular.otf') format('opentype'),
+         url('../fonts/Neofolia-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* Specific Hero Text Style (Carlito) */
 .hero-carlito-text {
-    font-family: 'Carlito', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     font-weight: 800; /* Extra Bold */
-    font-size: clamp(40px, 6.5vw, 200px);
+    font-size: clamp(30px, 5.0vw, 160px);
     color: transparent;
     -webkit-text-stroke: 1px #fff;
     line-height: 1.0;
@@ -33,7 +43,7 @@
 /* Small dot matrix text */
 .dot-matrix-text {
     font-family: var(--font-dot-matrix);
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
@@ -41,7 +51,7 @@
 /* Monospace body text */
 .mono-text {
     font-family: var(--font-mono);
-    font-size: 16px; /* Increased from 14px */
+    font-size: 14px; /* Reduced from 16px */
     letter-spacing: 0.05em;
     line-height: 1.8;
 }
@@ -263,7 +273,7 @@
 
 .label-text {
     font-family: var(--font-mono);
-    font-size: clamp(13px, 1.3vw, 22px);
+    font-size: clamp(11px, 1.1vw, 18px);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-text-muted);
@@ -271,7 +281,7 @@
 
 .caption-text {
     font-family: var(--font-mono);
-    font-size: 14px; /* Increased from 12px */
+    font-size: 12px; /* Reduced from 14px */
     letter-spacing: 0.1em;
     color: var(--color-text-muted); /* Lighter gray */
     line-height: 1.6;
