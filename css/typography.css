@@ -38,16 +38,22 @@
     font-family: 'Osiris', sans-serif;
     font-weight: 800; /* Extra Bold */
     font-size: clamp(30px, 5.0vw, 180px);
-    color: transparent;
-    -webkit-text-stroke: 1px #fff;
+    /* Specific glow for hero text - Tuned for Chrome/Safari consistency */
+    text-shadow: 
+        0 0 10px var(--color-neon-green),
+        0 0 20px var(--color-neon-green);
     line-height: 1.0;
     letter-spacing: -0.5px;
     text-transform: uppercase;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 .hero-carlito-text:hover {
-    color: #fff;
+    color: rgba(255, 255, 255, 0.1); /* Slight white fill on hover */
+    text-shadow: 
+        0 0 15px var(--color-neon-green),
+        0 0 30px var(--color-neon-green),
+        0 0 45px var(--color-neon-green);
 }
 
 /* Small dot matrix text */
