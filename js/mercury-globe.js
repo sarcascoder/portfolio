@@ -341,9 +341,9 @@ class MercuryGlobe {
             });
 
             tl.to(this.container, {
-                left: "60%",
+                left: "50%",
                 top: "50%",
-                scale: 0.5,
+                scale: 0.65,
                 duration: 2,
                 ease: "power2.inOut"
             });
