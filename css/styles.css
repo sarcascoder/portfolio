@@ -1029,6 +1029,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 .footer-right {
   display: flex;
   gap: 2vw;
+  margin-right: 140px; /* Space for fixed globe on PC */
 }
 
 .footer-link {
@@ -1527,6 +1528,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 
 /* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
+    .footer-right { margin-right: 0; }
     .hero {
         align-items: center;
         text-align: center;
