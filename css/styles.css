@@ -1241,6 +1241,8 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 .rotating-text-ring text {
     fill: var(--color-neon-green);
     font-weight: bold;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
     /* text-transform: uppercase; Removed to allow lowercase */
 }
 
@@ -1263,6 +1265,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 #contact-earth-wrapper:hover .rotating-text-ring text {
     fill: var(--color-white);
     text-shadow: 0 0 5px var(--color-neon-green);
+    opacity: 1;
 }
 #contact-earth-wrapper:hover #contact-earth-container {
   transform: scale(1.03);
