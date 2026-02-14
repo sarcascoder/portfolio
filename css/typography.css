@@ -15,6 +15,24 @@
 
 /* Custom Fonts */
 @font-face {
+    font-family: 'Osiris';
+    src: url('../public/fonts/cm-osiris-futuristic-font-3966420/Osiris.woff2') format('woff2'),
+         url('../public/fonts/cm-osiris-futuristic-font-3966420/Osiris.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Space Boards';
+    src: url('../public/fonts/space-boards-sci-fi-logo-font-1/Space Boards.otf') format('opentype'),
+         url('../public/fonts/space-boards-sci-fi-logo-font-1/Space Boards.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: 'Neofolia';
     src: url('../fonts/Neofolia-Regular.otf') format('opentype'),
          url('../fonts/Neofolia-Regular.ttf') format('truetype');
@@ -25,9 +43,9 @@
 
 /* Specific Hero Text Style (Carlito) */
 .hero-carlito-text {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Osiris', sans-serif;
     font-weight: 800; /* Extra Bold */
-    font-size: clamp(30px, 5.0vw, 160px);
+    font-size: clamp(30px, 5.0vw, 180px);
     color: transparent;
     -webkit-text-stroke: 1px #fff;
     line-height: 1.0;

@@ -53,8 +53,6 @@
         '.service-block',
         // Filter buttons
         '.filter-section',
-        // Footer
-        '.footer-content',
         // Lists (animate the whole list, not each li)
         '.service-list',
         '.service-offerings',

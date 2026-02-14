@@ -1,6 +1,3 @@
-/* ========================================
-   MAIN STYLES - Super Evil Geniuscorp Clone
-   ======================================== */
 
 /* CSS Variables - Color Palette */
 :root {
@@ -14,10 +11,10 @@
   --color-gray-mid: #333333;
   --color-gray-light: #666666;
 
-  --font-dot-matrix: "Orbitron", sans-serif;
-  --font-mono: "Orbitron", sans-serif;
-  --font-handwriting: "Orbitron", sans-serif;
-  --font-neofolia: "Neofolia", "Orbitron", sans-serif; /* Fallback to Orbitron until file is added */
+  --font-dot-matrix: "Osiris", "Orbitron", sans-serif;
+  --font-mono: "Osiris", "Orbitron", sans-serif;
+  --font-handwriting: "Osiris", "Orbitron", sans-serif;
+  --font-neofolia: "Neofolia", "Osiris", "Orbitron", sans-serif; /* Fallback to Orbitron until file is added */
 
   --transition-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -456,7 +453,7 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 
 .tagline-text {
   font-family: var(--font-handwriting); /* Caveat handwriting font */
-  font-size: clamp(15px, 2.0vw, 38px);
+  font-size: clamp(16px, 2.2vw, 40px);
   letter-spacing: 0.05em;
   color: var(--color-white);
   font-weight: 400;
@@ -1004,6 +1001,8 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 .footer {
   padding: 3vw 4vw;
   border-top: 1px solid var(--color-gray-mid);
+  position: relative;
+  z-index: 50;
 }
 
 .footer-content {
