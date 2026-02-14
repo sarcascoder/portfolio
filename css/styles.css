@@ -452,11 +452,12 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 }
 
 .tagline-text {
-  font-family: var(--font-handwriting); /* Caveat handwriting font */
+  font-family: 'Brittany', cursive; /* Brittany Signature font */
   font-size: clamp(16px, 2.2vw, 40px);
   letter-spacing: 0.05em;
   color: var(--color-white);
   font-weight: 400;
+  text-transform: none;
 }
 
 .evil-face {

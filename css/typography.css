@@ -23,19 +23,11 @@
     font-display: swap;
 }
 
-@font-face {
-    font-family: 'Space Boards';
-    src: url('../public/fonts/space-boards-sci-fi-logo-font-1/Space Boards.otf') format('opentype'),
-         url('../public/fonts/space-boards-sci-fi-logo-font-1/Space Boards.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
 
 @font-face {
-    font-family: 'Neofolia';
-    src: url('../fonts/Neofolia-Regular.otf') format('opentype'),
-         url('../fonts/Neofolia-Regular.ttf') format('truetype');
+    font-family: 'Brittany';
+    src: url('../public/fonts/BrittanySignature.ttf') format('truetype'),
+         url('../public/fonts/BrittanySignature.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
