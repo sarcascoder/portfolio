@@ -293,7 +293,24 @@ class MercuryGlobe {
     /**
      * Smoothly dismisses the loading screen and unlocks scrolling.
      */
+    /**
+     * Smoothly dismisses the loading screen and unlocks scrolling.
+     */
     _dismissLoadingScreen() {
+        // Use Global Rocket Loader if available
+        if (window.finishLoading) {
+            window.finishLoading();
+            
+            // Still refresh ScrollTrigger after a safe delay matching the loader's exit
+            setTimeout(() => {
+                if (typeof ScrollTrigger !== 'undefined') {
+                    ScrollTrigger.refresh(true);
+                }
+            }, 1200);
+            return;
+        }
+
+        // Fallback (Original Logic)
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
             loadingScreen.style.opacity = '0';

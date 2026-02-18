@@ -43,6 +43,12 @@ class App {
 
         // Safety timeout: dismiss loading screen even if model fails to signal
         this._loadingSafetyTimer = setTimeout(() => {
+            if (window.finishLoading) {
+                 window.finishLoading();
+                 return;
+            }
+            
+            // Fallback if rocket loader script is missing
             const ls = document.getElementById('loading-screen');
             if (ls && ls.style.display !== 'none') {
                 ls.style.opacity = '0';
