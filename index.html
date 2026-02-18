@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="css/cursor.css" />
     <link rel="stylesheet" href="css/video-reveal.css" />
     <script type="module" src="js/theme.js"></script>
+    <!-- Preload Universe Video for fast playback -->
+    <link rel="preload" as="video" href="universe_zoom.mp4" type="video/mp4">
   </head>
   <body>
     <!-- Loading Screen - prevents scroll until 3D assets are ready -->
@@ -77,8 +79,8 @@
 
     <!-- Universe Zoom Video Section (Hidden by default) -->
     <div id="universe-video-container" class="universe-video-container">
-      <video id="universe-video" class="lazy" muted playsinline data-src="universe_zoom.mp4">
-        <!-- Source removed, using data-src -->
+      <video id="universe-video" muted playsinline preload="auto" fetchpriority="high">
+        <source src="universe_zoom.mp4" type="video/mp4">
       </video>
       <div class="universe-overlay-gradient"></div>
     </div>
@@ -233,9 +235,9 @@
         <div class="projects-grid">
           <article class="project-card" data-category="branding">
             <div class="project-image">
-              <video class="project-video lazy" autoplay loop muted playsinline>
-                <source data-src="project1.mov" type="video/quicktime">
-                <source data-src="project1.mov" type="video/mp4">
+              <video class="project-video" autoplay loop muted playsinline>
+                <source src="project1.mov" type="video/quicktime">
+                <source src="project1.mov" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -248,9 +250,9 @@
 
           <article class="project-card" data-category="digital">
             <div class="project-image">
-              <video class="project-video lazy" autoplay loop muted playsinline>
-                <source data-src="project2.mov" type="video/quicktime">
-                <source data-src="project2.mov" type="video/mp4"> <!-- Fallback -->
+              <video class="project-video" autoplay loop muted playsinline>
+                <source src="project2.mov" type="video/quicktime">
+                <source src="project2.mov" type="video/mp4"> <!-- Fallback -->
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -263,8 +265,8 @@
 
           <article class="project-card" data-category="design">
             <div class="project-image">
-              <video class="project-video lazy" autoplay loop muted playsinline>
-                <source data-src="project3.mp4" type="video/mp4">
+              <video class="project-video" autoplay loop muted playsinline>
+                <source src="project3.mp4" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -400,7 +402,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="js/lazy-loader.js"></script> <!-- Lazy Loader -->
     <script type="module" src="js/cursor.js"></script>
     <script type="module" src="js/parallax.js"></script>
 
@@ -536,4 +537,3 @@
     </style>
   </body>
 </html>
-

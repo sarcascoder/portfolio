@@ -35,8 +35,7 @@ class PortalEffect {
         
         // Create image element
         this.image = document.createElement('img');
-        // Lazy load: Don't set src yet.
-        this.image.dataset.src = this.IMAGE_URL; 
+        this.image.src = this.IMAGE_URL;
         this.image.className = 'portal-video'; // Keep same class for styling (object-fit)
         
         
@@ -70,11 +69,6 @@ class PortalEffect {
             trigger.style.mixBlendMode = 'difference'; // Contrast effect
 
             trigger.addEventListener('mouseenter', () => {
-                // Initialize image on first hover
-                if (!this.image.src && this.image.dataset.src) {
-                     this.image.src = this.image.dataset.src;
-                }
-
                 this.isHovering = true;
                 this.targetSize = this.maxSize;
                 document.body.classList.add('portal-active');
