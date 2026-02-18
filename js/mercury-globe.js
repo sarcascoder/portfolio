@@ -209,28 +209,42 @@ class MercuryGlobe {
         // Render one frame so the globe is visible
         this.renderer.render(this.scene, this.camera);
 
+        // DEBUG: Trace initialization
+        console.log("MercuryGlobe: _onModelReady", {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            isMobile: this.isMobile
+        });
+
         // Step 1: Set explicit GSAP initial state on the container BEFORE creating ScrollTriggers.
         // This eliminates the "GSAP doesn't know the starting position" problem.
         if (typeof gsap !== 'undefined') {
             if (window.innerWidth > 768) {
+                console.log("MercuryGlobe: Applying DESKTOP initial state");
                 gsap.set(this.container, {
                     left: "4vw",
                     top: "50%",
                     yPercent: -50,
+                    x: 0, // Clear any potential pixel values parsed from CSS
+                    y: 0, // Clear any potential pixel values parsed from CSS
                     scale: 1,
                     opacity: 1,
                     clearProps: "" // don't clear — keep these as the known state
                 });
             } else {
+                console.log("MercuryGlobe: Applying MOBILE initial state");
                 gsap.set(this.container, {
                     left: "50%",
                     top: "35%",
                     xPercent: -50,
                     yPercent: -50,
+                    x: 0, // Clear any potential pixel values parsed from CSS
+                    y: 0, // Clear any potential pixel values parsed from CSS
                     scale: 1,
                     opacity: 1
                 });
             }
+            console.log("MercuryGlobe: Container style after init:", this.container.style.cssText);
         }
 
         // Step 2: Set up scroll animations now that the container has a known GSAP state
@@ -262,6 +276,13 @@ class MercuryGlobe {
                         // Everything is stable — dismiss loading screen
                         this._warmupComplete = true;
                         this._dismissLoadingScreen();
+                        
+                        // DEBUG: Final check
+                        console.log("MercuryGlobe: Warmup complete. Final container style:", {
+                            top: this.container.style.top,
+                            transform: this.container.style.transform,
+                            rect: this.container.getBoundingClientRect()
+                        });
                     }
                 };
                 requestAnimationFrame(warmupTick);
@@ -961,6 +982,44 @@ class MercuryGlobe {
         document.addEventListener('visibilitychange', () => {
             this.isVisible = document.visibilityState === 'visible';
         });
+
+        // Universe Video Toggle Listener
+        window.addEventListener('universeToggle', (e) => {
+            const isActive = e.detail.active;
+            console.log('MercuryGlobe: universeToggle', isActive);
+            this.isUniverseActive = isActive;
+            
+            if (isActive) {
+                // Move globe down out of view
+                gsap.to(this.container, {
+                    y: window.innerHeight + 100, // Move a bit further to be safe
+                    duration: 1,
+                    ease: "power3.inOut",
+                    overwrite: "auto"
+                });
+            } else {
+                // Force visibility
+                this.isVisible = true; 
+                
+                // Return to original position
+                gsap.to(this.container, {
+                    y: 0,
+                    yPercent: -50,
+                    opacity: 1,
+                    duration: 1,
+                    ease: "power3.inOut",
+                    overwrite: "auto",
+                    onComplete: () => {
+                         console.log('MercuryGlobe: Restored position');
+                         // Clear manual Y so standard positioning takes over completely if needed
+                         // But we want to keep y=0 if that's the base.
+                         // Actually, let's NOT clearProps "y" because standard CSS might not have it set to 0 strictly if we used `top`.
+                         // But we SHOULD ensure opacity is 1.
+                         this.container.style.opacity = '1';
+                    }
+                });
+            }
+        });
     }
     
     updateTheme(isDark) {
@@ -985,7 +1044,7 @@ class MercuryGlobe {
     animate() {
         requestAnimationFrame(() => this.animate());
         
-        if (!this.isVisible) return;
+        // if (!this.isVisible) return; // Disable visibility check to fix disappearance issue
 
         // During warm-up: render the scene but clamp all motion to avoid jumps.
         // The globe just sits still at its initial rotation until everything is stable.

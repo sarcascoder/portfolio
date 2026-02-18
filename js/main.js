@@ -61,6 +61,12 @@ class App {
         
         // Keyboard navigation
         this.initKeyboardNav();
+
+        // Universe Video Reveal
+        this.initUniverseReveal();
+        
+        // Hover Sound
+        this.initAudioEffects();
     }
 
     initLenis() {
@@ -307,10 +313,7 @@ class App {
         sections.forEach(section => observer.observe(section));
     }
     
-    // ==========================================
-    // KEYBOARD NAVIGATION
-    // ==========================================
-    
+
     initKeyboardNav() {
         document.addEventListener('keydown', (e) => {
             // M key toggles menu
@@ -320,6 +323,268 @@ class App {
                 }
             }
         });
+    }
+
+    // ==========================================
+    // UNIVERSE VIDEO REVEAL
+    // ==========================================
+    
+    // ==========================================
+    // UNIVERSE VIDEO REVEAL
+    // ==========================================
+    
+    initUniverseReveal() {
+        const videoContainer = document.getElementById('universe-video-container');
+        const video = document.getElementById('universe-video');
+        
+        if (!videoContainer || !video) return;
+        
+        // State tracking
+        let isUniverseActive = false;
+        let isTransitioning = false;
+        
+        // We use 'wheel' event to detect scroll intention when at the very top
+        window.addEventListener('wheel', (e) => {
+            // Ignore if menu is open or loading
+            if (this.isMenuOpen || document.body.classList.contains('loading-active')) return;
+            
+            // Current scroll position
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            
+            // SCROLL UP logic (revealing video)
+            // If at top (approx 0) AND scrolling UP (deltaY < 0) AND video not active
+            if (scrollTop <= 5 && e.deltaY < -10 && !isUniverseActive && !isTransitioning) {
+                this.activateUniverse(videoContainer, video);
+            }
+            
+            // SCROLL DOWN logic (hiding video)
+            // If video is active AND scrolling DOWN (deltaY > 0)
+            else if (isUniverseActive && e.deltaY > 20 && !isTransitioning) {
+                e.preventDefault(); // Stop the scroll from actually moving the page
+                this.deactivateUniverse(videoContainer, video);
+            }
+        }, { passive: false });
+        
+        // Also handle touch events for mobile
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        window.addEventListener('touchmove', (e) => {
+            if (this.isMenuOpen || document.body.classList.contains('loading-active')) return;
+            
+            const touchEndY = e.touches[0].clientY;
+            const deltaY = touchStartY - touchEndY; // Positive = scroll down, Negative = scroll up
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            
+            // Scroll Up (Swipe Down) at top
+            if (scrollTop <= 5 && deltaY < -20 && !isUniverseActive && !isTransitioning) {
+                this.activateUniverse(videoContainer, video);
+                touchStartY = touchEndY; // Reset
+            }
+            // Scroll Down (Swipe Up) when active
+            else if (isUniverseActive && deltaY > 50 && !isTransitioning) {
+                this.deactivateUniverse(videoContainer, video);
+            }
+        }, { passive: true });
+        
+        // Failsafe: if we scrolled down via scrollbar or inertia without triggering wheel/touch
+        window.addEventListener('scroll', () => {
+            if (this.isUniverseActive && window.scrollY > 50 && !isTransitioning) {
+                 this.deactivateUniverse(videoContainer, video);
+            }
+        }, { passive: true });
+    }
+    
+    activateUniverse(container, video) {
+        // Reset to start
+        video.currentTime = 0;
+        video.muted = false; // Enable sound!
+        video.volume = 1.0;
+        
+        // Remove any existing ended listeners to prevent stacking
+        video.onended = null;
+        
+        // When video ends, just pause at the last frame. 
+        // Do NOT deactivate. User must scroll down to close.
+        video.onended = () => {
+             console.log('Video ended. Stopping at last frame.');
+             video.pause();
+             // Ensure it stays at the end
+             video.currentTime = video.duration; 
+        };
+        
+        // Attempt to play. Note: browser might block unmuted autoplay if no user interaction registered.
+        // But scrolling is an interaction, so it often works.
+        const playPromise = video.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Autoplay blocked or failed:', error);
+                // Fallback to muted active if unmuted fails? 
+                // But user wants sound. Let's try to keep it unmuted and see.
+                // If it fails, it fails, but we won't mute it here strictly unless absolutely broken.
+            });
+        }
+        
+        container.classList.add('active');
+        document.body.classList.add('universe-mode');
+        
+        this.isUniverseActive = true;
+        
+        // Dispatch event for other components (Mercury Globe)
+        window.dispatchEvent(new CustomEvent('universeToggle', { detail: { active: true } }));
+        console.log('Universe Active (Autoplay with Sound)');
+    }
+    
+    deactivateUniverse(container, video) {
+        container.classList.remove('active');
+        document.body.classList.remove('universe-mode');
+        
+        this.isUniverseActive = false;
+        
+        // Force scroll to top to align with Hero section
+        // We use 'instant' to prevent any fighting with the layout shift
+        window.scrollTo({
+            top: 0,
+            behavior: 'instant'
+        });
+        
+        // Stop Lenis to kill inertia
+        if (this.lenis) {
+            this.lenis.stop();
+        }
+        
+        // LOCK scroll at top during transition to ensure we don't drift
+        const startTime = Date.now();
+        const lockScroll = () => {
+             if (Date.now() - startTime < 1100 && !this.isUniverseActive) {
+                 window.scrollTo(0, 0);
+                 requestAnimationFrame(lockScroll);
+             } else if (!this.isUniverseActive) {
+                 // Re-enable Lenis after transition
+                 if (this.lenis) this.lenis.start();
+             }
+        };
+        requestAnimationFrame(lockScroll);
+        
+        // Pause video after transition to save resources
+        setTimeout(() => {
+            if (!this.isUniverseActive) video.pause();
+        }, 1000);
+        
+        // Dispatch event for other components
+        window.dispatchEvent(new CustomEvent('universeToggle', { detail: { active: false } }));
+        console.log('Universe Deactivated');
+    }
+
+    // ==========================================
+    // AUDIO EFFECTS
+    // ==========================================
+    
+    initAudioEffects() {
+        // Simple Web Audio API for UI sounds
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Unlock AudioContext on first interaction
+        const unlockAudio = () => {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('keydown', unlockAudio);
+        };
+        
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+        document.addEventListener('keydown', unlockAudio);
+        
+        // --- CLICK SOUND ---
+        const playClick = () => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            // Sci-fi "blip" sound (Confirmation)
+            oscillator.type = 'sine'; 
+            oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+            
+            // Louder!
+            gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        };
+        
+        // --- HOVER SOUND ---
+        const playHover = () => {
+            if (audioCtx.state === 'suspended') return; // Don't force resume on hover, only click
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            // Short high-pitched "tick" or "chirp"
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+            
+            // Louder!
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.05);
+        };
+        
+        // Attach Click Listeners (Global + Specific if needed)
+        document.addEventListener('click', () => {
+            playClick();
+        });
+        
+        // Attach Hover Listeners to Interactive Elements
+        const attachHoverListeners = () => {
+             const selectors = [
+                 'a', 
+                 'button', 
+                 '.social-link', 
+                 '.theme-toggle-btn', 
+                 '.menu-toggle', 
+                 '.project-card',
+                 '.nav-link',
+                 '.scroll-indicator',
+                 '.scroll-indicator-up' // Also the new indicator
+             ];
+             
+             const elements = document.querySelectorAll(selectors.join(', '));
+             elements.forEach(el => {
+                 // Prevent multiple listeners
+                 if (!el.dataset.hasHoverSound) {
+                     el.addEventListener('mouseenter', () => playHover());
+                     el.dataset.hasHoverSound = 'true';
+                 }
+             });
+        };
+        
+        // Initial attach
+        attachHoverListeners();
+        
+        // Re-attach on DOM mutations (for dynamically added content)
+        const observer = new MutationObserver((mutations) => {
+            // throttle or just run it? simplified for now
+            attachHoverListeners();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 }
 

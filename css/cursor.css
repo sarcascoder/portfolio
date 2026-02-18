@@ -7,146 +7,72 @@ html, body, * {
     cursor: none !important;
 }
 
-/* Main cursor dot */
+/* Main cursor dot - SPACE SHUTTLE GLOBAL */
 .cursor-dot {
     position: fixed;
     top: 0;
     left: 0;
-    width: 8px;
-    height: 8px;
-    background-color: var(--color-neon-green);
-    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    background-color: transparent;
+    background-image: url('/shuttle-cursor.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 0;
     pointer-events: none;
     z-index: 99999;
-    transform: translate(-50%, -50%);
-    transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
-    mix-blend-mode: difference;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    transition: transform 0.1s ease; /* Smooth rotation if we add it later */
+    mix-blend-mode: normal;
 }
 
-/* Cursor outline ring */
+/* Cursor outline ring - HIDDEN GLOBALLY */
 .cursor-outline {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--color-neon-green);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99998;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
-    opacity: 0.5;
+    display: none !important;
+    opacity: 0 !important;
 }
 
 /* Cursor states */
 
 /* Hover state - on interactive elements */
 .cursor-dot.hover {
-    width: 12px;
-    height: 12px;
-    background-color: var(--color-white);
-}
-
-.cursor-outline.hover {
-    width: 60px;
-    height: 60px;
-    border-color: var(--color-white);
-    opacity: 0.8;
+    transform: translate(-50%, -50%) rotate(-45deg) scale(1.1); /* Slight pulse */
 }
 
 /* Click/Active state */
 .cursor-dot.active {
-    width: 6px;
-    height: 6px;
-    background-color: var(--color-electric-blue);
-}
-
-.cursor-outline.active {
-    width: 30px;
-    height: 30px;
-    border-color: var(--color-electric-blue);
+    transform: translate(-50%, -50%) rotate(-45deg) scale(0.9);
 }
 
 /* Text hover state */
 .cursor-dot.text {
-    width: 4px;
-    height: 20px;
-    border-radius: 2px;
-    background-color: var(--color-neon-green);
-}
-
-.cursor-outline.text {
-    opacity: 0;
+    /* Optional: change to a beam or keep shuttle */
+    background-image: url('/shuttle-cursor.png'); 
 }
 
 /* Link hover state */
 .cursor-dot.link {
-    width: 16px;
-    height: 16px;
+    transform: translate(-50%, -50%) rotate(-45deg) scale(1.2);
+    border: none;
     background-color: transparent;
-    border: 2px solid var(--color-neon-green);
-}
-
-.cursor-outline.link {
-    width: 50px;
-    height: 50px;
-    opacity: 1;
 }
 
 /* Button hover state */
 .cursor-dot.button {
-    width: 60px;
-    height: 60px;
-    background-color: rgba(0, 255, 0, 0.1);
-    border: 1px solid var(--color-neon-green);
+    transform: translate(-50%, -50%) rotate(-45deg) scale(1.2);
+    border: none;
+    background-color: transparent;
 }
 
 .cursor-outline.button {
-    opacity: 0;
+    display: none;
 }
 
 /* Hidden state */
-.cursor-dot.hidden,
-.cursor-outline.hidden {
+.cursor-dot.hidden {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
-}
-
-/* ========================================
-   Cursor Glow Effect
-   ======================================== */
-
-.cursor-dot::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    background-color: var(--color-neon-green);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    filter: blur(10px);
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* ========================================
-   Cursor Trail Effect (Optional)
-   ======================================== */
-
-.cursor-trail {
-    position: fixed;
-    width: 6px;
-    height: 6px;
-    background-color: var(--color-neon-green);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99997;
-    opacity: 0.3;
-    transform: translate(-50%, -50%);
-    transition: opacity 0.3s ease;
 }
 
 /* ========================================
@@ -165,7 +91,6 @@ html, body, * {
     }
 }
 
-/* Also for touch devices */
 @media (hover: none) and (pointer: coarse) {
     html, body, * {
         cursor: auto !important;
@@ -177,3 +102,5 @@ html, body, * {
         display: none !important;
     }
 }
+
+

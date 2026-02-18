@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="css/typography.css" />
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/cursor.css" />
+    <link rel="stylesheet" href="css/video-reveal.css" />
     <script type="module" src="js/theme.js"></script>
   </head>
   <body>
@@ -73,6 +74,14 @@
         }, { capture: true });
       })();
     </script>
+
+    <!-- Universe Zoom Video Section (Hidden by default) -->
+    <div id="universe-video-container" class="universe-video-container">
+      <video id="universe-video" muted playsinline>
+        <source src="universe_zoom.mp4" type="video/mp4">
+      </video>
+      <div class="universe-overlay-gradient"></div>
+    </div>
 
     <!-- Starfield Background -->
     <canvas id="starfield-canvas"></canvas>
@@ -157,6 +166,14 @@
         </div>
       </div>
 
+
+      <!-- Upward Scroll Indicator -->
+      <div class="scroll-indicator-up">
+        <div class="scroll-text-up">[SCROLL] HERE WE ARE</div>
+        <div class="scroll-arrows-up">
+          <span>↑</span>
+        </div>
+      </div>
 
       <!-- Mercury Globe (Replce Smiley) -->
       <div class="smiley-globe-container" id="mercury-container"></div>

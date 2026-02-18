@@ -1,0 +1,41 @@
+
+/* ========================================
+   Universe Zoom Video (Scroll Up Reveal)
+   ======================================== */
+.universe-video-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  transition: height 1s cubic-bezier(0.86, 0, 0.07, 1); /* Ease-in-out quint-like */
+  z-index: 5; /* Below header (1000) but above background */
+}
+
+.universe-video-container.active {
+  height: 100vh; /* Full screen reveal */
+}
+
+#universe-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8; /* Slight transparency to blend if needed */
+}
+
+.universe-overlay-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to top, var(--color-bg, #0a0a0a), transparent);
+  pointer-events: none;
+}
+
+/* Custom Cursor for Universe Mode */
+body.universe-mode,
+body.universe-mode a,
+body.universe-mode button {
+  cursor: url('/shuttle-cursor.png') 16 16, auto; /* in Vite public folder is root */
+  /* Fallback for dev if needed, trying root path first as is standard for public dir in Vite */
+}
