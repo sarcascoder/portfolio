@@ -57,6 +57,10 @@ class MercuryGlobe {
         this.modelLoaded = false;
         this._scrollAnimSetup = false;
         
+        // Visibility Tracking
+        this.isVisible = true;
+        this.isRunning = true;
+        
         // Warm-up phase: suppress all motion until everything is stable
         this._warmupComplete = false;
         this._warmupFrames = 0;
@@ -1042,9 +1046,11 @@ class MercuryGlobe {
     }
     
     animate() {
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame(this.animate.bind(this));
         
-        // if (!this.isVisible) return; // Disable visibility check to fix disappearance issue
+        // --- VISIBILITY CHECK ---
+        // If not visible and not in warm-up, skip processing to save CPU/GPU
+        if (!this.isVisible && this._warmupComplete) return;
 
         // During warm-up: render the scene but clamp all motion to avoid jumps.
         // The globe just sits still at its initial rotation until everything is stable.
