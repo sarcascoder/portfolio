@@ -8,6 +8,11 @@ class App {
         this.menuToggle = document.getElementById('menu-toggle');
         this.navMenu = document.getElementById('nav-menu');
         this.isMenuOpen = false;
+        this.isTouchDevice = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+        this.isMobileViewport = window.innerWidth <= 820;
+        this.isLowPowerDevice = (navigator.deviceMemory && navigator.deviceMemory <= 4)
+            || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 6);
+        this.isMobileOptimized = this.isTouchDevice && (this.isMobileViewport || this.isLowPowerDevice);
         
         this.init();
     }
@@ -15,6 +20,7 @@ class App {
     init() {
         // Lock scrolling until 3D assets load
         document.body.classList.add('loading-active');
+        document.body.classList.toggle('mobile-optimized', this.isMobileOptimized);
 
         // Menu toggle
         this.initMenu();
@@ -92,14 +98,15 @@ class App {
         const moonImage = document.querySelector('.about-moon-image');
         const moonOverlay = document.querySelector('.about-moon-overlay');
         const aboutContent = aboutSection?.querySelector('.section-content');
+        const isMobile = this.isMobileOptimized;
 
         if (!aboutSection || !moonImage || !moonOverlay) return;
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
         gsap.set(moonImage, {
             opacity: 0,
-            scale: 1.08,
-            yPercent: -8,
+            scale: isMobile ? 1.03 : 1.08,
+            yPercent: isMobile ? -4 : -8,
             transformOrigin: 'center center'
         });
 
@@ -109,7 +116,7 @@ class App {
 
         if (aboutContent) {
             gsap.set(aboutContent, {
-                yPercent: 48
+                yPercent: isMobile ? 18 : 48
             });
         }
 
@@ -118,27 +125,27 @@ class App {
                 trigger: aboutSection,
                 start: 'top bottom',
                 end: 'bottom top',
-                scrub: 0.8
+                scrub: isMobile ? 0.35 : 0.8
             }
         })
         .to(moonImage, {
             opacity: 1,
-            scale: 1.02,
-            yPercent: 4,
+            scale: isMobile ? 1.01 : 1.02,
+            yPercent: isMobile ? 2 : 4,
             ease: 'none'
         }, 0)
         .to(moonImage, {
             opacity: 0,
             scale: 1,
-            yPercent: 10,
+            yPercent: isMobile ? 6 : 10,
             ease: 'none'
         }, 0.28)
         .to(moonOverlay, {
-            opacity: 1,
+            opacity: isMobile ? 0.45 : 1,
             ease: 'none'
         }, 0)
         .to(aboutContent, {
-            yPercent: -68,
+            yPercent: isMobile ? -18 : -68,
             ease: 'none'
         }, 0);
     }
@@ -151,8 +158,8 @@ class App {
             orientation: 'vertical',
             gestureOrientation: 'vertical',
             smoothWheel: true,
-            wheelMultiplier: 0.35, // 55% scroll speed (slower/heavier)
-            touchMultiplier: 0.35,
+            wheelMultiplier: this.isMobileOptimized ? 0.55 : 0.35,
+            touchMultiplier: this.isMobileOptimized ? 1.05 : 0.35,
             normalizeWheel: true // Fix inconsistencies across devices
         });
 
@@ -190,8 +197,8 @@ class App {
     }
 
     initHeroScrollPacing() {
-        this.baseWheelMultiplier = 0.35;
-        this.baseTouchMultiplier = 0.35;
+        this.baseWheelMultiplier = this.lenis?.options?.wheelMultiplier || 0.35;
+        this.baseTouchMultiplier = this.lenis?.options?.touchMultiplier || 0.35;
         this.heroScrollTouchY = null;
 
         const applyMultiplierForDirection = (direction) => {
@@ -252,19 +259,22 @@ class App {
         }
 
         const effectStart = heroStart;
-        const effectEnd = aboutTop + aboutHeight * 0.92;
+        const effectEnd = aboutTop + aboutHeight * (this.isMobileOptimized ? 0.72 : 0.92);
 
         if (scrollY <= effectStart || scrollY >= effectEnd) {
             return this.baseWheelMultiplier;
         }
 
-        const fastMultiplier = 0.98;
-        const slowMultiplier = 0.035;
-        const holdMultiplier = 0.05;
-        const normalFastMultiplier = 0.84;
+        const fastMultiplier = this.isMobileOptimized ? 0.72 : 0.98;
+        const slowMultiplier = this.isMobileOptimized ? 0.3 : 0.035;
+        const holdMultiplier = this.isMobileOptimized ? 0.34 : 0.05;
+        const normalFastMultiplier = this.isMobileOptimized ? 0.65 : 0.84;
 
-        const slowZoneCenter = aboutTop + aboutHeight * 0.58;
-        const slowZoneHalfWidth = Math.max(window.innerHeight * 0.34, aboutHeight * 0.24);
+        const slowZoneCenter = aboutTop + aboutHeight * (this.isMobileOptimized ? 0.46 : 0.58);
+        const slowZoneHalfWidth = Math.max(
+            window.innerHeight * (this.isMobileOptimized ? 0.18 : 0.34),
+            aboutHeight * (this.isMobileOptimized ? 0.14 : 0.24)
+        );
         const slowZoneStart = slowZoneCenter - slowZoneHalfWidth;
         const slowZoneEnd = slowZoneCenter + slowZoneHalfWidth;
         const slowHoldStart = slowZoneCenter - slowZoneHalfWidth * 0.28;
@@ -536,6 +546,11 @@ class App {
         this.universeTouchY = null;
         this.universeLastAppliedTime = -1;
 
+        if (this.isMobileOptimized) {
+            video.preload = 'metadata';
+            video.setAttribute('fetchpriority', 'auto');
+        }
+
         video.muted = true;
         video.pause();
         video.playsInline = true;
@@ -628,6 +643,8 @@ class App {
     // ==========================================
 
     initScrollCursor() {
+        if (this.isTouchDevice) return;
+
         const cursorDot = document.getElementById('cursor-dot');
         if (!cursorDot) return;
 
@@ -672,6 +689,10 @@ class App {
         this.universeAudioSource = null;
         this.universeAudioFadeTimeout = null;
         this.universeAudioContextUnlocked = false;
+
+        if (this.isMobileOptimized) {
+            audio.preload = 'metadata';
+        }
 
         audio.volume = 1; // Volume controlled via GainNode, not element volume
 
@@ -924,6 +945,8 @@ class App {
     // ==========================================
     
     initAudioEffects() {
+        if (this.isTouchDevice) return;
+
         // Simple Web Audio API for UI sounds
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         

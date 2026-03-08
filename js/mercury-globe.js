@@ -28,6 +28,9 @@ class MercuryGlobe {
             maxRotation: 0.55,
             smoothing: 0.12,
         };
+
+        this.frameInterval = 1000 / 60;
+        this.lastFrameTime = 0;
         
         this.currentRotation = { x: 0, y: 0 };
         this.targetRotation = { x: 0, y: 0 };
@@ -52,6 +55,13 @@ class MercuryGlobe {
     init() {
         // Mobile Detection
         this.isMobile = window.innerWidth <= 768;
+        this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
+
+        if (this.isMobile) {
+            this.config.maxRotation = 0.22;
+            this.config.smoothing = 0.08;
+            this.targetRadius = 2.15;
+        }
 
         // Track model loading state
         this.modelLoaded = false;
@@ -101,10 +111,10 @@ class MercuryGlobe {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             alpha: true,
-            antialias: true
+            antialias: !this.isMobile
         });
         this.renderer.setSize(this.width, this.height);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1 : 1.75));
         this.renderer.physicallyCorrectLights = true;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
@@ -990,10 +1000,12 @@ class MercuryGlobe {
     }
     
     bindEvents() {
-        window.addEventListener('mousemove', (e) => {
-            this.targetMouse.x = e.clientX;
-            this.targetMouse.y = e.clientY;
-        });
+        if (!this.isMobile) {
+            window.addEventListener('mousemove', (e) => {
+                this.targetMouse.x = e.clientX;
+                this.targetMouse.y = e.clientY;
+            });
+        }
         
         window.addEventListener('resize', () => {
             this.centerX = window.innerWidth / 2;
@@ -1003,15 +1015,16 @@ class MercuryGlobe {
         
         window.addEventListener('themeChanged', (e) => this.updateTheme(e.detail.isDark));
 
-        window.addEventListener('mousedown', () => {
-            if (!this.isVisible) return;
-            // Trigger eyebrow jump
-            const s = 0.99; // Scale factor used in creation
-            this.targetEyebrowOffset = 0.15 * s;
-            setTimeout(() => {
-                this.targetEyebrowOffset = 0;
-            }, 150);
-        });
+        if (!this.isMobile) {
+            window.addEventListener('mousedown', () => {
+                if (!this.isVisible) return;
+                const s = 0.99;
+                this.targetEyebrowOffset = 0.15 * s;
+                setTimeout(() => {
+                    this.targetEyebrowOffset = 0;
+                }, 150);
+            });
+        }
 
         this.isVisible = true;
 
@@ -1072,20 +1085,26 @@ class MercuryGlobe {
     
     onResize() {
         if (!this.container) return;
+        this.isMobile = window.innerWidth <= 768;
+        this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
         const rect = this.container.getBoundingClientRect();
         this.width = rect.width;
         this.height = rect.height;
         this.camera.aspect = this.width / this.height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1 : 1.75));
     }
     
     lerp(start, end, factor) {
         return start + (end - start) * factor;
     }
     
-    animate() {
-        requestAnimationFrame(() => this.animate());
+    animate(now = 0) {
+        requestAnimationFrame((time) => this.animate(time));
+
+        if (now - this.lastFrameTime < this.frameInterval) return;
+        this.lastFrameTime = now;
         
         // if (!this.isVisible) return; // Disable visibility check to fix disappearance issue
 

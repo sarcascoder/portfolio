@@ -611,6 +611,30 @@ body.universe-mode .scroll-indicator-up {
   margin-top: 14vh;
 }
 
+body.mobile-optimized .about-preview {
+  min-height: 112vh;
+  padding-top: 12vw;
+  padding-bottom: 12vw;
+}
+
+body.mobile-optimized .about-text {
+  max-width: 100%;
+  margin-top: 8vh;
+}
+
+body.mobile-optimized .section-heading {
+  max-width: 100%;
+}
+
+body.mobile-optimized .vertical-marquee {
+  display: none;
+}
+
+body.mobile-optimized .about-moon-image,
+body.mobile-optimized .about-moon-overlay {
+  will-change: auto;
+}
+
 .about-moon-background {
   position: absolute;
   inset: 0;

@@ -24,8 +24,8 @@
     <link rel="stylesheet" href="css/cursor.css" />
     <link rel="stylesheet" href="css/video-reveal.css" />
     <script type="module" src="js/theme.js"></script>
-    <!-- Preload Universe Video for fast playback -->
-    <link rel="preload" as="video" href="universe_zoom.mp4" type="video/mp4">
+    <!-- Preload Universe Video for fast playback on larger screens only -->
+    <link rel="preload" as="video" href="universe_zoom.mp4" type="video/mp4" media="(min-width: 821px)">
   </head>
   <body>
     <!-- Loading Screen - prevents scroll until 3D assets are ready -->
@@ -220,12 +220,12 @@
 
     <!-- Universe Zoom Video Section (Hidden by default) -->
     <div id="universe-video-container" class="universe-video-container">
-      <video id="universe-video" muted playsinline preload="auto" fetchpriority="high">
+      <video id="universe-video" muted playsinline preload="metadata" fetchpriority="auto">
         <source src="universe_zoom.mp4" type="video/mp4">
       </video>
       <div class="universe-overlay-gradient"></div>
       <!-- Separate audio element for scroll-synced soundtrack -->
-      <audio id="universe-audio" preload="auto" loop="false">
+      <audio id="universe-audio" preload="metadata" loop="false">
         <source src="universe_zoom_audio.mp3" type="audio/mpeg">
       </audio>
     </div>

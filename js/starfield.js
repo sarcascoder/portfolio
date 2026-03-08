@@ -18,6 +18,10 @@ class Starfield {
     }
     
     init() {
+        this.isMobile = window.matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+        this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
+        this.lastFrameTime = 0;
+
         // Scene setup
         this.scene = new THREE.Scene();
         
@@ -28,13 +32,13 @@ class Starfield {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             alpha: true,
-            antialias: true
+            antialias: !this.isMobile
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1 : 1.75));
 
         // State
-        this.starsCount = 15000;
+        this.starsCount = this.isMobile ? 5000 : 15000;
         this.worldSize = 1000;
         this.halfSize = this.worldSize / 2;
         
@@ -85,9 +89,15 @@ class Starfield {
         // Let's create 3 Layers: Small (Distant), Medium, Large (Close/Bright)
         this.starSystems = [];
         
-        this.createStarLayer(10000, 1.5, 0.8); // Small, faint
-        this.createStarLayer(4000, 2.5, 0.9);  // Medium
-        this.createStarLayer(1000, 4.0, 1.0);  // Large
+        if (this.isMobile) {
+            this.createStarLayer(3200, 1.15, 0.65);
+            this.createStarLayer(1400, 1.9, 0.75);
+            this.createStarLayer(400, 3.0, 0.85);
+        } else {
+            this.createStarLayer(10000, 1.5, 0.8); // Small, faint
+            this.createStarLayer(4000, 2.5, 0.9);  // Medium
+            this.createStarLayer(1000, 4.0, 1.0);  // Large
+        }
     }
 
     createStarLayer(count, size, opacityMultiplier) {
@@ -174,6 +184,13 @@ class Starfield {
 
     // --- Comets ---
     createCometSystem() {
+        if (this.isMobile) {
+            this.comets = [];
+            this.cometSpawnTimer = 0;
+            this.cometTexture = null;
+            return;
+        }
+
         this.comets = [];
         this.cometSpawnTimer = 0;
         this.cometTexture = this.getCometTexture();
@@ -258,10 +275,12 @@ class Starfield {
 
     // --- Controls ---
     initControls() {
-        document.addEventListener('mousemove', (e) => {
-            this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        });
+        if (!this.isMobile) {
+            document.addEventListener('mousemove', (e) => {
+                this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+        }
 
         document.addEventListener('keydown', (e) => {
             const step = 2.0;
@@ -277,14 +296,17 @@ class Starfield {
         document.addEventListener('wheel', (e) => {
             // Sync with Lenis scroll speed (0.35)
             // Original factor was 0.05. New factor: 0.05 * 0.35 = 0.0175
-            this.targetVelocity.z += e.deltaY * 0.00075;
+            this.targetVelocity.z += e.deltaY * (this.isMobile ? 0.00045 : 0.00075);
         }, { passive: true });
     }
 
     onResize() {
+        this.isMobile = window.matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+        this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1 : 1.75));
     }
     
     updateTheme(isDark) {
@@ -310,16 +332,21 @@ class Starfield {
         });
     }
 
-    animate() {
-        requestAnimationFrame(() => this.animate());
+    animate(now = 0) {
+        requestAnimationFrame((time) => this.animate(time));
+
+        if (now - this.lastFrameTime < this.frameInterval) {
+            return;
+        }
+        this.lastFrameTime = now;
         
         // Physics
         this.velocity.lerp(this.targetVelocity, 0.05);
         this.targetVelocity.multiplyScalar(this.friction);
         
         // Camera Look
-        const lookX = this.mouse.y * 1.0;
-        const lookY = -this.mouse.x * 1.0;
+        const lookX = this.mouse.y * (this.isMobile ? 0.35 : 1.0);
+        const lookY = -this.mouse.x * (this.isMobile ? 0.35 : 1.0);
         this.camera.rotation.x += (lookX - this.camera.rotation.x) * this.lookSpeed;
         this.camera.rotation.y += (lookY - this.camera.rotation.y) * this.lookSpeed;
         
@@ -357,7 +384,9 @@ class Starfield {
         }
 
         // Update Comets
-        this.updateComets();
+        if (!this.isMobile) {
+            this.updateComets();
+        }
 
         this.renderer.render(this.scene, this.camera);
     }
