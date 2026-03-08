@@ -71,6 +71,9 @@ class App {
         // Universe Video Reveal
         this.initUniverseReveal();
 
+        // Universe Audio (scroll-synced soundtrack)
+        this.initUniverseAudio();
+
         // Scroll cursor state detection
         this.initScrollCursor();
 
@@ -537,6 +540,167 @@ class App {
         window.addEventListener('touchmove', setScrollCursor, { passive: true });
     }
 
+    // ==========================================
+    // UNIVERSE AUDIO (scroll-synced soundtrack)
+    // ==========================================
+
+    initUniverseAudio() {
+        const audio = document.getElementById('universe-audio');
+        if (!audio) return;
+
+        this.universeAudio = audio;
+        this.universeAudioReady = false;
+        this.universeAudioPlaying = false;
+        this.universeAudioCtx = null;
+        this.universeGainNode = null;
+        this.universeAudioSource = null;
+        this.universeAudioFadeTimeout = null;
+        this.universeAudioContextUnlocked = false;
+
+        audio.volume = 1; // Volume controlled via GainNode, not element volume
+
+        const markAudioReady = () => {
+            this.universeAudioReady = true;
+        };
+
+        if (audio.readyState >= 2) {
+            markAudioReady();
+        } else {
+            audio.addEventListener('canplay', markAudioReady, { once: true });
+        }
+    }
+
+    /**
+     * Lazily create Web Audio API nodes on first user gesture.
+     * Must be called from a user-interaction context (wheel/touch/click).
+     */
+    ensureUniverseAudioContext() {
+        if (this.universeAudioContextUnlocked) return true;
+
+        const audio = this.universeAudio;
+        if (!audio) return false;
+
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = ctx.createMediaElementSource(audio);
+            const gain = ctx.createGain();
+
+            gain.gain.value = 0; // Start silent — will fade in on scroll
+            source.connect(gain);
+            gain.connect(ctx.destination);
+
+            this.universeAudioCtx = ctx;
+            this.universeAudioSource = source;
+            this.universeGainNode = gain;
+            this.universeAudioContextUnlocked = true;
+
+            // Resume context if suspended (autoplay policy)
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+
+            return true;
+        } catch (e) {
+            console.warn('Universe audio: Web Audio API init failed', e);
+            return false;
+        }
+    }
+
+    /**
+     * Called from syncUniverseVideoFrame to play audio at the matching position.
+     * @param {number} targetTime - The current video time to sync audio to
+     * @param {boolean} isScrolling - Whether the user is actively scrolling
+     */
+    syncUniverseAudio(targetTime, isScrolling) {
+        const audio = this.universeAudio;
+        if (!audio || !this.universeAudioReady) return;
+
+        // Lazy-init the AudioContext on first scroll interaction
+        if (!this.universeAudioContextUnlocked) {
+            if (!this.ensureUniverseAudioContext()) return;
+        }
+
+        const ctx = this.universeAudioCtx;
+        const gain = this.universeGainNode;
+        if (!ctx || !gain) return;
+
+        // Resume context if it got suspended
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+
+        if (isScrolling) {
+            // Sync audio position — only seek if drifted more than 0.5s
+            const drift = Math.abs(audio.currentTime - targetTime);
+            if (drift > 0.5) {
+                audio.currentTime = targetTime;
+            }
+
+            // Start playing if not already
+            if (audio.paused) {
+                audio.play().catch(() => {
+                    // Autoplay blocked — will try again on next scroll
+                });
+            }
+
+            // Fade in volume smoothly
+            gain.gain.cancelScheduledValues(ctx.currentTime);
+            gain.gain.setTargetAtTime(0.6, ctx.currentTime, 0.15); // 0.6 = target volume, 150ms ramp
+
+            this.universeAudioPlaying = true;
+
+            // Clear any pending fade-out
+            clearTimeout(this.universeAudioFadeTimeout);
+
+            // Schedule fade-out if scrolling stops
+            this.universeAudioFadeTimeout = setTimeout(() => {
+                this.fadeOutUniverseAudio();
+            }, 300);
+        }
+    }
+
+    fadeOutUniverseAudio() {
+        const audio = this.universeAudio;
+        const ctx = this.universeAudioCtx;
+        const gain = this.universeGainNode;
+        if (!audio || !ctx || !gain) return;
+
+        // Smooth fade out over 400ms
+        gain.gain.cancelScheduledValues(ctx.currentTime);
+        gain.gain.setTargetAtTime(0, ctx.currentTime, 0.12); // ~400ms to near-zero
+
+        // Pause after fade completes
+        setTimeout(() => {
+            if (this.universeAudioPlaying) {
+                audio.pause();
+                this.universeAudioPlaying = false;
+            }
+        }, 500);
+    }
+
+    /**
+     * Immediately stop universe audio (e.g. when leaving universe mode entirely)
+     */
+    stopUniverseAudio() {
+        const audio = this.universeAudio;
+        const gain = this.universeGainNode;
+        const ctx = this.universeAudioCtx;
+        if (!audio) return;
+
+        clearTimeout(this.universeAudioFadeTimeout);
+
+        if (gain && ctx) {
+            gain.gain.cancelScheduledValues(ctx.currentTime);
+            gain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+        }
+
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            this.universeAudioPlaying = false;
+        }, 200);
+    }
+
     clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
     }
@@ -588,6 +752,8 @@ class App {
             container.classList.remove('active');
             document.body.classList.remove('universe-mode');
             if (this.lenis) this.lenis.start();
+            // Stop audio when universe fully closes
+            if (this.universeAudioPlaying) this.stopUniverseAudio();
         }
 
         const isOpen = progress > 0.03;
@@ -624,6 +790,16 @@ class App {
             video.currentTime = targetTime;
         } catch (error) {
             // Ignore transient seek errors while metadata/buffer settles.
+        }
+
+        // Sync audio: play soundtrack when actively scrolling in playback phase
+        const isScrolling = Math.abs(this.universeProgress - this.universeTargetProgress) > 0.001;
+        if (playbackProgress > 0.005) {
+            // In playback phase — sync audio
+            this.syncUniverseAudio(targetTime, isScrolling);
+        } else if (this.universeAudioPlaying) {
+            // Left the playback phase — stop audio
+            this.stopUniverseAudio();
         }
     }
 
