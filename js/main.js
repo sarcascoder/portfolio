@@ -82,6 +82,7 @@ class App {
         const aboutSection = document.getElementById('about-section');
         const moonImage = document.querySelector('.about-moon-image');
         const moonOverlay = document.querySelector('.about-moon-overlay');
+        const aboutContent = aboutSection?.querySelector('.section-content');
 
         if (!aboutSection || !moonImage || !moonOverlay) return;
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -89,13 +90,19 @@ class App {
         gsap.set(moonImage, {
             opacity: 0,
             scale: 1.08,
-            yPercent: 8,
+            yPercent: -8,
             transformOrigin: 'center center'
         });
 
         gsap.set(moonOverlay, {
             opacity: 0
         });
+
+        if (aboutContent) {
+            gsap.set(aboutContent, {
+                yPercent: 48
+            });
+        }
 
         gsap.timeline({
             scrollTrigger: {
@@ -108,17 +115,21 @@ class App {
         .to(moonImage, {
             opacity: 1,
             scale: 1.02,
-            yPercent: 0,
+            yPercent: 4,
             ease: 'none'
         }, 0)
         .to(moonImage, {
             opacity: 0,
             scale: 1,
-            yPercent: -8,
+            yPercent: 10,
             ease: 'none'
         }, 0.28)
         .to(moonOverlay, {
             opacity: 1,
+            ease: 'none'
+        }, 0)
+        .to(aboutContent, {
+            yPercent: -68,
             ease: 'none'
         }, 0);
     }
