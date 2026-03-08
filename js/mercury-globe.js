@@ -357,7 +357,10 @@ class MercuryGlobe {
                 top: "50%",
                 yPercent: -50,
                 scale: 1,
-                opacity: 1
+                opacity: 1,
+                filter: "blur(0px)",
+                transformPerspective: 1200,
+                transformOrigin: "50% 50%"
             });
 
             // --- Transition to About Section ---
@@ -365,24 +368,19 @@ class MercuryGlobe {
                 scrollTrigger: {
                     trigger: "#about-section",
                     start: "top bottom",
-                    end: "center center",
+                    end: "top 35%",
                     scrub: 0.5,
                     toggleActions: "play reverse play reverse"
                 }
             });
 
             tl.to(this.container, {
-                scale: 0.85,
-                top: "60%",
+                scale: 0.38,
+                opacity: 0,
+                z: -700,
+                xPercent: -8,
+                filter: "blur(10px)",
                 duration: 1,
-                ease: "power1.inOut"
-            });
-
-            tl.to(this.container, {
-                left: "50%",
-                top: "50%",
-                scale: 0.65,
-                duration: 2,
                 ease: "power2.inOut"
             });
 
@@ -400,6 +398,10 @@ class MercuryGlobe {
                 left: "0%",
                 top: "50%",
                 scale: 0.5,
+                opacity: 1,
+                z: 0,
+                xPercent: 0,
+                filter: "blur(0px)",
                 ease: "power2.inOut"
             });
 
@@ -449,23 +451,47 @@ class MercuryGlobe {
                 xPercent: -50,
                 yPercent: -50,
                 scale: 1,
-                opacity: 1
+                opacity: 1,
+                filter: "blur(0px)",
+                transformPerspective: 1200,
+                transformOrigin: "50% 50%"
             });
 
-            const tlMobile = gsap.timeline({
+            const tlMobileAbout = gsap.timeline({
                 scrollTrigger: {
-                    trigger: "body",
-                    start: "top top",
-                    end: "bottom bottom",
+                    trigger: "#about-section",
+                    start: "top bottom",
+                    end: "top 38%",
                     scrub: 0.5
                 }
             });
 
-            tlMobile.to(this.container, {
+            tlMobileAbout.to(this.container, {
+                scale: 0.42,
+                opacity: 0,
+                z: -500,
+                yPercent: -50,
+                filter: "blur(10px)",
+                ease: "power2.inOut"
+            });
+
+            const tlMobileProjects = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#projects-section",
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: 0.5
+                }
+            });
+
+            tlMobileProjects.to(this.container, {
+                left: "50%",
                 top: "50%",
                 scale: 0.6,
                 opacity: 0.3,
-                ease: "none"
+                z: 0,
+                filter: "blur(0px)",
+                ease: "power2.inOut"
             });
         });
 

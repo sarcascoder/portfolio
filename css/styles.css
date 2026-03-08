@@ -594,6 +594,7 @@ body.universe-mode .scroll-indicator-up {
   background-color: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  overflow: hidden;
 }
 
 [data-theme="light"] .about-preview {
@@ -606,10 +607,55 @@ body.universe-mode .scroll-indicator-up {
   z-index: 25;
 }
 
+.about-moon-background {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.about-moon-image,
+.about-moon-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.about-moon-image {
+  background-image: url('/man_on_moon.jpg');
+  background-position: center 56%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(1.08) translate3d(0, 18px, 0);
+  transform-origin: center center;
+  filter: none;
+  will-change: transform, opacity;
+}
+
+.about-moon-overlay {
+  background: transparent;
+  opacity: 0;
+  will-change: opacity;
+}
+
+[data-theme="light"] .about-moon-image {
+  filter: none;
+}
+
+[data-theme="light"] .about-moon-overlay {
+  background: transparent;
+}
+
 @media (max-width: 1024px) {
   .about-text {
     max-width: 100%;
     text-align: center;
+  }
+
+  .about-moon-image {
+    background-position: center 62%;
+    background-size: cover;
   }
 }
 

@@ -70,9 +70,57 @@ class App {
 
         // Universe Video Reveal
         this.initUniverseReveal();
+
+        // About section moon background reveal
+        this.initAboutMoonReveal();
         
         // Hover Sound
         this.initAudioEffects();
+    }
+
+    initAboutMoonReveal() {
+        const aboutSection = document.getElementById('about-section');
+        const moonImage = document.querySelector('.about-moon-image');
+        const moonOverlay = document.querySelector('.about-moon-overlay');
+
+        if (!aboutSection || !moonImage || !moonOverlay) return;
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+        gsap.set(moonImage, {
+            opacity: 0,
+            scale: 1.08,
+            yPercent: 8,
+            transformOrigin: 'center center'
+        });
+
+        gsap.set(moonOverlay, {
+            opacity: 0
+        });
+
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: aboutSection,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 0.8
+            }
+        })
+        .to(moonImage, {
+            opacity: 1,
+            scale: 1.02,
+            yPercent: 0,
+            ease: 'none'
+        }, 0)
+        .to(moonImage, {
+            opacity: 0,
+            scale: 1,
+            yPercent: -8,
+            ease: 'none'
+        }, 0.28)
+        .to(moonOverlay, {
+            opacity: 1,
+            ease: 'none'
+        }, 0);
     }
 
     initLenis() {
