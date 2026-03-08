@@ -197,6 +197,8 @@ class App {
     }
 
     initHeroScrollPacing() {
+        if (this.isMobileOptimized) return;
+
         this.baseWheelMultiplier = this.lenis?.options?.wheelMultiplier || 0.35;
         this.baseTouchMultiplier = this.lenis?.options?.touchMultiplier || 0.35;
         this.heroScrollTouchY = null;
@@ -240,6 +242,12 @@ class App {
     }
 
     getHeroScrollMultiplier(direction = 1) {
+        if (this.isMobileOptimized) {
+            return direction > 0
+                ? (this.baseTouchMultiplier || this.baseWheelMultiplier || 0.55)
+                : (this.baseWheelMultiplier || 0.55);
+        }
+
         const heroSection = document.getElementById('hero');
         const aboutSection = document.getElementById('about-section');
 
@@ -625,6 +633,12 @@ class App {
 
             const delta = currentY - this.universeTouchY;
             if (Math.abs(delta) < 2) return;
+
+            const shouldScrubUniverse = delta > 0 || this.universeTargetProgress > 0;
+            if (!shouldScrubUniverse) {
+                this.universeTouchY = currentY;
+                return;
+            }
 
             e.preventDefault();
             scrubUniverse(delta);
