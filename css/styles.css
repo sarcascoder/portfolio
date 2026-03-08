@@ -650,7 +650,7 @@ body.mobile-optimized .about-moon-overlay {
 }
 
 .about-moon-image {
-  background-image: url('/man_on_moon.jpg');
+  background-image: url('/man_on_moon.png');
   background-position: center 56%;
   background-repeat: no-repeat;
   background-size: cover;
