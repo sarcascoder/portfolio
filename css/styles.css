@@ -595,6 +595,9 @@ body.universe-mode .scroll-indicator-up {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   overflow: hidden;
+  min-height: 145vh;
+  padding-top: 12vw;
+  padding-bottom: 14vw;
 }
 
 [data-theme="light"] .about-preview {
@@ -605,6 +608,7 @@ body.universe-mode .scroll-indicator-up {
   max-width: 70vw;
   position: relative;
   z-index: 25;
+  margin-top: 14vh;
 }
 
 .about-moon-background {
@@ -648,9 +652,16 @@ body.universe-mode .scroll-indicator-up {
 }
 
 @media (max-width: 1024px) {
+  .about-preview {
+    min-height: 125vh;
+    padding-top: 16vw;
+    padding-bottom: 18vw;
+  }
+
   .about-text {
     max-width: 100%;
     text-align: center;
+    margin-top: 10vh;
   }
 
   .about-moon-image {

@@ -21,6 +21,9 @@ class App {
 
         // Initialize Lenis for custom scroll control
         this.initLenis();
+
+        // Adaptive hero-to-about scroll pacing
+        this.initHeroScrollPacing();
         
         // Smooth scroll for anchor links
         this.initSmoothScroll();
@@ -185,7 +188,120 @@ class App {
             gsap.ticker.lagSmoothing(0);
         }
     }
-    
+
+    initHeroScrollPacing() {
+        this.baseWheelMultiplier = 0.35;
+        this.baseTouchMultiplier = 0.35;
+        this.heroScrollTouchY = null;
+
+        const applyMultiplierForDirection = (direction) => {
+            if (!this.lenis || this.universeTargetProgress > 0 || this.isMenuOpen) return;
+
+            const multiplier = this.getHeroScrollMultiplier(direction);
+            this.lenis.options.wheelMultiplier = multiplier;
+            this.lenis.options.touchMultiplier = multiplier;
+        };
+
+        window.addEventListener('wheel', (e) => {
+            applyMultiplierForDirection(e.deltaY > 0 ? 1 : -1);
+        }, { passive: true, capture: true });
+
+        window.addEventListener('touchstart', (e) => {
+            this.heroScrollTouchY = e.touches[0]?.clientY ?? null;
+        }, { passive: true, capture: true });
+
+        window.addEventListener('touchmove', (e) => {
+            const currentY = e.touches[0]?.clientY;
+            if (typeof currentY !== 'number' || this.heroScrollTouchY == null) return;
+
+            const delta = this.heroScrollTouchY - currentY;
+            if (Math.abs(delta) < 2) return;
+
+            applyMultiplierForDirection(delta > 0 ? 1 : -1);
+            this.heroScrollTouchY = currentY;
+        }, { passive: true, capture: true });
+
+        window.addEventListener('touchend', () => {
+            this.heroScrollTouchY = null;
+        }, { passive: true, capture: true });
+
+        window.addEventListener('resize', () => {
+            if (!this.lenis) return;
+            this.lenis.options.wheelMultiplier = this.baseWheelMultiplier;
+            this.lenis.options.touchMultiplier = this.baseTouchMultiplier;
+        });
+    }
+
+    getHeroScrollMultiplier(direction = 1) {
+        const heroSection = document.getElementById('hero');
+        const aboutSection = document.getElementById('about-section');
+
+        if (!heroSection || !aboutSection) {
+            return this.baseWheelMultiplier || 0.35;
+        }
+
+        const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        const heroStart = Math.max(heroSection.offsetTop, 0);
+        const heroHeight = heroSection.offsetHeight || window.innerHeight;
+        const aboutTop = aboutSection.offsetTop;
+        const aboutHeight = aboutSection.offsetHeight || window.innerHeight;
+        const aboutMid = aboutTop + aboutHeight * 0.5;
+
+        if (direction <= 0) {
+            return this.baseWheelMultiplier;
+        }
+
+        const effectStart = heroStart;
+        const effectEnd = aboutTop + aboutHeight * 0.92;
+
+        if (scrollY <= effectStart || scrollY >= effectEnd) {
+            return this.baseWheelMultiplier;
+        }
+
+        const fastMultiplier = 0.98;
+        const slowMultiplier = 0.035;
+        const holdMultiplier = 0.05;
+        const normalFastMultiplier = 0.84;
+
+        const slowZoneCenter = aboutTop + aboutHeight * 0.58;
+        const slowZoneHalfWidth = Math.max(window.innerHeight * 0.34, aboutHeight * 0.24);
+        const slowZoneStart = slowZoneCenter - slowZoneHalfWidth;
+        const slowZoneEnd = slowZoneCenter + slowZoneHalfWidth;
+        const slowHoldStart = slowZoneCenter - slowZoneHalfWidth * 0.28;
+        const slowHoldEnd = slowZoneCenter + slowZoneHalfWidth * 0.4;
+
+        if (scrollY < slowZoneStart) {
+            const progress = this.clamp((scrollY - effectStart) / Math.max(slowZoneStart - effectStart, 1), 0, 1);
+            return this.mix(fastMultiplier, slowMultiplier, this.smoothStep(progress));
+        }
+
+        if (scrollY <= slowHoldStart) {
+            const progress = this.clamp((scrollY - slowZoneStart) / Math.max(slowHoldStart - slowZoneStart, 1), 0, 1);
+            return this.mix(slowMultiplier, holdMultiplier, this.smoothStep(progress));
+        }
+
+        if (scrollY <= slowHoldEnd) {
+            return holdMultiplier;
+        }
+
+        if (scrollY <= slowZoneEnd) {
+            const progress = this.clamp((scrollY - slowHoldEnd) / Math.max(slowZoneEnd - slowHoldEnd, 1), 0, 1);
+            return this.mix(holdMultiplier, slowMultiplier, this.smoothStep(progress));
+        }
+
+        const progress = this.clamp((scrollY - slowZoneEnd) / Math.max(effectEnd - slowZoneEnd, 1), 0, 1);
+        return this.mix(slowMultiplier, normalFastMultiplier, this.smoothStep(progress));
+    }
+
+    smoothStep(value) {
+        const t = this.clamp(value, 0, 1);
+        return t * t * (3 - 2 * t);
+    }
+
+    mix(start, end, amount) {
+        return start + (end - start) * amount;
+    }
+
     // ==========================================
     // MENU FUNCTIONALITY
     // ==========================================
