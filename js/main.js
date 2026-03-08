@@ -445,8 +445,24 @@ class App {
         };
 
         const scrubUniverse = (delta) => {
-            const range = Math.max(window.innerHeight * 22, 11000);
-            const nextProgress = this.clamp(this.universeTargetProgress + delta / range, 0, 1);
+            // Two-speed scroll: fast for reveal (container expand), slow for video playback
+            const revealCutoff = 0.04; // reveal phase is only 4% of total progress
+            const currentProgress = this.universeTargetProgress;
+
+            // Use fast scroll in the reveal zone (both entering and exiting)
+            const isClosing = delta < 0; // scrolling back down
+            const inRevealZone = currentProgress < revealCutoff || (isClosing && currentProgress < revealCutoff * 3);
+
+            let range;
+            if (inRevealZone) {
+                // Reveal phase: fast/snappy — small range means fewer pixels of scroll needed
+                range = Math.max(window.innerHeight * 1.8, 900);
+            } else {
+                // Playback phase: slow and controlled
+                range = Math.max(window.innerHeight * 22, 11000);
+            }
+
+            const nextProgress = this.clamp(currentProgress + delta / range, 0, 1);
 
             if (nextProgress === this.universeTargetProgress) return;
 
@@ -529,7 +545,10 @@ class App {
         if (this.universeRaf) return;
 
         const tick = () => {
-            const next = this.universeProgress + (this.universeTargetProgress - this.universeProgress) * 0.16;
+            // Use faster lerp during reveal phase for snappy container expansion
+            const revealCutoff = 0.04;
+            const lerpFactor = this.universeProgress < revealCutoff ? 0.35 : 0.16;
+            const next = this.universeProgress + (this.universeTargetProgress - this.universeProgress) * lerpFactor;
             this.universeProgress = Math.abs(next - this.universeTargetProgress) < 0.001 ? this.universeTargetProgress : next;
 
             this.applyUniverseProgress();
@@ -552,8 +571,9 @@ class App {
         if (!container || !video) return;
 
         const progress = this.clamp(this.universeProgress, 0, 1);
-        const revealPhase = this.clamp(progress / 0.985, 0, 1);
-        const playbackPhase = progress <= 0.985 ? 0 : this.clamp((progress - 0.985) / 0.015, 0, 1);
+        const revealCutoff = 0.04; // must match scrubUniverse
+        const revealPhase = this.clamp(progress / revealCutoff, 0, 1);
+        const playbackPhase = progress <= revealCutoff ? 0 : this.clamp((progress - revealCutoff) / (1 - revealCutoff), 0, 1);
         const revealHeight = `${revealPhase * 100}vh`;
 
         container.style.height = revealHeight;
