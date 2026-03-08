@@ -71,6 +71,9 @@ class App {
         // Universe Video Reveal
         this.initUniverseReveal();
 
+        // Scroll cursor state detection
+        this.initScrollCursor();
+
         // About section moon background reveal
         this.initAboutMoonReveal();
         
@@ -403,145 +406,205 @@ class App {
         const video = document.getElementById('universe-video');
         
         if (!videoContainer || !video) return;
-        
-        // State tracking
-        let isUniverseActive = false;
-        let isTransitioning = false;
-        
-        // We use 'wheel' event to detect scroll intention when at the very top
-        window.addEventListener('wheel', (e) => {
-            // Ignore if menu is open or loading
-            if (this.isMenuOpen || document.body.classList.contains('loading-active')) return;
-            
-            // Current scroll position
+        this.universeVideo = video;
+        this.universeContainer = videoContainer;
+        this.universeProgress = 0;
+        this.universeTargetProgress = 0;
+        this.universeIsOpen = false;
+        this.universeVideoReady = false;
+        this.universeDuration = 0;
+        this.universeRaf = null;
+        this.universeTouchY = null;
+        this.universeLastAppliedTime = -1;
+
+        video.muted = true;
+        video.pause();
+        video.playsInline = true;
+
+        const markVideoReady = () => {
+            if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+            this.universeDuration = video.duration;
+            this.universeVideoReady = true;
+            this.syncUniverseVideoFrame(true);
+        };
+
+        if (video.readyState >= 1) {
+            markVideoReady();
+        } else {
+            video.addEventListener('loadedmetadata', markVideoReady, { once: true });
+        }
+
+        video.addEventListener('canplay', () => {
+            markVideoReady();
+        });
+
+        const shouldCaptureUniverseScroll = () => {
+            if (this.isMenuOpen || document.body.classList.contains('loading-active')) return false;
             const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            
-            // SCROLL UP logic (revealing video)
-            // If at top (approx 0) AND scrolling UP (deltaY < 0) AND video not active
-            if (scrollTop <= 5 && e.deltaY < -10 && !isUniverseActive && !isTransitioning) {
-                this.activateUniverse(videoContainer, video);
-            }
-            
-            // SCROLL DOWN logic (hiding video)
-            // If video is active AND scrolling DOWN (deltaY > 0)
-            else if (isUniverseActive && e.deltaY > 20 && !isTransitioning) {
-                e.preventDefault(); // Stop the scroll from actually moving the page
-                this.deactivateUniverse(videoContainer, video);
+            return this.universeTargetProgress > 0 || scrollTop <= 4;
+        };
+
+        const scrubUniverse = (delta) => {
+            const range = Math.max(window.innerHeight * 22, 11000);
+            const nextProgress = this.clamp(this.universeTargetProgress + delta / range, 0, 1);
+
+            if (nextProgress === this.universeTargetProgress) return;
+
+            this.universeTargetProgress = nextProgress;
+            this.startUniverseRenderLoop();
+        };
+
+        window.addEventListener('wheel', (e) => {
+            if (!shouldCaptureUniverseScroll()) return;
+
+            if (e.deltaY < 0 || this.universeTargetProgress > 0) {
+                e.preventDefault();
+                scrubUniverse(-e.deltaY);
             }
         }, { passive: false });
-        
-        // Also handle touch events for mobile
-        let touchStartY = 0;
+
         window.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
+            this.universeTouchY = e.touches[0]?.clientY ?? null;
         }, { passive: true });
-        
+
         window.addEventListener('touchmove', (e) => {
-            if (this.isMenuOpen || document.body.classList.contains('loading-active')) return;
-            
-            const touchEndY = e.touches[0].clientY;
-            const deltaY = touchStartY - touchEndY; // Positive = scroll down, Negative = scroll up
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            
-            // Scroll Up (Swipe Down) at top
-            if (scrollTop <= 5 && deltaY < -20 && !isUniverseActive && !isTransitioning) {
-                this.activateUniverse(videoContainer, video);
-                touchStartY = touchEndY; // Reset
-            }
-            // Scroll Down (Swipe Up) when active
-            else if (isUniverseActive && deltaY > 50 && !isTransitioning) {
-                this.deactivateUniverse(videoContainer, video);
-            }
+            if (!shouldCaptureUniverseScroll() || this.universeTouchY == null) return;
+
+            const currentY = e.touches[0]?.clientY;
+            if (typeof currentY !== 'number') return;
+
+            const delta = currentY - this.universeTouchY;
+            if (Math.abs(delta) < 2) return;
+
+            e.preventDefault();
+            scrubUniverse(delta);
+            this.universeTouchY = currentY;
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => {
+            this.universeTouchY = null;
         }, { passive: true });
-        
-        // Failsafe: if we scrolled down via scrollbar or inertia without triggering wheel/touch
-        window.addEventListener('scroll', () => {
-            if (this.isUniverseActive && window.scrollY > 50 && !isTransitioning) {
-                 this.deactivateUniverse(videoContainer, video);
+
+        this.applyUniverseProgress(true);
+    }
+
+    // ==========================================
+    // SCROLL CURSOR STATE
+    // ==========================================
+
+    initScrollCursor() {
+        const cursorDot = document.getElementById('cursor-dot');
+        if (!cursorDot) return;
+
+        this.scrollCursorTimeout = null;
+        this.isScrollCursorActive = false;
+
+        const setScrollCursor = () => {
+            if (!this.isScrollCursorActive) {
+                this.isScrollCursorActive = true;
+                cursorDot.classList.add('scrolling');
             }
-        }, { passive: true });
-    }
-    
-    activateUniverse(container, video) {
-        // Reset to start
-        video.currentTime = 0;
-        video.muted = false; // Enable sound!
-        video.volume = 1.0;
-        
-        // Remove any existing ended listeners to prevent stacking
-        video.onended = null;
-        
-        // When video ends, just pause at the last frame. 
-        // Do NOT deactivate. User must scroll down to close.
-        video.onended = () => {
-             console.log('Video ended. Stopping at last frame.');
-             video.pause();
-             // Ensure it stays at the end
-             video.currentTime = video.duration; 
+
+            clearTimeout(this.scrollCursorTimeout);
+
+            this.scrollCursorTimeout = setTimeout(() => {
+                if (this.isScrollCursorActive) {
+                    this.isScrollCursorActive = false;
+                    cursorDot.classList.remove('scrolling');
+                }
+            }, 150);
         };
-        
-        // Attempt to play. Note: browser might block unmuted autoplay if no user interaction registered.
-        // But scrolling is an interaction, so it often works.
-        const playPromise = video.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log('Autoplay blocked or failed:', error);
-                // Fallback to muted active if unmuted fails? 
-                // But user wants sound. Let's try to keep it unmuted and see.
-                // If it fails, it fails, but we won't mute it here strictly unless absolutely broken.
-            });
-        }
-        
-        container.classList.add('active');
-        document.body.classList.add('universe-mode');
-        
-        this.isUniverseActive = true;
-        
-        // Dispatch event for other components (Mercury Globe)
-        window.dispatchEvent(new CustomEvent('universeToggle', { detail: { active: true } }));
-        console.log('Universe Active (Autoplay with Sound)');
+
+        window.addEventListener('wheel', setScrollCursor, { passive: true });
+
+        window.addEventListener('touchstart', setScrollCursor, { passive: true });
+        window.addEventListener('touchmove', setScrollCursor, { passive: true });
     }
-    
-    deactivateUniverse(container, video) {
-        container.classList.remove('active');
-        document.body.classList.remove('universe-mode');
-        
-        this.isUniverseActive = false;
-        
-        // Force scroll to top to align with Hero section
-        // We use 'instant' to prevent any fighting with the layout shift
-        window.scrollTo({
-            top: 0,
-            behavior: 'instant'
-        });
-        
-        // Stop Lenis to kill inertia
-        if (this.lenis) {
-            this.lenis.stop();
-        }
-        
-        // LOCK scroll at top during transition to ensure we don't drift
-        const startTime = Date.now();
-        const lockScroll = () => {
-             if (Date.now() - startTime < 1100 && !this.isUniverseActive) {
-                 window.scrollTo(0, 0);
-                 requestAnimationFrame(lockScroll);
-             } else if (!this.isUniverseActive) {
-                 // Re-enable Lenis after transition
-                 if (this.lenis) this.lenis.start();
-             }
+
+    clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    startUniverseRenderLoop() {
+        if (this.universeRaf) return;
+
+        const tick = () => {
+            const next = this.universeProgress + (this.universeTargetProgress - this.universeProgress) * 0.16;
+            this.universeProgress = Math.abs(next - this.universeTargetProgress) < 0.001 ? this.universeTargetProgress : next;
+
+            this.applyUniverseProgress();
+
+            if (Math.abs(this.universeProgress - this.universeTargetProgress) < 0.001) {
+                this.universeRaf = null;
+                return;
+            }
+
+            this.universeRaf = requestAnimationFrame(tick);
         };
-        requestAnimationFrame(lockScroll);
-        
-        // Pause video after transition to save resources
-        setTimeout(() => {
-            if (!this.isUniverseActive) video.pause();
-        }, 1000);
-        
-        // Dispatch event for other components
-        window.dispatchEvent(new CustomEvent('universeToggle', { detail: { active: false } }));
-        console.log('Universe Deactivated');
+
+        this.universeRaf = requestAnimationFrame(tick);
+    }
+
+    applyUniverseProgress(forceSync = false) {
+        const container = this.universeContainer;
+        const video = this.universeVideo;
+
+        if (!container || !video) return;
+
+        const progress = this.clamp(this.universeProgress, 0, 1);
+        const revealPhase = this.clamp(progress / 0.985, 0, 1);
+        const playbackPhase = progress <= 0.985 ? 0 : this.clamp((progress - 0.985) / 0.015, 0, 1);
+        const revealHeight = `${revealPhase * 100}vh`;
+
+        container.style.height = revealHeight;
+        video.style.opacity = `${0.15 + revealPhase * 0.85}`;
+
+        if (progress > 0.001) {
+            container.classList.add('active');
+            document.body.classList.add('universe-mode');
+            window.scrollTo(0, 0);
+            if (this.lenis) this.lenis.stop();
+        } else {
+            container.classList.remove('active');
+            document.body.classList.remove('universe-mode');
+            if (this.lenis) this.lenis.start();
+        }
+
+        const isOpen = progress > 0.03;
+        if (this.universeIsOpen !== isOpen) {
+            this.universeIsOpen = isOpen;
+            this.isUniverseActive = isOpen;
+            window.dispatchEvent(new CustomEvent('universeToggle', { detail: { active: isOpen } }));
+        } else {
+            this.isUniverseActive = isOpen;
+        }
+
+        this.syncUniverseVideoFrame(forceSync, playbackPhase);
+    }
+
+    syncUniverseVideoFrame(forceSync = false, progressOverride = null) {
+        const video = this.universeVideo;
+        if (!video || !this.universeVideoReady || !this.universeDuration) return;
+
+        const playbackProgress = progressOverride == null
+            ? this.clamp(this.universeProgress, 0, 1)
+            : this.clamp(progressOverride, 0, 1);
+        const targetTime = playbackProgress * this.universeDuration;
+
+        if (!forceSync && Math.abs(targetTime - this.universeLastAppliedTime) < 1 / 30) {
+            return;
+        }
+
+        if (video.seeking && !forceSync) return;
+
+        this.universeLastAppliedTime = targetTime;
+        video.pause();
+
+        try {
+            video.currentTime = targetTime;
+        } catch (error) {
+            // Ignore transient seek errors while metadata/buffer settles.
+        }
     }
 
     // ==========================================

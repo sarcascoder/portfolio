@@ -75,6 +75,19 @@ html, body, * {
     transform: translate(-50%, -50%) scale(0);
 }
 
+/* Scrolling state - FIRE CURSOR */
+.cursor-dot.scrolling {
+    background-image: url('/shuttle-cursor-fire.png');
+    transform: translate(-50%, -50%) rotate(-45deg) scale(1.05);
+}
+
+/* Scrolling + hover combinations */
+.cursor-dot.scrolling.hover,
+.cursor-dot.scrolling.link,
+.cursor-dot.scrolling.button {
+    transform: translate(-50%, -50%) rotate(-45deg) scale(1.15);
+}
+
 /* ========================================
    Mobile - Show default cursor
    ======================================== */
