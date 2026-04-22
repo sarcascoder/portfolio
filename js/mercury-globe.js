@@ -54,10 +54,14 @@ class MercuryGlobe {
     
     init() {
         // Mobile Detection
-        this.isMobile = window.innerWidth <= 768;
+        // isMobileLayout drives positioning (must match the CSS @media breakpoint, 1024px)
+        // so desktop GSAP timelines don't kick in on tablets / landscape phones where
+        // the CSS has already centered the globe.
+        this.isMobileLayout = window.matchMedia('(max-width: 1024px)').matches;
+        this.isMobile = window.innerWidth <= 768; // used for perf / sensitivity only
         this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
 
-        if (this.isMobile) {
+        if (this.isMobileLayout) {
             this.config.maxRotation = 0.85;
             this.config.smoothing = 0.14;
             this.targetRadius = 2.15;
@@ -234,7 +238,7 @@ class MercuryGlobe {
         // Step 1: Set explicit GSAP initial state on the container BEFORE creating ScrollTriggers.
         // This eliminates the "GSAP doesn't know the starting position" problem.
         if (typeof gsap !== 'undefined') {
-            if (window.innerWidth > 768) {
+            if (!this.isMobileLayout) {
                 console.log("MercuryGlobe: Applying DESKTOP initial state");
                 gsap.set(this.container, {
                     left: "4vw",
@@ -363,8 +367,9 @@ class MercuryGlobe {
 
         let mm = gsap.matchMedia();
 
-        // === DESKTOP ANIMATION (> 768px) ===
-        mm.add("(min-width: 769px)", () => {
+        // === DESKTOP ANIMATION (> 1024px) ===
+        // Must match the CSS breakpoint so we don't fight the stylesheet on tablets/landscape phones.
+        mm.add("(min-width: 1025px)", () => {
 
             // Initial State Check (desktop) — keep consistent with the original movement
             gsap.set(this.container, {
@@ -456,8 +461,9 @@ class MercuryGlobe {
             });
         });
 
-        // === MOBILE ANIMATION (<= 768px) ===
-        mm.add("(max-width: 768px)", () => {
+        // === MOBILE / TABLET ANIMATION (<= 1024px) ===
+        // Matches the CSS breakpoint that centers the globe.
+        mm.add("(max-width: 1024px)", () => {
 
             // Initial State Check (mobile) — matches the original working behavior
             gsap.set(this.container, {
@@ -481,10 +487,14 @@ class MercuryGlobe {
                 }
             });
 
+            // Pin xPercent/left in every mobile tween so horizontal center is never lost
+            // even if a desktop timeline was previously active or GSAP has stale state.
             tlMobileAbout.to(this.container, {
                 scale: 0.42,
                 opacity: 0,
                 z: -500,
+                left: "50%",
+                xPercent: -50,
                 yPercent: -50,
                 filter: "blur(10px)",
                 ease: "power2.inOut"
@@ -502,6 +512,7 @@ class MercuryGlobe {
             tlMobileProjects.to(this.container, {
                 left: "50%",
                 top: "50%",
+                xPercent: -50,
                 scale: 0.6,
                 opacity: 0.3,
                 z: 0,
@@ -1005,33 +1016,31 @@ class MercuryGlobe {
     }
 
     bindEvents() {
-        if (!this.isMobile) {
-            window.addEventListener('mousemove', (e) => {
-                this.targetMouse.x = e.clientX;
-                this.targetMouse.y = e.clientY;
-                this.lastInteractionTime = performance.now();
-            });
-        } else {
-            // Mobile: drive rotation via touch anywhere on the page
-            const updateFromTouch = (e) => {
-                const touch = e.touches?.[0] || e.changedTouches?.[0];
-                if (!touch) return;
-                this.targetMouse.x = touch.clientX;
-                this.targetMouse.y = touch.clientY;
-                this.lastInteractionTime = performance.now();
-            };
+        // Bind both mouse and touch handlers so hybrid devices (iPad, touch laptops)
+        // always rotate whichever input the user reaches for.
+        window.addEventListener('mousemove', (e) => {
+            this.targetMouse.x = e.clientX;
+            this.targetMouse.y = e.clientY;
+            this.lastInteractionTime = performance.now();
+        });
 
-            window.addEventListener('touchstart', updateFromTouch, { passive: true });
-            window.addEventListener('touchmove', updateFromTouch, { passive: true });
+        const updateFromTouch = (e) => {
+            const touch = e.touches?.[0] || e.changedTouches?.[0];
+            if (!touch) return;
+            this.targetMouse.x = touch.clientX;
+            this.targetMouse.y = touch.clientY;
+            this.lastInteractionTime = performance.now();
+        };
+        window.addEventListener('touchstart', updateFromTouch, { passive: true });
+        window.addEventListener('touchmove', updateFromTouch, { passive: true });
 
-            // Device orientation: rotate globe by tilting the phone (big tactile win on mobile)
+        // Device orientation only makes sense on a real handheld
+        if (this.isMobileLayout) {
             window.addEventListener('deviceorientation', (e) => {
                 if (e.beta == null || e.gamma == null) return;
-                // gamma: -90..90 (left/right), beta: -180..180 (front/back)
                 const clamp11 = (v) => Math.max(-1, Math.min(1, v));
                 const normX = clamp11(e.gamma / 45);
                 const normY = clamp11((e.beta - 45) / 45);
-                // Map to pseudo-mouse coordinates
                 this.targetMouse.x = window.innerWidth / 2 + normX * (window.innerWidth / 2) * 0.7;
                 this.targetMouse.y = window.innerHeight / 2 + normY * (window.innerHeight / 2) * 0.7;
                 this.lastInteractionTime = performance.now();
@@ -1055,12 +1064,8 @@ class MercuryGlobe {
             }, 150);
         };
 
-        if (!this.isMobile) {
-            window.addEventListener('mousedown', triggerEyebrowBounce);
-        } else {
-            // Give the smiley a tap-reaction on mobile too
-            window.addEventListener('touchstart', triggerEyebrowBounce, { passive: true });
-        }
+        window.addEventListener('mousedown', triggerEyebrowBounce);
+        window.addEventListener('touchstart', triggerEyebrowBounce, { passive: true });
 
         this.isVisible = true;
 
@@ -1091,10 +1096,12 @@ class MercuryGlobe {
                 });
             } else {
                 // Force visibility
-                this.isVisible = true; 
-                
-                // Return to original position
-                gsap.to(this.container, {
+                this.isVisible = true;
+
+                // Return to original position — explicitly re-pin horizontal center on
+                // mobile layout so any stale x/xPercent from prior scroll timelines
+                // can't leave the globe off-center.
+                const restoreProps = {
                     y: 0,
                     yPercent: -50,
                     opacity: 1,
@@ -1103,13 +1110,15 @@ class MercuryGlobe {
                     overwrite: "auto",
                     onComplete: () => {
                          console.log('MercuryGlobe: Restored position');
-                         // Clear manual Y so standard positioning takes over completely if needed
-                         // But we want to keep y=0 if that's the base.
-                         // Actually, let's NOT clearProps "y" because standard CSS might not have it set to 0 strictly if we used `top`.
-                         // But we SHOULD ensure opacity is 1.
                          this.container.style.opacity = '1';
                     }
-                });
+                };
+                if (this.isMobileLayout) {
+                    restoreProps.left = "50%";
+                    restoreProps.xPercent = -50;
+                    restoreProps.x = 0;
+                }
+                gsap.to(this.container, restoreProps);
             }
         });
     }
@@ -1122,6 +1131,7 @@ class MercuryGlobe {
     onResize() {
         if (!this.container) return;
         this.isMobile = window.innerWidth <= 768;
+        this.isMobileLayout = window.matchMedia('(max-width: 1024px)').matches;
         this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
         const rect = this.container.getBoundingClientRect();
         this.width = rect.width;
