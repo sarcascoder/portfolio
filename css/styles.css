@@ -540,12 +540,14 @@ body.menu-open .header-right > *:not(.menu-toggle) {
 .scroll-indicator-up {
   position: absolute;
   top: 40px; /* Adjust vertical position */
-  left: 70%;
+  left: 50%; /* Re-centred from 70% — the old position drifted off-axis on smaller screens */
   transform: translateX(-50%);
-  z-index: 15; /* Higher than globe if needed, but lower than nav? Nav is usually fixed. */
+  z-index: 15;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+  transition: opacity 0.5s var(--ease-hover);
   gap: 10px;
   pointer-events: none;
   transition: opacity 0.5s ease;
@@ -558,40 +560,106 @@ body.universe-mode .scroll-indicator-up {
 }
 
 .scroll-text-up {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Clean, classy sans */
-  font-size: 10px; /* Very small */
-  letter-spacing: 0.3em; /* Wide spacing for "classy" look */
-  color: var(--color-neon-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+/* Tag above the arrows: a pill that telegraphs "video experience" — live
+   dot + label keeps the cosmic / mission-console voice consistent with
+   the bottom-left telemetry HUD. */
+.scroll-up-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  font-weight: 300;
-  opacity: 0.8;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+  color: rgba(0, 225, 255, 0.88);
+  background: rgba(10, 14, 22, 0.42);
+  border: 1px solid rgba(0, 225, 255, 0.22);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.scroll-up-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-neon-green);
+  box-shadow: 0 0 8px rgba(0, 225, 255, 0.8);
+  animation: scroll-up-dot-pulse 1.6s ease-in-out infinite;
+}
+@keyframes scroll-up-dot-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;    }
+  50%      { transform: scale(0.6); opacity: 0.45; }
+}
+
+/* Primary action copy — the ask itself */
+.scroll-up-primary {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--color-white);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 225, 255, 0.35);
+}
+/* Secondary one-line context — what happens if you scroll */
+.scroll-up-sub {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--font-mono);
+  text-transform: none;
 }
 
 .scroll-arrows-up {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: -5px; /* Tighter gap */
+  gap: 0;
   font-family: var(--font-dot-matrix);
-  font-size: 20px;
+  font-size: 22px;
+  line-height: 0.85;
   color: var(--color-neon-green);
   animation: scroll-bounce-up 2s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(0, 225, 255, 0.4);
 }
 
+/* Staggered upward travelling fade — reads as "motion cascading up" */
 .scroll-arrows-up span {
-  opacity: 0.3;
-  animation: arrow-fade 2s ease-in-out infinite;
-  line-height: 0.8; /* Compact arrows */
+  opacity: 0.25;
+  animation: arrow-fade 1.8s ease-in-out infinite;
 }
-
-.scroll-arrows-up span:nth-child(3) { animation-delay: 0s; }
+.scroll-arrows-up span:nth-child(3) { animation-delay: 0s;   } /* bottom arrow fades first  */
 .scroll-arrows-up span:nth-child(2) { animation-delay: 0.2s; }
-.scroll-arrows-up span:nth-child(1) { animation-delay: 0.4s; }
+.scroll-arrows-up span:nth-child(1) { animation-delay: 0.4s; } /* top arrow fades last      */
 
 @keyframes scroll-bounce-up {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0);   }
+  50%      { transform: translateY(-8px); }
+}
+
+/* Fade the whole indicator once the user has started scrolling past ~8% progress
+   so it never becomes visual noise. The JS below toggles .scroll-indicator-hidden. */
+.scroll-indicator-up.scroll-indicator-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+@media (max-width: 640px) {
+  .scroll-up-tag      { font-size: 8px;  letter-spacing: 0.2em; }
+  .scroll-up-primary  { font-size: 11px; letter-spacing: 0.22em; }
+  .scroll-up-sub      { font-size: 9px; }
+  .scroll-arrows-up   { font-size: 18px; }
+  .scroll-indicator-up { top: 22px; }
 }
 
 /* ========================================

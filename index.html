@@ -663,11 +663,22 @@
       </div>
 
 
-      <!-- Upward Scroll Indicator -->
-      <div class="scroll-indicator-up">
-        <div class="scroll-text-up">[SCROLL] HERE WE ARE</div>
+      <!-- Upward Scroll Indicator — tells the user that scrolling UP triggers
+           a scrubbable "zoom out of Earth" video. Cues: pulsing tag, stacked
+           arrows with staggered fade, primary action copy, secondary one-line
+           description, and a thin progress hint bar. -->
+      <div class="scroll-indicator-up" id="scroll-indicator-up">
+        <span class="scroll-up-tag">
+          <span class="scroll-up-dot"></span>UNIVERSE · SCROLL-SYNCED
+        </span>
         <div class="scroll-arrows-up">
           <span>↑</span>
+          <span>↑</span>
+          <span>↑</span>
+        </div>
+        <div class="scroll-text-up">
+          <span class="scroll-up-primary">SCROLL UP TO ZOOM OUT</span>
+          <span class="scroll-up-sub">See our place in the universe</span>
         </div>
       </div>
 
