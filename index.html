@@ -33,7 +33,7 @@
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: var(--color-bg, #0a0a0a);
+      background: radial-gradient(ellipse at center, #06080f 0%, #020306 80%);
       z-index: 99999;
       display: flex;
       align-items: center;
@@ -41,14 +41,22 @@
       flex-direction: column;
       transition: opacity 0.6s ease;
       pointer-events: all;
+      overflow: hidden;
     ">
-      <!-- Launch scene: starfield backdrop, circular progress ring, rocket rising
-           on a pad with 3-layer flame and spark trail. See the accompanying <style>
-           block for layer composition and the <script> below for progress binding. -->
-      <div class="launch-scene" id="launch-scene">
-        <div class="launch-stars star-layer-a"></div>
-        <div class="launch-stars star-layer-b"></div>
+      <!-- Starfield covers the full viewport so the whole loading screen feels like deep space.
+           Kept on #loading-screen rather than inside .launch-scene so it isn't clipped by the
+           scene's bounds. Three parallax layers for depth. -->
+      <div class="launch-stars star-layer-a" aria-hidden="true"></div>
+      <div class="launch-stars star-layer-b" aria-hidden="true"></div>
+      <div class="launch-stars star-layer-c" aria-hidden="true"></div>
+      <!-- Subtle cyan atmosphere glow centered on the pad for cinematic depth -->
+      <div class="launch-atmosphere" aria-hidden="true"></div>
 
+      <!-- Launch scene: circular progress ring, rocket rising on a pad with
+           3-layer flame and spark trail. Starfield is provided by the parent.
+           See the accompanying <style> block for layer composition and the
+           <script> below for progress binding. -->
+      <div class="launch-scene" id="launch-scene">
         <svg class="launch-ring" viewBox="0 0 120 120" aria-hidden="true">
           <circle class="launch-ring-track" cx="60" cy="60" r="54" />
           <circle class="launch-ring-progress" id="rocket-progress" cx="60" cy="60" r="54" />
@@ -116,6 +124,9 @@
          On completion, .launch-scene.launching kicks off the blast-off.
          ============================================================ */
 
+      /* Launch scene is now unframed: it's a centered focal column (ring + rocket
+         + caption-spacer). The starfield behind it is rendered on the parent
+         #loading-screen so it fills the full viewport. */
       .launch-scene {
         position: relative;
         width: 300px;
@@ -124,53 +135,132 @@
         display: flex;
         align-items: flex-end;
         justify-content: center;
-        overflow: hidden;
-        border-radius: 20px;
+        z-index: 2; /* keep rocket + ring above the starfield */
+      }
+      .launch-caption {
+        position: relative;
+        z-index: 2;
       }
 
-      /* Parallax star layers — CSS-only starfield via stacked box-shadow points */
+      /* ============================================================
+         Full-viewport parallax starfield (three layers)
+         ------------------------------------------------------------
+         CSS-only: each layer's ::before is a single 1-2px dot plus a
+         huge box-shadow list that paints every other "star". We offset
+         the list into a large virtual canvas (2000x2000) and drift it
+         upward to simulate rocket ascent through space.
+         ============================================================ */
       .launch-stars {
         position: absolute;
-        inset: 0;
+        top: -50vh;
+        left: 0;
+        right: 0;
+        height: 200vh; /* tall so drift doesn't reveal an edge */
         pointer-events: none;
+        z-index: 0;
       }
-      .launch-stars::before,
-      .launch-stars::after {
+      .launch-stars::before {
         content: '';
         position: absolute;
-        width: 1px;
-        height: 1px;
+        top: 0;
+        left: 0;
+        width: 2px;
+        height: 2px;
         border-radius: 50%;
         background: #fff;
       }
-      /* Back layer: smaller, dimmer, slow drift */
+
+      /* Back layer — many tiny dim stars, slow drift */
       .star-layer-a::before {
+        width: 1px;
+        height: 1px;
         box-shadow:
-          20px 30px rgba(255,255,255,0.55),
-          54px 190px rgba(255,255,255,0.4),
-          90px 70px rgba(255,255,255,0.6),
-          130px 220px rgba(0,225,255,0.5),
-          176px 30px rgba(255,255,255,0.5),
-          210px 150px rgba(255,255,255,0.35),
-          250px 60px rgba(255,255,255,0.6),
-          270px 210px rgba(255,255,255,0.4);
-        animation: star-drift-a 24s linear infinite;
+          3vw 12vh rgba(255,255,255,0.55),
+          8vw 42vh rgba(255,255,255,0.4),
+          14vw 72vh rgba(0,225,255,0.45),
+          21vw 28vh rgba(255,255,255,0.6),
+          27vw 88vh rgba(255,255,255,0.35),
+          33vw 18vh rgba(255,255,255,0.55),
+          39vw 62vh rgba(255,255,255,0.5),
+          46vw 8vh  rgba(0,225,255,0.4),
+          52vw 38vh rgba(255,255,255,0.45),
+          58vw 78vh rgba(255,255,255,0.5),
+          64vw 24vh rgba(255,255,255,0.55),
+          71vw 52vh rgba(0,225,255,0.5),
+          77vw 14vh rgba(255,255,255,0.6),
+          83vw 68vh rgba(255,255,255,0.4),
+          89vw 44vh rgba(255,255,255,0.55),
+          95vw 82vh rgba(255,255,255,0.5),
+          6vw 58vh  rgba(255,255,255,0.45),
+          18vw 48vh rgba(255,255,255,0.35),
+          30vw 98vh rgba(255,255,255,0.4),
+          42vw 72vh rgba(0,225,255,0.5),
+          56vw 16vh rgba(255,255,255,0.55),
+          68vw 94vh rgba(255,255,255,0.45),
+          74vw 34vh rgba(255,255,255,0.5),
+          86vw 24vh rgba(255,255,255,0.4),
+          10vw 96vh rgba(255,255,255,0.5),
+          24vw 64vh rgba(255,255,255,0.45);
+        animation: star-drift-slow 40s linear infinite;
       }
-      /* Front layer: bigger, brighter, faster drift */
+
+      /* Mid layer — medium brightness, cyan-tinted accents */
       .star-layer-b::before {
-        width: 2px;
-        height: 2px;
+        width: 1.5px;
+        height: 1.5px;
         box-shadow:
-          40px 110px rgba(255,255,255,0.85),
-          110px 40px rgba(0,225,255,0.8),
-          160px 180px rgba(255,255,255,0.9),
-          220px 90px rgba(255,255,255,0.85),
-          260px 160px rgba(0,225,255,0.75);
-        filter: drop-shadow(0 0 3px rgba(0,225,255,0.6));
-        animation: star-drift-b 14s linear infinite;
+          11vw 22vh rgba(255,255,255,0.85),
+          25vw 52vh rgba(0,225,255,0.8),
+          37vw 14vh rgba(255,255,255,0.9),
+          48vw 78vh rgba(255,255,255,0.8),
+          60vw 36vh rgba(0,225,255,0.75),
+          73vw 66vh rgba(255,255,255,0.85),
+          81vw 10vh rgba(0,225,255,0.7),
+          92vw 48vh rgba(255,255,255,0.8),
+          15vw 80vh rgba(255,255,255,0.75),
+          28vw 30vh rgba(255,255,255,0.85),
+          44vw 60vh rgba(0,225,255,0.7),
+          57vw 88vh rgba(255,255,255,0.8),
+          66vw 20vh rgba(255,255,255,0.85),
+          85vw 74vh rgba(255,255,255,0.75);
+        filter: drop-shadow(0 0 3px rgba(0,225,255,0.5));
+        animation: star-drift-mid 22s linear infinite;
       }
-      @keyframes star-drift-a { to { transform: translateY(-260px); } }
-      @keyframes star-drift-b { to { transform: translateY(-280px); } }
+
+      /* Front layer — few bright flare stars, fast drift, strong glow */
+      .star-layer-c::before {
+        width: 2.5px;
+        height: 2.5px;
+        box-shadow:
+          18vw 16vh rgba(255,255,255,1),
+          42vw 68vh rgba(0,225,255,0.95),
+          62vw 24vh rgba(255,255,255,1),
+          78vw 58vh rgba(255,255,255,0.95),
+          32vw 90vh rgba(0,225,255,0.9);
+        filter: drop-shadow(0 0 6px rgba(0,225,255,0.9));
+        animation: star-drift-fast 12s linear infinite;
+      }
+
+      @keyframes star-drift-slow { to { transform: translateY(-50vh); } }
+      @keyframes star-drift-mid  { to { transform: translateY(-60vh); } }
+      @keyframes star-drift-fast { to { transform: translateY(-80vh); } }
+
+      /* Cyan atmosphere glow centered on the pad — gives cinematic horizon feel */
+      .launch-atmosphere {
+        position: absolute;
+        bottom: -25vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120vw;
+        height: 80vh;
+        background: radial-gradient(ellipse at center top,
+          rgba(0, 225, 255, 0.18) 0%,
+          rgba(0, 102, 255, 0.08) 30%,
+          transparent 65%);
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(30px);
+      }
 
       /* Circular progress ring behind the rocket */
       .launch-ring {
@@ -189,9 +279,6 @@
       }
       .launch-ring-progress {
         fill: none;
-        stroke: url(#ring-grad, var(--color-neon-green, #00e1ff));
-        /* Fallback for Safari that doesn't resolve url() on stroke from a <defs> outside SVG:
-           give a solid cyan stroke and let the glow filter do the work. */
         stroke: #00e1ff;
         stroke-width: 1.6;
         stroke-linecap: round;
