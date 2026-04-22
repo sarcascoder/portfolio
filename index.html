@@ -386,7 +386,7 @@
             <div class="project-image">
               <!-- preload="none" + deferred autoplay: the video doesn't start
                    fetching until the card scrolls into view (see lazy-video.js). -->
-              <video class="project-video" loop muted playsinline preload="none" data-src="project1.mov">
+              <video class="project-video" loop muted playsinline preload="none" data-src="/project1.mov">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -399,7 +399,7 @@
 
           <article class="project-card" data-category="digital">
             <div class="project-image">
-              <video class="project-video" loop muted playsinline preload="none" data-src="project2.mov">
+              <video class="project-video" loop muted playsinline preload="none" data-src="/project2.mov">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -412,7 +412,7 @@
 
           <article class="project-card" data-category="design">
             <div class="project-image">
-              <video class="project-video" loop muted playsinline preload="none" data-src="project3.mp4">
+              <video class="project-video" loop muted playsinline preload="none" data-src="/project3.mp4">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -604,15 +604,15 @@
                     
                     <div class="form-group">
                         <label for="phone">PHONE</label>
-                        <div class="phone-input-container" style="display: flex; gap: 10px;">
-                            <select id="country-code" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px; font-family: inherit;">
+                        <div class="phone-input-container">
+                            <select id="country-code">
                                 <option value="+91">🇮🇳 +91</option>
                                 <option value="+1">🇺🇸 +1</option>
                                 <option value="+44">🇬🇧 +44</option>
                                 <option value="+971">🇦🇪 +971</option>
                                 <option value="">Other</option>
                             </select>
-                            <input type="tel" id="phone" placeholder="Phone Number" style="flex: 1;">
+                            <input type="tel" id="phone" placeholder="Phone Number">
                         </div>
                     </div>
                     
