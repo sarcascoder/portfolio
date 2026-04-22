@@ -655,6 +655,61 @@ class App {
             this.universeTouchY = null;
         }, { passive: true });
 
+        // Programmatic entry — called by the .universe-teaser click handler.
+        // Animates target progress to 1 through the existing render loop so
+        // the reveal, audio fade-in, and body.universe-mode toggles all fire
+        // through the same code path as a manual scroll.
+        this.revealUniverse = (targetProgress = 1) => {
+            if (!this.universeContainer) return;
+            this.universeTargetProgress = Math.max(0, Math.min(1, targetProgress));
+            this.startUniverseRenderLoop();
+        };
+
+        // Hook up the hero teaser, if present. One-time listener — the teaser
+        // hides on body.universe-mode via CSS and the reveal is reversible.
+        const teaser = document.getElementById('universe-teaser');
+        if (teaser) {
+            teaser.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.revealUniverse(1);
+            });
+        }
+
+        // In-video navigation hint — fade in once the reveal passes the
+        // initial-expand phase, auto-fade after a few seconds so the visuals
+        // breathe. Tracked via body.universe-mode transitions.
+        const hint = document.getElementById('universe-hint');
+        if (hint) {
+            let hintTimer = null;
+            const showHint = () => {
+                clearTimeout(hintTimer);
+                hint.classList.remove('universe-hint-faded');
+                hint.classList.add('universe-hint-visible');
+                hint.setAttribute('aria-hidden', 'false');
+                hintTimer = setTimeout(() => {
+                    hint.classList.remove('universe-hint-visible');
+                    hint.classList.add('universe-hint-faded');
+                    hint.setAttribute('aria-hidden', 'true');
+                }, 4500);
+            };
+            const hideHint = () => {
+                clearTimeout(hintTimer);
+                hint.classList.remove('universe-hint-visible');
+                hint.classList.add('universe-hint-faded');
+                hint.setAttribute('aria-hidden', 'true');
+            };
+            // Observe body's class list to trigger on universe-mode toggle
+            const mo = new MutationObserver(() => {
+                if (document.body.classList.contains('universe-mode')) {
+                    // Small delay so the hint doesn't fight the initial reveal animation
+                    setTimeout(showHint, 700);
+                } else {
+                    hideHint();
+                }
+            });
+            mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        }
+
         this.applyUniverseProgress(true);
     }
 
@@ -1064,15 +1119,12 @@ class App {
              });
         };
         
-        // Initial attach
+        // Initial attach. Previously this was also re-run by a
+        // MutationObserver on every DOM mutation — which fired constantly
+        // during scroll-triggered reveal animations and burned CPU. Removed:
+        // the selectors all refer to elements present at initial render,
+        // so a one-shot attach is enough.
         attachHoverListeners();
-        
-        // Re-attach on DOM mutations (for dynamically added content)
-        const observer = new MutationObserver((mutations) => {
-            // throttle or just run it? simplified for now
-            attachHoverListeners();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
     }
 }
 

@@ -15,7 +15,7 @@ html, body, * {
     width: 60px;
     height: 60px;
     background-color: transparent;
-    background-image: url('/shuttle-cursor.png');
+    background-image: url('/shuttle-cursor.webp');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -113,7 +113,7 @@ html, body, * {
 /* Text hover state */
 .cursor-dot.text {
     /* Optional: change to a beam or keep shuttle */
-    background-image: url('/shuttle-cursor.png'); 
+    background-image: url('/shuttle-cursor.webp'); 
 }
 
 /* Link hover state */
@@ -142,7 +142,7 @@ html, body, * {
 
 /* Scrolling state - FIRE CURSOR */
 .cursor-dot.scrolling {
-    background-image: url('/shuttle-cursor-fire.png');
+    background-image: url('/shuttle-cursor-fire.webp');
     transform: translate(-50%, -50%) rotate(-45deg) scale(1.05);
 }
 

@@ -19,36 +19,72 @@
         video.dataset.loaded = 'true';
     };
 
+    const playSafely = (video) => {
+        const promise = video.play();
+        if (promise && typeof promise.catch === 'function') promise.catch(() => {});
+    };
+
     const start = () => {
         const videos = document.querySelectorAll(selector);
-        if (!videos.length) return;
+        const pauseOffscreenVideos = document.querySelectorAll('video[data-pause-offscreen]');
 
         // Graceful fallback: no IntersectionObserver -> just load everything.
         if (typeof IntersectionObserver === 'undefined') {
-            videos.forEach((v) => {
-                attachSource(v);
-                v.play().catch(() => {});
-            });
+            videos.forEach((v) => { attachSource(v); playSafely(v); });
             return;
         }
 
-        // 300px rootMargin gives the video a head start before it's actually visible.
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                const video = entry.target;
-                if (entry.isIntersecting) {
-                    attachSource(video);
-                    // play() can reject on some browsers that block muted autoplay in background tabs;
-                    // the catch stops the rejection from surfacing to the console.
-                    const promise = video.play();
-                    if (promise && typeof promise.catch === 'function') promise.catch(() => {});
-                } else if (video.dataset.loaded === 'true') {
-                    video.pause();
+        // Lazy-load: 300px rootMargin gives the video a head start
+        if (videos.length) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    const video = entry.target;
+                    if (entry.isIntersecting) {
+                        attachSource(video);
+                        playSafely(video);
+                    } else if (video.dataset.loaded === 'true') {
+                        video.pause();
+                    }
+                });
+            }, { rootMargin: '300px 0px', threshold: 0 });
+            videos.forEach((v) => observer.observe(v));
+        }
+
+        // Pause-when-offscreen: for already-sourced videos (like the hero teaser)
+        // whose decoder would otherwise burn CPU after the user scrolls past.
+        // Also pauses when the parent is hidden (universe-mode) because offsetParent
+        // becomes null.
+        if (pauseOffscreenVideos.length) {
+            const pauseObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    const video = entry.target;
+                    if (entry.isIntersecting) {
+                        if (video.paused) playSafely(video);
+                    } else {
+                        video.pause();
+                    }
+                });
+            }, { threshold: 0 });
+            pauseOffscreenVideos.forEach((v) => pauseObserver.observe(v));
+        }
+
+        // Also pause the teaser video entirely while the universe reveal is active
+        // — the CSS hides it but the video element keeps decoding frames otherwise.
+        const teaser = document.querySelector('.universe-teaser-video');
+        if (teaser) {
+            const bodyObserver = new MutationObserver(() => {
+                if (document.body.classList.contains('universe-mode')) {
+                    teaser.pause();
+                } else if (teaser.paused) {
+                    // Only resume if the teaser is actually on-screen; the pauseObserver
+                    // above will handle the case where we're scrolled away.
+                    const rect = teaser.getBoundingClientRect();
+                    const onScreen = rect.bottom > 0 && rect.top < window.innerHeight;
+                    if (onScreen) playSafely(teaser);
                 }
             });
-        }, { rootMargin: '300px 0px', threshold: 0 });
-
-        videos.forEach((v) => observer.observe(v));
+            bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        }
     };
 
     if (document.readyState === 'loading') {

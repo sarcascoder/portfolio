@@ -38,6 +38,6 @@
 body.universe-mode,
 body.universe-mode a,
 body.universe-mode button {
-  cursor: url('/shuttle-cursor.png') 16 16, auto; /* in Vite public folder is root */
+  cursor: url('/shuttle-cursor.webp') 16 16, auto; /* in Vite public folder is root */
   /* Fallback for dev if needed, trying root path first as is standard for public dir in Vite */
 }

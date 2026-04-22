@@ -87,7 +87,17 @@
         clockEl.textContent = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`;
     };
     updateClock();
-    setInterval(updateClock, 1000);
+    // Clock tick — pause when tab is backgrounded (no point updating an unseen clock)
+    let clockTimer = setInterval(updateClock, 1000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            clearInterval(clockTimer);
+            clockTimer = null;
+        } else if (!clockTimer) {
+            updateClock();
+            clockTimer = setInterval(updateClock, 1000);
+        }
+    });
 
     // --- Visibility toggling driven by existing body classes ---
     const refreshVisibility = () => {

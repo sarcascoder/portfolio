@@ -16,7 +16,7 @@ class PortalEffect {
         
         // Configuration
         this.maxSize = 120; // Maximum radius of the portal
-        this.IMAGE_URL = new URL('../portal_image.png', import.meta.url).href;
+        this.IMAGE_URL = new URL('../portal_image.webp', import.meta.url).href;
         
         this.init();
     }

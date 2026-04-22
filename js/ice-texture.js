@@ -3,7 +3,9 @@
  * Used for the smiley face overlay on Mercury
  */
 
-import * as THREE from 'three';
+import {
+    CanvasTexture, RepeatWrapping
+} from 'three';
 
 export function generateIceTexture({ size = 512, repeat = 1.6 } = {}) {
     const canvas = document.createElement('canvas');
@@ -49,9 +51,9 @@ export function generateIceTexture({ size = 512, repeat = 1.6 } = {}) {
 
     ctx.globalAlpha = 1;
 
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
+    const texture = new CanvasTexture(canvas);
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
     texture.repeat.set(repeat, repeat);
     return texture;
 }

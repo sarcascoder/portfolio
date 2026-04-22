@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Audiowide&family=Carlito:wght@400;700;800&family=Caveat:wght@400;700&family=VT323&family=Space+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Audiowide&family=Carlito:wght@400;700;800&family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap"
       rel="stylesheet"
     />
 
@@ -26,6 +26,10 @@
     <script type="module" src="js/theme.js"></script>
     <!-- Preload Universe Video for fast playback on larger screens only -->
     <link rel="preload" as="video" href="universe_zoom.mp4" type="video/mp4" media="(min-width: 821px)">
+    <!-- Preload the hero 3D model so its 6.5 MB fetch runs in parallel with
+         the CSS/JS parse. Saves ~150-300 ms of perceived load time — the
+         rocket loader waits for this file before dismissing. -->
+    <link rel="preload" as="fetch" href="/mercury.glb" type="model/gltf-binary" crossorigin>
   </head>
   <body>
     <!-- Loading Screen - prevents scroll until 3D assets are ready -->
@@ -569,6 +573,28 @@
         <source src="universe_zoom.mp4" type="video/mp4">
       </video>
       <div class="universe-overlay-gradient"></div>
+      <!-- Video attribution — universe_zoom.mp4 is sourced from the
+           ScienceClic English YouTube channel. Small corner credit,
+           visible while the reveal is active. -->
+      <div class="universe-credit" aria-label="Video credit">
+        <span class="universe-credit-label">Video</span>
+        <span class="universe-credit-name">ScienceClic English</span>
+        <span class="universe-credit-sub">“Zooming out from Earth to the Observable Universe”</span>
+      </div>
+
+      <!-- In-video navigation hint. Fades in shortly after the reveal starts
+           and auto-hides after a few seconds via CSS + JS so it doesn't block
+           the view. -->
+      <div class="universe-hint" id="universe-hint" aria-hidden="true">
+        <div class="universe-hint-line universe-hint-up">
+          <span class="universe-hint-arrow">↑</span>
+          <span>Keep scrolling up — return home to Earth</span>
+        </div>
+        <div class="universe-hint-line universe-hint-down">
+          <span class="universe-hint-arrow">↓</span>
+          <span>Scroll down — drift deeper into the universe</span>
+        </div>
+      </div>
       <!-- Separate audio element for scroll-synced soundtrack -->
       <audio id="universe-audio" preload="metadata" loop="false">
         <source src="universe_zoom_audio.mp3" type="audio/mpeg">
@@ -663,24 +689,25 @@
       </div>
 
 
-      <!-- Upward Scroll Indicator — tells the user that scrolling UP triggers
-           a scrubbable "zoom out of Earth" video. Cues: pulsing tag, stacked
-           arrows with staggered fade, primary action copy, secondary one-line
-           description, and a thin progress hint bar. -->
-      <div class="scroll-indicator-up" id="scroll-indicator-up">
-        <span class="scroll-up-tag">
-          <span class="scroll-up-dot"></span>UNIVERSE · SCROLL-SYNCED
-        </span>
-        <div class="scroll-arrows-up">
-          <span>↑</span>
-          <span>↑</span>
-          <span>↑</span>
+      <!-- Universe teaser — a trapezium sliver of the actual universe video
+           pinned to the right edge of the hero. Shows a live slice of what's
+           behind the curtain so users immediately know there's more. Click
+           or scroll up to reveal the full scrubbable experience.
+           The reveal itself is triggered by window.app.revealUniverse(). -->
+      <button class="universe-teaser" id="universe-teaser" type="button"
+              aria-label="Scroll up to zoom into the universe reveal"
+              data-cursor-label="SCROLL UP" data-cursor-magnetic="true">
+        <div class="universe-teaser-clip">
+          <video class="universe-teaser-video" muted loop playsinline preload="metadata" autoplay data-pause-offscreen="true">
+            <source src="universe_zoom.mp4" type="video/mp4">
+          </video>
+          <div class="universe-teaser-vignette" aria-hidden="true"></div>
         </div>
-        <div class="scroll-text-up">
-          <span class="scroll-up-primary">SCROLL UP TO ZOOM OUT</span>
-          <span class="scroll-up-sub">See our place in the universe</span>
+        <div class="universe-teaser-caption" aria-hidden="true">
+          <span class="universe-teaser-arrow">↑</span>
+          <span class="universe-teaser-primary">SCROLL UP</span>
         </div>
-      </div>
+      </button>
 
       <!-- Mercury Globe (Replce Smiley) -->
       <div class="smiley-globe-container" id="mercury-container" data-cursor-label="EXPLORE"></div>
@@ -912,7 +939,6 @@
     </footer>
 
     <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script type="module" src="js/cursor.js"></script>

@@ -62,10 +62,11 @@ class SmoothCursor {
     document.addEventListener("mouseup", () => this.onMouseUp());
 
     this.addHoverListeners();
-    // Re-attach for content added after first render
-    const mo = new MutationObserver(() => this.addHoverListeners());
-    mo.observe(document.body, { childList: true, subtree: true });
-
+    // NOTE: previously a MutationObserver on the whole body/subtree re-ran
+    // addHoverListeners on every DOM mutation. That fired dozens of times
+    // per second during scroll-triggered reveal animations and was the main
+    // JS-side heat source on desktop. Removed. If content is injected after
+    // load, call window.smoothCursor.refresh() once to pick it up.
     this.animate();
 
     this.cursorDot.style.opacity = "0";
