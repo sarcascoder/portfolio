@@ -33,6 +33,71 @@ html, body, * {
     opacity: 0 !important;
 }
 
+/* ============================================================
+   Contextual Cursor Ring
+   ------------------------------------------------------------
+   Replaces the rocket icon with a labelled cyan ring when
+   hovering elements that carry a data-cursor-label attribute.
+   cursor.js sets .active + label text; the rocket fades to
+   a quiet thumbnail so the ring becomes the focal cursor.
+   ============================================================ */
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 82px;
+    height: 82px;
+    border: 1.2px solid rgba(0, 225, 255, 0.85);
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    mix-blend-mode: normal;
+    box-shadow: 0 0 18px rgba(0, 225, 255, 0.25);
+    transition:
+        transform var(--dur-hover, 0.25s) var(--ease-hover, cubic-bezier(0.33, 1, 0.68, 1)),
+        opacity var(--dur-hover, 0.25s) var(--ease-hover, cubic-bezier(0.33, 1, 0.68, 1)),
+        border-color var(--dur-hover, 0.25s) var(--ease-hover);
+    will-change: transform, left, top;
+}
+.cursor-ring.active {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+.cursor-ring.pressing {
+    transform: translate(-50%, -50%) scale(0.82);
+    border-color: rgba(0, 225, 255, 1);
+}
+.cursor-ring-label {
+    font-family: var(--font-mono, 'Space Mono', monospace);
+    font-size: 9px;
+    letter-spacing: 0.26em;
+    color: rgba(0, 225, 255, 1);
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(2px);
+    transition:
+        opacity var(--dur-hover, 0.25s) var(--ease-hover, cubic-bezier(0.33, 1, 0.68, 1)) 0.06s,
+        transform var(--dur-hover, 0.25s) var(--ease-hover) 0.06s;
+    white-space: nowrap;
+    text-shadow: 0 0 8px rgba(0, 225, 255, 0.5);
+    pointer-events: none;
+}
+.cursor-ring.active .cursor-ring-label {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* When the ring is active the rocket dims + shrinks so the ring is the focal cursor */
+.cursor-dot.morph-hidden {
+    opacity: 0.15 !important;
+    transform: translate(-50%, -50%) rotate(-45deg) scale(0.45) !important;
+}
+
 /* Cursor states */
 
 /* Hover state - on interactive elements */
@@ -96,9 +161,10 @@ html, body, * {
     html, body, * {
         cursor: auto !important;
     }
-    
+
     .cursor-dot,
     .cursor-outline,
+    .cursor-ring,
     .cursor-trail {
         display: none !important;
     }
@@ -108,9 +174,10 @@ html, body, * {
     html, body, * {
         cursor: auto !important;
     }
-    
+
     .cursor-dot,
     .cursor-outline,
+    .cursor-ring,
     .cursor-trail {
         display: none !important;
     }

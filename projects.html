@@ -23,6 +23,9 @@
     <!-- Custom Cursor -->
     <div class="cursor-dot" id="cursor-dot"></div>
     <div class="cursor-outline" id="cursor-outline"></div>
+    <div class="cursor-ring" id="cursor-ring" aria-hidden="true">
+      <span class="cursor-ring-label" id="cursor-ring-label"></span>
+    </div>
 
     <!-- Vignette Frame -->
     <div class="vignette-frame"></div>
@@ -45,7 +48,7 @@
                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
             </a>
-            <button class="menu-toggle" id="menu-toggle">
+            <button class="menu-toggle" id="menu-toggle" data-cursor-label="MENU" data-cursor-magnetic="true">
                 <span>MENU</span>
                 <div class="menu-icon">
                     <span></span>
@@ -94,7 +97,7 @@
     <section class="projects-page-section">
         <div class="projects-container">
             
-            <article class="project-card large" data-category="branding">
+            <article class="project-card large" data-category="branding" data-cursor-label="OPEN">
                 <div class="project-image">
 <video class="project-media" loop muted playsinline preload="none" data-src="/project1.mp4"></video>
                 </div>
@@ -112,7 +115,7 @@
                 </div>
             </article>
 
-            <article class="project-card" data-category="digital">
+            <article class="project-card" data-category="digital" data-cursor-label="OPEN">
                 <div class="project-image">
 <img src="authorisations_and_authentication_library.png" alt="Backend Library" class="project-media">
                 </div>
@@ -129,7 +132,7 @@
                 </div>
             </article>
 
-            <article class="project-card" data-category="design">
+            <article class="project-card" data-category="design" data-cursor-label="OPEN">
                 <div class="project-image">
 <video class="project-media" loop muted playsinline preload="none" data-src="/cement_tracking.mp4"></video>
                 </div>
@@ -146,7 +149,7 @@
                 </div>
             </article>
 
-            <article class="project-card" data-category="motion">
+            <article class="project-card" data-category="motion" data-cursor-label="OPEN">
                 <div class="project-image">
                     <div class="project-placeholder gradient-4">
                         <span class="placeholder-text">CREATIVE SOLUTIONS</span>
@@ -165,7 +168,7 @@
                 </div>
             </article>
 
-            <article class="project-card large" data-category="digital">
+            <article class="project-card large" data-category="digital" data-cursor-label="OPEN">
                 <div class="project-image">
                     <div class="project-placeholder gradient-5">
                         <span class="placeholder-text">THIS PERSONAL PORTFOLIO WEBSITE</span>
@@ -183,7 +186,7 @@
                 </div>
             </article>
 
-            <article class="project-card" data-category="branding">
+            <article class="project-card" data-category="branding" data-cursor-label="OPEN">
                 <div class="project-image">
 <img src="videoRAG.png" alt="Video RAG" class="project-media">
                 </div>
@@ -433,13 +436,13 @@
                 </text>
             </svg>
         </div>
-        <a href="index.html#contact" class="globe-link-overlay" aria-label="Contact" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:10;"></a>
+        <a href="index.html#contact" class="globe-link-overlay" aria-label="Contact" data-cursor-label="CONTACT" data-cursor-magnetic="true" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:10;"></a>
     </div>
 
     <!-- Contact Modal -->
     <div id="contact-modal" class="modal-overlay">
         <div class="modal-container">
-            <button id="close-modal" class="close-modal-btn">&times;</button>
+            <button id="close-modal" class="close-modal-btn" data-cursor-label="CLOSE" data-cursor-magnetic="true">&times;</button>
             
             <div class="modal-header">
                 <h2 class="modal-title dot-matrix-heading">GET IN <span class="neon-glow">TOUCH</span></h2>
@@ -477,7 +480,7 @@
                         <textarea id="message" required rows="4" placeholder="Tell me about your project..."></textarea>
                     </div>
                     
-                    <button type="submit" class="submit-btn">SEND MESSAGE</button>
+                    <button type="submit" class="submit-btn" data-cursor-label="SEND" data-cursor-magnetic="true">SEND MESSAGE</button>
                 </form>
                 
                 <div class="modal-divider">
