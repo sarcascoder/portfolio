@@ -902,6 +902,25 @@
     <script type="module" src="js/mercury-globe.js"></script>
     <script type="module" src="js/portal-effect.js"></script>
     
+    <!-- Mission telemetry HUD: balances the contact globe in the opposite corner,
+         shows live section tracking + scroll progress + UTC clock. See js/telemetry.js. -->
+    <div id="telemetry-hud" class="telemetry-hud" aria-hidden="true">
+      <div class="telemetry-top">
+        <span class="telemetry-live"><span class="telemetry-dot"></span>LIVE</span>
+        <span class="telemetry-node">AT—01 · MERCURY</span>
+      </div>
+      <div class="telemetry-section" id="telemetry-section">SECTION 00 · HERO</div>
+      <div class="telemetry-bottom">
+        <div class="telemetry-scroll">
+          <span class="telemetry-scroll-track">
+            <span class="telemetry-scroll-fill" id="telemetry-scroll-fill"></span>
+          </span>
+          <span class="telemetry-scroll-pct" id="telemetry-scroll-pct">00%</span>
+        </div>
+        <span class="telemetry-clock" id="telemetry-clock">--:-- UTC</span>
+      </div>
+    </div>
+
     <!-- Fixed Globe Logo with Contact Text -->
     <!-- MODIFIED: Now contains the Smiley Earth -->
   <div id="contact-earth-wrapper" style="position: fixed; bottom: 10px; right: 10px; z-index: 100;">
@@ -983,6 +1002,7 @@
     <script type="module" src="/js/scroll-reveal.js"></script>
     <script type="module" src="/js/contact-modal.js"></script>
     <script type="module" src="/js/lazy-video.js"></script>
+    <script type="module" src="/js/telemetry.js"></script>
 
     <!-- Globes self-initialize from their module scripts -->
 

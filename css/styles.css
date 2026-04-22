@@ -2155,3 +2155,128 @@ body.mobile-optimized .about-moon-overlay {
     z-index: 2;
     pointer-events: none;
 }
+
+/* ========================================
+   Mission Telemetry HUD
+   Fixed bottom-left. Mirrors the contact globe. Hidden during universe mode,
+   menu-open, or while loading. Deliberately quiet — sits in the background
+   until the eye catches it, then reads like a spacecraft console readout.
+   ======================================== */
+.telemetry-hud {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 90;
+    pointer-events: none;
+    font-family: var(--font-mono, 'Space Mono', monospace);
+    color: rgba(255, 255, 255, 0.72);
+    background: rgba(10, 14, 22, 0.42);
+    border: 1px solid rgba(0, 225, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 230px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.6s var(--transition-smooth, ease), transform 0.6s var(--transition-smooth, ease);
+}
+.telemetry-hud.telemetry-ready {
+    opacity: 1;
+    transform: translateY(0);
+}
+.telemetry-hud.telemetry-hidden {
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+}
+
+.telemetry-top,
+.telemetry-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.telemetry-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-neon-green, #00e1ff);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+}
+.telemetry-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-neon-green, #00e1ff);
+    box-shadow: 0 0 8px rgba(0, 225, 255, 0.8);
+    animation: telemetry-pulse 1.8s ease-in-out infinite;
+}
+@keyframes telemetry-pulse {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: 0.45; transform: scale(0.78); }
+}
+
+.telemetry-node {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+}
+
+.telemetry-section {
+    margin: 6px 0;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    transition: color 0.3s ease;
+}
+
+.telemetry-scroll {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.telemetry-scroll-track {
+    position: relative;
+    display: inline-block;
+    width: 90px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.telemetry-scroll-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-neon-green, #00e1ff), var(--color-electric-blue, #0066ff));
+    box-shadow: 0 0 8px rgba(0, 225, 255, 0.55);
+    transition: width 0.15s linear;
+}
+.telemetry-scroll-pct {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+}
+
+.telemetry-clock {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Hide on small mobile — would crowd the globe and consume too much real estate */
+@media (max-width: 560px) {
+    .telemetry-hud {
+        display: none;
+    }
+}
