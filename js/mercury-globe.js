@@ -1034,14 +1034,60 @@ class MercuryGlobe {
         window.addEventListener('touchstart', updateFromTouch, { passive: true });
         window.addEventListener('touchmove', updateFromTouch, { passive: true });
 
-        // Device orientation only makes sense on a real handheld
+        // Device orientation only makes sense on a real handheld.
+        //
+        // Baseline-relative tilt: the very first valid reading is captured as
+        // the "rest" orientation — whatever angle the phone happens to be in
+        // when the user opens the page becomes the zero point where the smiley
+        // faces straight at them. Subsequent events apply only the DELTA from
+        // that baseline, so different users holding the phone at different
+        // resting angles all get the same on-axis starting image.
+        //
+        // A small warm-up is used: the first couple of readings can be noisy
+        // (some devices emit a burst of events during orientation sensor init),
+        // so we wait until `ORIENTATION_WARMUP_MS` has passed before locking
+        // in the baseline. The caller can ignore all events before that.
         if (this.isMobileLayout) {
+            this.orientationBaseline = null;
+            this.orientationWarmupStart = 0;
+            const ORIENTATION_WARMUP_MS = 250;
+
+            // Reset the baseline when the device orientation changes (portrait <-> landscape),
+            // because beta/gamma swap meaning and the old zero-point no longer reflects the
+            // user's current hold.
+            const resetBaseline = () => {
+                this.orientationBaseline = null;
+                this.orientationWarmupStart = 0;
+            };
+            window.addEventListener('orientationchange', resetBaseline);
+            if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
+                screen.orientation.addEventListener('change', resetBaseline);
+            }
+
             window.addEventListener('deviceorientation', (e) => {
                 if (e.beta == null || e.gamma == null) return;
+
+                // Establish the warm-up window on the first event, then lock the baseline once it elapses.
+                if (this.orientationBaseline === null) {
+                    if (this.orientationWarmupStart === 0) {
+                        this.orientationWarmupStart = performance.now();
+                        return;
+                    }
+                    if (performance.now() - this.orientationWarmupStart < ORIENTATION_WARMUP_MS) {
+                        return;
+                    }
+                    this.orientationBaseline = { beta: e.beta, gamma: e.gamma };
+                    return; // the baseline reading itself produces zero rotation — skip emitting it
+                }
+
+                // Deltas from the captured baseline. 30° tilt in either axis = full response.
                 const clamp11 = (v) => Math.max(-1, Math.min(1, v));
-                const normX = clamp11(e.gamma / 45);
-                const normY = clamp11((e.beta - 45) / 45);
-                this.targetMouse.x = window.innerWidth / 2 + normX * (window.innerWidth / 2) * 0.7;
+                const deltaGamma = e.gamma - this.orientationBaseline.gamma;
+                const deltaBeta  = e.beta  - this.orientationBaseline.beta;
+                const normX = clamp11(deltaGamma / 30);
+                const normY = clamp11(deltaBeta  / 30);
+
+                this.targetMouse.x = window.innerWidth  / 2 + normX * (window.innerWidth  / 2) * 0.7;
                 this.targetMouse.y = window.innerHeight / 2 + normY * (window.innerHeight / 2) * 0.7;
                 this.lastInteractionTime = performance.now();
             }, { passive: true });
