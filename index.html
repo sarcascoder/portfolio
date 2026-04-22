@@ -670,6 +670,13 @@
       <!-- Mercury Globe (Replce Smiley) -->
       <div class="smiley-globe-container" id="mercury-container"></div>
 
+      <!-- Interaction affordance: fades out on first pointer/touch/tilt
+           or after a short visible window. See js/hero-hint.js. -->
+      <div id="hero-hint" class="hero-hint" aria-hidden="true">
+        <span class="hero-hint-dot"></span>
+        <span class="hero-hint-text" id="hero-hint-text">MOVE CURSOR TO EXPLORE</span>
+      </div>
+
       <!-- Scroll Indicator -->
       <div class="scroll-indicator">
         <div class="scroll-arrows">
@@ -1003,6 +1010,7 @@
     <script type="module" src="/js/contact-modal.js"></script>
     <script type="module" src="/js/lazy-video.js"></script>
     <script type="module" src="/js/telemetry.js"></script>
+    <script type="module" src="/js/hero-hint.js"></script>
 
     <!-- Globes self-initialize from their module scripts -->
 
