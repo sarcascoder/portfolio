@@ -42,88 +42,334 @@
       transition: opacity 0.6s ease;
       pointer-events: all;
     ">
-      <div class="rocket-loader-container">
-        <div class="rocket-track">
-           <div class="rocket-progress-bar" id="rocket-progress"></div>
-        </div>
-        <div class="rocket-icon-wrapper" id="rocket-icon">
-           <!-- Rocket SVG -->
-           <svg viewBox="0 0 512 512" width="40" height="40" fill="white" style="transform: rotate(45deg);">
-              <path d="M464.45,47.55c-16.79-16.79-43.51-17.16-65.22-3.23l-7.39,4.72c-15.09,9.66-26.73,23.36-33.86,39.84l-2.03,4.7c-7.14,16.5-7.73,34.93-1.63,51.81l9.1,25.17c3.12,8.62,1.3,18.25-4.83,25.19-6.14,6.95-15.86,9.54-24.62,6.56l-20.67-7.05c-19.1-6.52-40.06-4.63-57.94,5.21l-3.3,1.82c-1.89,1.04-3.72,2.16-5.48,3.35L22.9,329.83c-13.62,13.62-10.6,36.52,5.65,46.12l68.75,40.63c4.24,2.51,9.45,2.5,13.68-.02l54.67-32.55,16.29,16.29c6.25,6.25,16.38,6.25,22.63,0l11.31-11.31c6.25-6.25,6.25-16.38,0-22.63l-16.29-16.29,32.55-54.67c2.52-4.23,2.53-9.44.02-13.68l-40.63-68.75c-9.6-16.24-32.5-19.27-46.12-5.65l-124.2,213.7c-1.19,1.76-2.31,3.59-3.35,5.48l-1.82,3.3c-9.84,17.88-11.73,38.84-5.21,57.94l7.05,20.67c2.98,8.76.39,18.48-6.56,24.62-6.94,6.13-16.57,7.95-25.19,4.83l-25.17-9.1c-16.89-6.1-35.32-5.51-51.81,1.63l-4.7,2.03c-16.48,7.13-30.18,18.77-39.84,33.86l-4.72,7.39c-13.93,21.71-13.56,48.43,3.23,65.22,17.96,17.96,47.09,17.96,65.05,0L464.45,112.6C482.41,94.64,482.41,65.51,464.45,47.55ZM139.31,372.69c-25,25-65.52,25-90.51,0s-25-65.52,0-90.51,65.52-25,90.51,0S164.31,347.69,139.31,372.69Z" style="fill: var(--color-text, #fff); filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));"></path>
-              <path class="rocket-fire-path" d="M110,380 Q90,420 110,460 Q130,420 110,380" fill="orange" style="display:none;"></path>
-           </svg>
-           <div class="exhaust-flame"></div>
+      <!-- Launch scene: starfield backdrop, circular progress ring, rocket rising
+           on a pad with 3-layer flame and spark trail. See the accompanying <style>
+           block for layer composition and the <script> below for progress binding. -->
+      <div class="launch-scene" id="launch-scene">
+        <div class="launch-stars star-layer-a"></div>
+        <div class="launch-stars star-layer-b"></div>
+
+        <svg class="launch-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="launch-ring-track" cx="60" cy="60" r="54" />
+          <circle class="launch-ring-progress" id="rocket-progress" cx="60" cy="60" r="54" />
+        </svg>
+
+        <div class="pad-glow"></div>
+
+        <div class="rocket-wrapper" id="rocket-icon">
+          <!-- Vertical rocket SVG: fins, white-blue body with a subtle gradient,
+               glowing cyan porthole and a dark engine ring. Nose points up. -->
+          <svg class="rocket-svg" viewBox="0 0 60 110" width="44" height="80" aria-hidden="true">
+            <defs>
+              <linearGradient id="rocket-body-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#cdd7f5"/>
+                <stop offset="45%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#8ea3d8"/>
+              </linearGradient>
+              <radialGradient id="rocket-window-grad" cx="40%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#eaffff"/>
+                <stop offset="60%" stop-color="#00e1ff"/>
+                <stop offset="100%" stop-color="#0066a0"/>
+              </radialGradient>
+            </defs>
+            <!-- Fins -->
+            <path d="M18 70 L6 98 L18 92 Z" fill="#00a6c7"/>
+            <path d="M42 70 L54 98 L42 92 Z" fill="#00a6c7"/>
+            <!-- Body -->
+            <path d="M30 4 L18 32 L18 84 L42 84 L42 32 Z"
+                  fill="url(#rocket-body-grad)" stroke="#6a82c0" stroke-width="0.6"/>
+            <!-- Porthole -->
+            <circle cx="30" cy="40" r="6" fill="#0a1a3c"/>
+            <circle cx="30" cy="40" r="4.6" fill="url(#rocket-window-grad)"/>
+            <circle cx="28.2" cy="38.2" r="1.1" fill="#ffffff" opacity="0.9"/>
+            <!-- Body seam -->
+            <line x1="18" y1="56" x2="42" y2="56" stroke="#6a82c0" stroke-width="0.5" opacity="0.4"/>
+            <!-- Engine -->
+            <rect x="20" y="84" width="20" height="5" rx="1" fill="#3a4a6d"/>
+            <rect x="22" y="87" width="16" height="3" fill="#23304e"/>
+          </svg>
+
+          <!-- Three-layer flame: each layer flickers at a different rate for realism -->
+          <div class="flame">
+            <span class="flame-outer"></span>
+            <span class="flame-mid"></span>
+            <span class="flame-core"></span>
+          </div>
+          <!-- Falling-spark trail: animated gradient gives a continuous particle feel -->
+          <div class="rocket-trail"></div>
         </div>
       </div>
-      <p id="loading-text" style="
-        margin-top: 40px; 
-        font-family: 'Space Mono', monospace; 
-        font-size: 14px; 
-        letter-spacing: 4px; 
-        color: var(--color-text, #fff); 
-        text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-      ">LOADING 0%</p>
+
+      <p id="loading-text" class="launch-caption">LOADING 0%</p>
     </div>
     <style>
-      /* Rocket Loader Styles */
-      @keyframes loader-spin { to { transform: rotate(360deg); } }
-      
-      .rocket-loader-container {
+      /* ============================================================
+         LAUNCH LOADER
+         ------------------------------------------------------------
+         Layers, bottom → top:
+           1. Two parallax star layers (CSS box-shadow stars)
+           2. Circular progress ring (SVG stroke-dashoffset bound to %)
+           3. Pad glow (radial gradient) pulsing at the base
+           4. Rocket wrapper — translates up with progress, ignites + shakes
+           5. 3-layer flame (orange > yellow > white core), each with its own flicker
+           6. Spark trail (animated gradient falling beneath the rocket)
+         On completion, .launch-scene.launching kicks off the blast-off.
+         ============================================================ */
+
+      .launch-scene {
         position: relative;
         width: 300px;
+        height: 280px;
         max-width: 80vw;
-        height: 2px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 2px;
-        margin-bottom: 10px;
-      }
-      
-      .rocket-track {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: visible; /* Allow rocket to stick out */
-      }
-      
-      .rocket-progress-bar {
-        height: 100%;
-        width: 0%; /* JS will animate this */
-        background: linear-gradient(90deg, #00ff00, #00ffff);
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-        transition: width 0.1s linear;
-      }
-      
-      .rocket-icon-wrapper {
-        position: absolute;
-        top: 50%;
-        left: 0%; /* JS will animate this */
-        transform: translate(-50%, -50%);
-        width: 40px;
-        height: 40px;
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
-        transition: left 0.1s linear;
-        z-index: 10;
+        overflow: hidden;
+        border-radius: 20px;
       }
 
-      .exhaust-flame {
+      /* Parallax star layers — CSS-only starfield via stacked box-shadow points */
+      .launch-stars {
         position: absolute;
-        top: 100%; 
-        left: -10px;
-        width: 15px;
-        height: 30px;
-        background: radial-gradient(circle, orange 20%, transparent 70%);
-        transform: rotate(135deg);
-        filter: blur(4px);
-        animation: flame-flicker 0.1s infinite alternate;
-        z-index: -1;
-        opacity: 0.8;
+        inset: 0;
+        pointer-events: none;
       }
-      
-      @keyframes flame-flicker {
-        0% { transform: rotate(135deg) scale(1.0); opacity: 0.8; }
-        100% { transform: rotate(135deg) scale(1.2); opacity: 1.0; }
+      .launch-stars::before,
+      .launch-stars::after {
+        content: '';
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        border-radius: 50%;
+        background: #fff;
+      }
+      /* Back layer: smaller, dimmer, slow drift */
+      .star-layer-a::before {
+        box-shadow:
+          20px 30px rgba(255,255,255,0.55),
+          54px 190px rgba(255,255,255,0.4),
+          90px 70px rgba(255,255,255,0.6),
+          130px 220px rgba(0,225,255,0.5),
+          176px 30px rgba(255,255,255,0.5),
+          210px 150px rgba(255,255,255,0.35),
+          250px 60px rgba(255,255,255,0.6),
+          270px 210px rgba(255,255,255,0.4);
+        animation: star-drift-a 24s linear infinite;
+      }
+      /* Front layer: bigger, brighter, faster drift */
+      .star-layer-b::before {
+        width: 2px;
+        height: 2px;
+        box-shadow:
+          40px 110px rgba(255,255,255,0.85),
+          110px 40px rgba(0,225,255,0.8),
+          160px 180px rgba(255,255,255,0.9),
+          220px 90px rgba(255,255,255,0.85),
+          260px 160px rgba(0,225,255,0.75);
+        filter: drop-shadow(0 0 3px rgba(0,225,255,0.6));
+        animation: star-drift-b 14s linear infinite;
+      }
+      @keyframes star-drift-a { to { transform: translateY(-260px); } }
+      @keyframes star-drift-b { to { transform: translateY(-280px); } }
+
+      /* Circular progress ring behind the rocket */
+      .launch-ring {
+        position: absolute;
+        top: 22px;
+        left: 50%;
+        width: 230px;
+        height: 230px;
+        transform: translateX(-50%) rotate(-90deg); /* start at 12 o'clock */
+        pointer-events: none;
+      }
+      .launch-ring-track {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.08);
+        stroke-width: 1.2;
+      }
+      .launch-ring-progress {
+        fill: none;
+        stroke: url(#ring-grad, var(--color-neon-green, #00e1ff));
+        /* Fallback for Safari that doesn't resolve url() on stroke from a <defs> outside SVG:
+           give a solid cyan stroke and let the glow filter do the work. */
+        stroke: #00e1ff;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-dasharray: 339.29; /* 2 * PI * 54 */
+        stroke-dashoffset: 339.29; /* starts empty */
+        filter: drop-shadow(0 0 6px rgba(0, 225, 255, 0.7));
+        transition: stroke-dashoffset 0.15s linear;
+      }
+
+      /* Glow under the rocket — pulses during ignition */
+      .pad-glow {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 220px;
+        height: 70px;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse at center, rgba(255, 120, 30, 0.55) 0%, rgba(255, 80, 0, 0.2) 40%, transparent 75%);
+        filter: blur(4px);
+        opacity: 0.55;
+        animation: pad-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes pad-pulse {
+        0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(0.9); }
+        50%      { opacity: 0.85; transform: translateX(-50%) scale(1.05); }
+      }
+
+      /* Rocket — translated upward by JS as progress grows. Ignition shake
+         is a CSS keyframe that layers on top of the JS-driven translate via
+         a nested element approach: the wrapper handles translate, the inner
+         .rocket-svg handles shake. */
+      .rocket-wrapper {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        width: 60px;
+        transform: translate(-50%, 0);
+        transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1);
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .rocket-svg {
+        position: relative;
+        z-index: 3;
+        filter: drop-shadow(0 0 6px rgba(0, 225, 255, 0.35));
+        animation: rocket-shake 0.06s infinite alternate;
+      }
+      @keyframes rocket-shake {
+        from { transform: translateX(-0.4px) rotate(-0.5deg); }
+        to   { transform: translateX(0.4px)  rotate(0.5deg); }
+      }
+
+      /* Flame: three stacked ellipses. Each layer has its own flicker timing
+         so they don't move in lockstep (realism trick). */
+      .flame {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 40px;
+        height: 70px;
+        transform: translate(-50%, -6px);
+        pointer-events: none;
+        z-index: 2;
+      }
+      .flame span {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        border-radius: 50% 50% 45% 45% / 30% 30% 70% 70%;
+        transform-origin: top center;
+        filter: blur(3px);
+      }
+      .flame-outer {
+        width: 36px;
+        height: 62px;
+        margin-left: -18px;
+        background: radial-gradient(ellipse at center top, rgba(255, 160, 60, 0.95) 0%, rgba(255, 80, 0, 0.55) 55%, transparent 85%);
+        animation: flicker-outer 0.18s infinite alternate ease-in-out;
+      }
+      .flame-mid {
+        width: 22px;
+        height: 48px;
+        margin-left: -11px;
+        background: radial-gradient(ellipse at center top, rgba(255, 230, 120, 0.95) 0%, rgba(255, 160, 50, 0.6) 50%, transparent 90%);
+        animation: flicker-mid 0.12s infinite alternate ease-in-out;
+      }
+      .flame-core {
+        width: 10px;
+        height: 32px;
+        margin-left: -5px;
+        background: radial-gradient(ellipse at center top, #ffffff 0%, rgba(255, 240, 180, 0.9) 45%, transparent 90%);
+        filter: blur(1.5px);
+        animation: flicker-core 0.08s infinite alternate ease-in-out;
+      }
+      @keyframes flicker-outer {
+        from { transform: translate(-0px, 0) scaleY(1.0) scaleX(1.0); opacity: 0.8; }
+        to   { transform: translate(1px, 0) scaleY(1.2) scaleX(0.88); opacity: 1; }
+      }
+      @keyframes flicker-mid {
+        from { transform: translate(-1px, 0) scaleY(0.9)  scaleX(1.1); opacity: 0.9; }
+        to   { transform: translate(1px, 2px) scaleY(1.15) scaleX(0.9); opacity: 1; }
+      }
+      @keyframes flicker-core {
+        from { transform: scaleY(0.95); opacity: 0.9; }
+        to   { transform: scaleY(1.15); opacity: 1;   }
+      }
+
+      /* Spark trail: a vertical gradient with animated radial highlights that
+         drift downward to suggest particles shedding from the engine. */
+      .rocket-trail {
+        position: absolute;
+        top: calc(100% + 40px);
+        left: 50%;
+        width: 6px;
+        height: 110px;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg,
+          rgba(255, 200, 100, 0.85) 0%,
+          rgba(255, 120, 20, 0.5) 35%,
+          rgba(255, 80, 0, 0.25) 65%,
+          transparent 100%);
+        -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+                mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+        filter: blur(1.5px);
+        opacity: 0.85;
+        z-index: 1;
+      }
+      .rocket-trail::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        background:
+          radial-gradient(1.5px at 50% 10%, rgba(255, 230, 150, 0.95), transparent 60%),
+          radial-gradient(1px   at 30% 35%, rgba(255, 180, 80, 0.8),   transparent 70%),
+          radial-gradient(1.5px at 65% 55%, rgba(255, 120, 40, 0.7),   transparent 70%),
+          radial-gradient(1px   at 40% 78%, rgba(255, 90, 20, 0.5),    transparent 80%);
+        animation: spark-fall 0.6s linear infinite;
+      }
+      @keyframes spark-fall {
+        0%   { transform: translateY(-10px); opacity: 1; }
+        100% { transform: translateY(30px);  opacity: 0; }
+      }
+
+      /* Launch caption */
+      .launch-caption {
+        margin-top: 28px;
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        letter-spacing: 0.45em;
+        color: rgba(255, 255, 255, 0.75);
+        text-shadow: 0 0 12px rgba(0, 225, 255, 0.35);
+        text-transform: uppercase;
+      }
+
+      /* === Blast-off: triggered on 100% via the .launching class === */
+      .launch-scene.launching .rocket-wrapper {
+        transform: translate(-50%, -360px); /* shoots past the top */
+        transition: transform 0.7s cubic-bezier(0.5, 0, 0.2, 1);
+      }
+      .launch-scene.launching .flame {
+        transform: translate(-50%, -6px) scaleY(1.6);
+        transition: transform 0.4s ease-out;
+      }
+      .launch-scene.launching .rocket-trail {
+        height: 260px;
+        opacity: 0;
+        transition: height 0.6s ease-out, opacity 0.6s ease-out 0.15s;
+      }
+      .launch-scene.launching .launch-ring-progress {
+        stroke-dashoffset: 0 !important;
+        filter: drop-shadow(0 0 14px rgba(0, 225, 255, 0.95));
+      }
+      .launch-scene.launching .pad-glow {
+        transform: translateX(-50%) scale(2.2);
+        opacity: 0;
+        transition: transform 0.5s ease-out, opacity 0.5s ease-out;
       }
 
       body.loading-active {
@@ -137,69 +383,81 @@
     </style>
 
     <script>
-      // Rocket Loader Logic
+      // ==========================================================
+      // LAUNCH LOADER — progress binding + blast-off sequence
+      // ==========================================================
       (function() {
-        // State
         let progress = 0;
         let isLoaded = false;
-        
-        const progressBar = document.getElementById('rocket-progress');
-        const rocketIcon = document.getElementById('rocket-icon');
-        const loadingText = document.getElementById('loading-text');
+
+        const ring          = document.getElementById('rocket-progress');   // <circle>
+        const rocket        = document.getElementById('rocket-icon');       // .rocket-wrapper
+        const scene         = document.getElementById('launch-scene');
+        const loadingText   = document.getElementById('loading-text');
         const loadingScreen = document.getElementById('loading-screen');
-        
-        // Fast loading to 80% (Psychological Speed)
+
+        // 2 * PI * r (r=54 in the viewBox) — must match the CSS dasharray
+        const RING_CIRCUM = 339.29;
+
+        // How far the rocket can rise within the scene before blast-off.
+        // Measured in px; keeps it inside the 280px scene with some headroom.
+        const MAX_RISE = 190;
+
+        // Fast initial progress, decelerating past 80% (psychological pacing
+        // identical to the previous loader so the rest of the app's timing is unchanged).
         const interval = setInterval(() => {
-          if (isLoaded) {
-             // If loaded, we handle it in finishLoading()
-             return; 
-          }
-          
-          // Fast initially, slows down as it approaches 80%
+          if (isLoaded) return;
           if (progress < 80) {
-             let increment = (80 - progress) * 0.05; // Decelerate
-             if (increment < 0.1) increment = 0.1;
-             progress += increment;
-          } else {
-             // Crawl slowly past 80% if really stuck
-             if (progress < 95) progress += 0.05;
+            let increment = (80 - progress) * 0.05;
+            if (increment < 0.1) increment = 0.1;
+            progress += increment;
+          } else if (progress < 95) {
+            progress += 0.05;
           }
-          
           updateVisuals();
         }, 50);
-        
+
         function updateVisuals() {
-           if (progressBar) progressBar.style.width = `${progress}%`;
-           if (rocketIcon) rocketIcon.style.left = `${progress}%`;
-           if (loadingText) loadingText.innerText = `LOADING ${Math.round(progress)}%`;
+          const clamped = Math.max(0, Math.min(100, progress));
+          if (ring) {
+            ring.style.strokeDashoffset = RING_CIRCUM * (1 - clamped / 100);
+          }
+          if (rocket) {
+            const rise = (clamped / 100) * MAX_RISE;
+            rocket.style.transform = `translate(-50%, ${-rise}px)`;
+          }
+          if (loadingText) {
+            loadingText.innerText = `LOADING ${Math.round(clamped)}%`;
+          }
         }
-        
-        // Global function to trigger completion
+
+        // Called once the app's assets are ready — drive the blast-off.
         window.finishLoading = function() {
-           if (isLoaded) return;
-           isLoaded = true;
-           clearInterval(interval);
-           
-           // Zip to 100%
-           progress = 100;
-           updateVisuals();
-           
-           // Fade out after short delay
-           setTimeout(() => {
-               if (loadingScreen) {
-                   loadingScreen.style.opacity = '0';
-                   setTimeout(() => {
-                       loadingScreen.style.display = 'none';
-                       document.body.classList.remove('loading-active');
-                       
-                       // Dispatch event for other scripts (Lenis, etc)
-                       window.dispatchEvent(new Event('loading-complete'));
-                   }, 600);
-               }
-           }, 500); // Wait 500ms at 100% before fading
+          if (isLoaded) return;
+          isLoaded = true;
+          clearInterval(interval);
+
+          // Snap ring to full and caption to 100% immediately for polish
+          progress = 100;
+          updateVisuals();
+
+          // Trigger blast-off class (rocket shoots upward, trail stretches & fades)
+          if (scene) scene.classList.add('launching');
+
+          // Fade screen out after the blast plays (~700ms)
+          setTimeout(() => {
+            if (loadingScreen) {
+              loadingScreen.style.opacity = '0';
+              setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                document.body.classList.remove('loading-active');
+                window.dispatchEvent(new Event('loading-complete'));
+              }, 600);
+            }
+          }, 800);
         };
-        
-        // Block scrolling (existing logic)
+
+        // Block scrolling while loading
         var block = function(e) { if (document.body.classList.contains('loading-active')) { e.preventDefault(); e.stopPropagation(); } };
         document.addEventListener('wheel', block, { passive: false, capture: true });
         document.addEventListener('touchmove', block, { passive: false, capture: true });
