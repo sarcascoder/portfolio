@@ -384,9 +384,9 @@
         <div class="projects-grid">
           <article class="project-card" data-category="branding">
             <div class="project-image">
-              <video class="project-video" autoplay loop muted playsinline>
-                <source src="project1.mov" type="video/quicktime">
-                <source src="project1.mov" type="video/mp4">
+              <!-- preload="none" + deferred autoplay: the video doesn't start
+                   fetching until the card scrolls into view (see lazy-video.js). -->
+              <video class="project-video" loop muted playsinline preload="none" data-src="project1.mov">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -399,9 +399,7 @@
 
           <article class="project-card" data-category="digital">
             <div class="project-image">
-              <video class="project-video" autoplay loop muted playsinline>
-                <source src="project2.mov" type="video/quicktime">
-                <source src="project2.mov" type="video/mp4"> <!-- Fallback -->
+              <video class="project-video" loop muted playsinline preload="none" data-src="project2.mov">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -414,8 +412,7 @@
 
           <article class="project-card" data-category="design">
             <div class="project-image">
-              <video class="project-video" autoplay loop muted playsinline>
-                <source src="project3.mp4" type="video/mp4">
+              <video class="project-video" loop muted playsinline preload="none" data-src="project3.mp4">
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -558,7 +555,6 @@
     <script type="module" src="js/hover-preview.js"></script>
     <script type="module" src="js/smiley-face.js"></script>
     <script type="module" src="js/mercury-globe.js"></script>
-    <!-- logo-globe.js removed -->
     <script type="module" src="js/portal-effect.js"></script>
     
     <!-- Fixed Globe Logo with Contact Text -->
@@ -641,6 +637,7 @@
     <script type="module" src="/js/main.js"></script>
     <script type="module" src="/js/scroll-reveal.js"></script>
     <script type="module" src="/js/contact-modal.js"></script>
+    <script type="module" src="/js/lazy-video.js"></script>
 
     <!-- Globes self-initialize from their module scripts -->
 

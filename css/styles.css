@@ -886,21 +886,87 @@ body.mobile-optimized .about-moon-overlay {
   transform: rotate(180deg);
 }
 
+/* --- Premium project card --- */
+/* Layered treatment: subtle 1px neon ring at rest, soft cyan halo + lift on hover,
+   media zoom inside the clipped frame, and a diagonal highlight sweep on hover.
+   All effects are transform/opacity-only, so no layout recompute per frame. */
 .project-card {
   position: relative;
   overflow: hidden;
-  transition: transform 0.5s var(--transition-smooth);
+  border-radius: 14px;
+  isolation: isolate; /* keeps ::after blend-modes scoped to the card */
+  transition:
+    transform 0.6s var(--transition-smooth),
+    box-shadow 0.6s var(--transition-smooth);
+  will-change: transform;
+}
+
+.project-card::before {
+  /* Resting neon edge — very faint, picks up on hover */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(0, 225, 255, 0.05) 0%,
+    rgba(0, 225, 255, 0.35) 50%,
+    rgba(0, 225, 255, 0.05) 100%);
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.3;
+  transition: opacity 0.5s var(--transition-smooth);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.project-card::after {
+  /* Diagonal highlight sweep — slides across on hover */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 225, 255, 0.12) 50%,
+    transparent 60%,
+    transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.9s var(--transition-smooth);
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: screen;
 }
 
 .project-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-12px);
+  box-shadow:
+    0 18px 45px -12px rgba(0, 0, 0, 0.65),
+    0 0 35px -8px rgba(0, 225, 255, 0.28);
+}
+
+.project-card:hover::before {
+  opacity: 1;
+}
+
+.project-card:hover::after {
+  transform: translateX(100%);
+}
+
+[data-theme="light"] .project-card:hover {
+  box-shadow:
+    0 18px 45px -14px rgba(0, 0, 0, 0.25),
+    0 0 30px -8px rgba(0, 119, 170, 0.3);
 }
 
 .project-image {
   position: relative;
   aspect-ratio: 4/3;
   overflow: hidden;
-  background-color: var(--color-black); /* Black background for letterboxing */
+  border-radius: inherit;
+  background-color: var(--color-black); /* letterboxing */
 }
 
 .project-placeholder {
@@ -938,6 +1004,15 @@ body.mobile-optimized .about-moon-overlay {
   height: 100%;
   object-fit: contain; /* Show full video without cropping */
   display: block;
+  /* Subtle zoom on card hover — transforms only, no reflow */
+  transform: scale(1);
+  transition: transform 1.1s var(--transition-smooth), filter 0.6s var(--transition-smooth);
+  will-change: transform;
+}
+
+.project-card:hover .project-video {
+  transform: scale(1.04);
+  filter: brightness(1.05);
 }
 
 .project-info {
@@ -964,16 +1039,25 @@ body.mobile-optimized .about-moon-overlay {
 }
 
 .view-all-link {
+  /* Premium CTA: gradient fill reveals on hover, cyan glow, arrow travels further.
+     Kept structurally the same so existing HTML/JS (arrow rotation etc.) works. */
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 1vw;
   font-family: var(--font-mono);
   font-size: clamp(14px, 1.2vw, 20px);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--color-white);
   border: 1px solid var(--color-gray-mid);
-  padding: 1vw 2vw;
-  transition: all 0.3s ease;
+  padding: 1vw 2.2vw;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color 0.35s var(--transition-smooth),
+    border-color 0.35s var(--transition-smooth),
+    transform 0.5s var(--transition-smooth),
+    box-shadow 0.5s var(--transition-smooth);
 }
 
 [data-theme="light"] .view-all-link {
@@ -981,17 +1065,46 @@ body.mobile-optimized .about-moon-overlay {
     border-color: var(--color-gray-light);
 }
 
+.view-all-link::before {
+  /* Gradient wash that slides in from the left on hover */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(0, 225, 255, 0.16) 0%,
+    rgba(0, 102, 255, 0.22) 100%);
+  transform: translateX(-101%);
+  transition: transform 0.55s var(--transition-smooth);
+  z-index: -1;
+}
+
 .view-all-link:hover {
   border-color: var(--color-neon-green);
   color: var(--color-neon-green);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -14px rgba(0, 225, 255, 0.55);
+}
+
+.view-all-link:hover::before {
+  transform: translateX(0);
+}
+
+.view-all-link:active {
+  transform: translateY(0);
+  transition-duration: 0.12s;
 }
 
 .view-all-link .arrow {
-  transition: transform 0.3s ease;
+  transition: transform 0.45s var(--transition-smooth);
 }
 
 .view-all-link:hover .arrow {
-  transform: translateX(5px);
+  transform: translateX(10px);
+}
+
+/* Projects-section version has the arrow flipped — mirror the hover shift */
+.projects-section .view-all-link:hover .arrow {
+  transform: translateX(-10px) rotate(180deg);
 }
 
 /* ========================================
@@ -1547,29 +1660,65 @@ body.mobile-optimized .about-moon-overlay {
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
 }
 
+/* Submit button: gradient surface at rest, brighter gradient + halo + lift on hover.
+   Uses a single ::before layer for the hover fill so the transition doesn't repaint the text. */
 .submit-btn {
+    position: relative;
     width: 100%;
-    padding: 15px;
-    background-color: var(--color-white);
+    padding: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #e5f6ff 100%);
     color: var(--color-black);
     font-family: var(--font-mono);
     font-weight: 700;
     font-size: 16px;
+    letter-spacing: 0.12em;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+        transform 0.4s var(--transition-smooth),
+        box-shadow 0.4s var(--transition-smooth),
+        color 0.3s var(--transition-smooth);
     margin-top: 10px;
 }
 
+.submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-neon-green) 0%, var(--color-electric-blue) 100%);
+    opacity: 0;
+    transition: opacity 0.4s var(--transition-smooth);
+    z-index: -1;
+}
+
 .submit-btn:hover {
-    background-color: var(--color-neon-green);
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow:
+        0 14px 34px -14px rgba(0, 225, 255, 0.7),
+        0 0 28px -6px rgba(0, 102, 255, 0.45);
+}
+
+.submit-btn:hover::before {
+    opacity: 1;
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+    transition-duration: 0.12s;
 }
 
 .submit-btn:disabled {
-    background-color: var(--color-gray-light);
+    background: var(--color-gray-light);
     cursor: not-allowed;
     box-shadow: none;
+    transform: none;
+}
+
+.submit-btn:disabled::before {
+    opacity: 0;
 }
 
 /* Divider */
