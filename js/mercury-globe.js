@@ -58,10 +58,15 @@ class MercuryGlobe {
         this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
 
         if (this.isMobile) {
-            this.config.maxRotation = 0.22;
-            this.config.smoothing = 0.08;
+            this.config.maxRotation = 0.85;
+            this.config.smoothing = 0.14;
             this.targetRadius = 2.15;
         }
+
+        // Idle auto-drift: keep the globe feeling alive when the user isn't interacting
+        this.idleRotation = { x: 0, y: 0 };
+        this.lastInteractionTime = performance.now();
+        this.idleTimeout = this.isMobile ? 900 : 1800; // ms before idle drift kicks in
 
         // Track model loading state
         this.modelLoaded = false;
@@ -998,32 +1003,63 @@ class MercuryGlobe {
         this.targetThemeProgress = this.themeProgress;
         this.updateTheme(initialTheme === 'dark');
     }
-    
+
     bindEvents() {
         if (!this.isMobile) {
             window.addEventListener('mousemove', (e) => {
                 this.targetMouse.x = e.clientX;
                 this.targetMouse.y = e.clientY;
+                this.lastInteractionTime = performance.now();
             });
+        } else {
+            // Mobile: drive rotation via touch anywhere on the page
+            const updateFromTouch = (e) => {
+                const touch = e.touches?.[0] || e.changedTouches?.[0];
+                if (!touch) return;
+                this.targetMouse.x = touch.clientX;
+                this.targetMouse.y = touch.clientY;
+                this.lastInteractionTime = performance.now();
+            };
+
+            window.addEventListener('touchstart', updateFromTouch, { passive: true });
+            window.addEventListener('touchmove', updateFromTouch, { passive: true });
+
+            // Device orientation: rotate globe by tilting the phone (big tactile win on mobile)
+            window.addEventListener('deviceorientation', (e) => {
+                if (e.beta == null || e.gamma == null) return;
+                // gamma: -90..90 (left/right), beta: -180..180 (front/back)
+                const clamp11 = (v) => Math.max(-1, Math.min(1, v));
+                const normX = clamp11(e.gamma / 45);
+                const normY = clamp11((e.beta - 45) / 45);
+                // Map to pseudo-mouse coordinates
+                this.targetMouse.x = window.innerWidth / 2 + normX * (window.innerWidth / 2) * 0.7;
+                this.targetMouse.y = window.innerHeight / 2 + normY * (window.innerHeight / 2) * 0.7;
+                this.lastInteractionTime = performance.now();
+            }, { passive: true });
         }
-        
+
         window.addEventListener('resize', () => {
             this.centerX = window.innerWidth / 2;
             this.centerY = window.innerHeight / 2;
             this.onResize();
         });
-        
+
         window.addEventListener('themeChanged', (e) => this.updateTheme(e.detail.isDark));
 
+        const triggerEyebrowBounce = () => {
+            if (!this.isVisible) return;
+            const s = 0.99;
+            this.targetEyebrowOffset = 0.15 * s;
+            setTimeout(() => {
+                this.targetEyebrowOffset = 0;
+            }, 150);
+        };
+
         if (!this.isMobile) {
-            window.addEventListener('mousedown', () => {
-                if (!this.isVisible) return;
-                const s = 0.99;
-                this.targetEyebrowOffset = 0.15 * s;
-                setTimeout(() => {
-                    this.targetEyebrowOffset = 0;
-                }, 150);
-            });
+            window.addEventListener('mousedown', triggerEyebrowBounce);
+        } else {
+            // Give the smiley a tap-reaction on mobile too
+            window.addEventListener('touchstart', triggerEyebrowBounce, { passive: true });
         }
 
         this.isVisible = true;
@@ -1192,13 +1228,23 @@ class MercuryGlobe {
         
         this.targetRotation.y = offsetX * this.config.maxRotation;
         this.targetRotation.x = offsetY * this.config.maxRotation;
-        
+
         this.currentRotation.x = this.lerp(this.currentRotation.x, this.targetRotation.x, this.config.smoothing);
         this.currentRotation.y = this.lerp(this.currentRotation.y, this.targetRotation.y, this.config.smoothing);
-        
+
+        // Idle auto-drift: after a period without interaction, gently orbit so the globe feels alive
+        const timeSinceInteraction = now - (this.lastInteractionTime || 0);
+        const idleAmount = Math.max(0, Math.min(1, (timeSinceInteraction - this.idleTimeout) / 1500));
+        const t = now * 0.0004;
+        const idleAmplitude = this.isMobile ? 0.35 : 0.22;
+        const driftY = Math.sin(t) * idleAmplitude;
+        const driftX = Math.sin(t * 0.7) * idleAmplitude * 0.4;
+        this.idleRotation.x = this.lerp(this.idleRotation.x, driftX * idleAmount, 0.05);
+        this.idleRotation.y = this.lerp(this.idleRotation.y, driftY * idleAmount, 0.05);
+
         if (this.mercuryGroup) {
-            this.mercuryGroup.rotation.x = this.currentRotation.x;
-            this.mercuryGroup.rotation.y = this.currentRotation.y;
+            this.mercuryGroup.rotation.x = this.currentRotation.x + this.idleRotation.x;
+            this.mercuryGroup.rotation.y = this.currentRotation.y + this.idleRotation.y;
         }
         
         this.renderer.render(this.scene, this.camera);

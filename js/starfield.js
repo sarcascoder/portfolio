@@ -184,13 +184,6 @@ class Starfield {
 
     // --- Comets ---
     createCometSystem() {
-        if (this.isMobile) {
-            this.comets = [];
-            this.cometSpawnTimer = 0;
-            this.cometTexture = null;
-            return;
-        }
-
         this.comets = [];
         this.cometSpawnTimer = 0;
         this.cometTexture = this.getCometTexture();
@@ -251,7 +244,10 @@ class Starfield {
 
     updateComets() {
         this.cometSpawnTimer++;
-        if (this.cometSpawnTimer > 100 && Math.random() > 0.5) {
+        // Mobile: spawn less often and less aggressively to keep FPS up
+        const spawnThreshold = this.isMobile ? 220 : 100;
+        const spawnChance = this.isMobile ? 0.75 : 0.5;
+        if (this.cometSpawnTimer > spawnThreshold && Math.random() > spawnChance) {
             this.spawnComet();
             this.cometSpawnTimer = 0;
         }
@@ -280,6 +276,23 @@ class Starfield {
                 this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
             });
+        } else {
+            // Touch: drag finger to pan the camera through the stars
+            document.addEventListener('touchmove', (e) => {
+                const t = e.touches?.[0];
+                if (!t) return;
+                this.mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
+            }, { passive: true });
+
+            // Scroll-synced forward boost using scroll position (wheel events rarely fire on mobile)
+            let lastScrollY = window.scrollY || 0;
+            window.addEventListener('scroll', () => {
+                const y = window.scrollY || 0;
+                const delta = y - lastScrollY;
+                lastScrollY = y;
+                this.targetVelocity.z += delta * 0.0008;
+            }, { passive: true });
         }
 
         document.addEventListener('keydown', (e) => {
@@ -292,7 +305,7 @@ class Starfield {
                 case 'shift': this.targetVelocity.multiplyScalar(2.0); break;
             }
         });
-        
+
         document.addEventListener('wheel', (e) => {
             // Sync with Lenis scroll speed (0.35)
             // Original factor was 0.05. New factor: 0.05 * 0.35 = 0.0175
@@ -343,25 +356,34 @@ class Starfield {
         // Physics
         this.velocity.lerp(this.targetVelocity, 0.05);
         this.targetVelocity.multiplyScalar(this.friction);
-        
-        // Camera Look
-        const lookX = this.mouse.y * (this.isMobile ? 0.35 : 1.0);
-        const lookY = -this.mouse.x * (this.isMobile ? 0.35 : 1.0);
+
+        // Constant ambient drift — always flying gently through space, stronger on mobile
+        // where pointer-driven look is subtle
+        const ambientDrift = this.isMobile ? 0.35 : 0.18;
+        this.velocity.z += ambientDrift * 0.01;
+        // Slight sideways shimmer so the field doesn't look like a straight tunnel
+        const t = performance.now() * 0.0002;
+        this.velocity.x += Math.sin(t) * 0.004;
+        this.velocity.y += Math.cos(t * 0.8) * 0.003;
+
+        // Camera Look — stronger on mobile so touch panning has presence
+        const lookX = this.mouse.y * (this.isMobile ? 0.75 : 1.0);
+        const lookY = -this.mouse.x * (this.isMobile ? 0.75 : 1.0);
         this.camera.rotation.x += (lookX - this.camera.rotation.x) * this.lookSpeed;
         this.camera.rotation.y += (lookY - this.camera.rotation.y) * this.lookSpeed;
-        
+
         // MAIN FEATURE: Move the Universe (Infinite Wrap)
         // Instead of moving Camera, we move the Stars opposite to velocity
         // transform velocity to world space based on rotation
         const moveVec = this.velocity.clone().negate(); // Move stars opposite
-        moveVec.applyEuler(this.camera.rotation); 
-        
+        moveVec.applyEuler(this.camera.rotation);
+
         // Apply movement to all star layers
         if (this.starSystems) {
             this.starSystems.forEach(points => {
                 const posAttr = points.geometry.attributes.position;
                 const arr = posAttr.array;
-                
+
                 for (let i = 0; i < arr.length; i += 3) {
                     arr[i] += moveVec.x;
                     arr[i+1] += moveVec.y;
@@ -383,10 +405,8 @@ class Starfield {
             });
         }
 
-        // Update Comets
-        if (!this.isMobile) {
-            this.updateComets();
-        }
+        // Update Comets (throttled on mobile via spawn rates in updateComets)
+        this.updateComets();
 
         this.renderer.render(this.scene, this.camera);
     }

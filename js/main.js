@@ -598,10 +598,16 @@ class App {
             let range;
             if (inRevealZone) {
                 // Reveal phase: fast/snappy — small range means fewer pixels of scroll needed
-                range = Math.max(window.innerHeight * 1.8, 900);
+                // Mobile needs a shorter range because a swipe rarely exceeds ~300px
+                range = this.isMobileOptimized
+                    ? Math.max(window.innerHeight * 0.6, 400)
+                    : Math.max(window.innerHeight * 1.8, 900);
             } else {
-                // Playback phase: slow and controlled
-                range = Math.max(window.innerHeight * 22, 11000);
+                // Playback phase: slow and controlled on desktop (long wheel throw),
+                // much shorter on mobile so a few finger swipes scrub the whole video
+                range = this.isMobileOptimized
+                    ? Math.max(window.innerHeight * 5, 2800)
+                    : Math.max(window.innerHeight * 22, 11000);
             }
 
             const nextProgress = this.clamp(currentProgress + delta / range, 0, 1);
