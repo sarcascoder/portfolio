@@ -1035,23 +1035,28 @@ class App {
             playClick();
         });
         
-        // Attach Hover Listeners to Interactive Elements
+        // Attach hover sound only to high-intent elements. Previously it fired on
+        // every <a> and <button> on the page, which made the interface chatter
+        // constantly — felt like a 90s interface. Now: CTAs, nav, theme/menu
+        // toggles, and project cards only.
         const attachHoverListeners = () => {
              const selectors = [
-                 'a', 
-                 'button', 
-                 '.social-link', 
-                 '.theme-toggle-btn', 
-                 '.menu-toggle', 
-                 '.project-card',
+                 '.submit-btn',
+                 '.view-all-link',
                  '.nav-link',
-                 '.scroll-indicator',
-                 '.scroll-indicator-up' // Also the new indicator
+                 '.social-link',
+                 '.theme-toggle-btn',
+                 '.menu-toggle',
+                 '.project-card',
+                 '.service-item',
+                 '.home-icon-link',
+                 '.logo-image-link',
+                 '.globe-link-overlay',
+                 '.close-modal-btn'
              ];
-             
+
              const elements = document.querySelectorAll(selectors.join(', '));
              elements.forEach(el => {
-                 // Prevent multiple listeners
                  if (!el.dataset.hasHoverSound) {
                      el.addEventListener('mouseenter', () => playHover());
                      el.dataset.hasHoverSound = 'true';
