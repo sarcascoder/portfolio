@@ -2556,8 +2556,9 @@ body.mobile-optimized .about-moon-overlay {
     border-radius: 999px;
     opacity: 0;
     pointer-events: none;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* blur(8px) → blur(4px): visible for ~6.5s during intro, same visual read. */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     transition: opacity 0.6s var(--transition-smooth, ease), transform 0.6s var(--transition-smooth, ease);
     z-index: 15;
     white-space: nowrap;

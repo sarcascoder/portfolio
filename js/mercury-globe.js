@@ -1199,7 +1199,16 @@ class MercuryGlobe {
     animate(now = 0) {
         requestAnimationFrame((time) => this.animate(time));
 
-        if (now - this.lastFrameTime < this.frameInterval) return;
+        // Idle throttle: after 2s of no interaction, cap the animation loop
+        // at 30fps instead of 60. The globe's idle drift is slow enough that
+        // 30fps is visually indistinguishable from 60fps for passive motion;
+        // as soon as the user moves the cursor (which updates
+        // lastInteractionTime) we're back to full-rate.
+        const idleFor = now - (this.lastInteractionTime || 0);
+        const interval = (idleFor > 2000 && !this.isMobile)
+            ? 1000 / 30
+            : this.frameInterval;
+        if (now - this.lastFrameTime < interval) return;
         this.lastFrameTime = now;
 
         // Skip render entirely when the globe isn't actually visible — when
@@ -1316,8 +1325,23 @@ class MercuryGlobe {
             this.mercuryGroup.rotation.x = this.currentRotation.x + this.idleRotation.x;
             this.mercuryGroup.rotation.y = this.currentRotation.y + this.idleRotation.y;
         }
-        
-        this.renderer.render(this.scene, this.camera);
+
+        // Dirty-flag render: compose every piece of state that contributes to
+        // the rendered image (rotation, theme blend, eyebrow offset) into a
+        // single number, and only call renderer.render() when it has changed
+        // meaningfully since the last frame. When the user's mouse is still
+        // AND the idle drift hasn't kicked in yet AND the theme isn't
+        // transitioning, the scene is literally identical frame-to-frame —
+        // skipping the WebGL draw call saves the entire GPU cost.
+        const key =
+            (this.currentRotation.x + this.idleRotation.x) * 1000 +
+            (this.currentRotation.y + this.idleRotation.y) * 97 +
+            this.themeProgress * 13 +
+            this.eyebrowOffset * 7;
+        if (this._lastRenderKey === undefined || Math.abs(key - this._lastRenderKey) > 0.0004) {
+            this._lastRenderKey = key;
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 }
 

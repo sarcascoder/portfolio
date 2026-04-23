@@ -156,8 +156,8 @@ class SmileyFace {
         return start + (end - start) * factor;
     }
     
-    animate() {
-        requestAnimationFrame(() => this.animate());
+    animate(now = 0) {
+        requestAnimationFrame((t) => this.animate(t));
 
         // Skip render entirely when the tab is hidden, the canvas is off-screen,
         // or the universe reveal is covering the page. The existing isVisible
@@ -171,16 +171,23 @@ class SmileyFace {
             return;
         }
 
+        // Cap at 30fps — the earth only auto-rotates, and at 0.001 rad/frame
+        // it moves too slowly for 60 vs 30fps to be visually distinguishable.
+        // We compensate by doubling the per-frame rotation increment below so
+        // the wall-clock rotation speed stays identical.
+        if (now - (this._lastTime || 0) < 1000 / 30) return;
+        this._lastTime = now;
+
         if (this.earthGroup) {
-            // Auto-rotate
+            // Auto-rotate — 2× increment to match former 60fps wall-clock speed
             if (this.earthMesh) {
-                this.earthMesh.rotation.y += 0.001;
+                this.earthMesh.rotation.y += 0.002;
             }
             if (this.cloudsMesh) {
-                this.cloudsMesh.rotation.y += 0.0013;
+                this.cloudsMesh.rotation.y += 0.0026;
             }
         }
-        
+
         this.renderer.render(this.scene, this.camera);
     }
 }

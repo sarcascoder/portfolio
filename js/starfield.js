@@ -327,10 +327,17 @@ class Starfield {
 
     // --- Controls ---
     initControls() {
+        // Activity tracker — any input resets this. The animate loop checks
+        // it to decide whether to run full 60fps + ambient drift, or drop to
+        // 30fps + freeze drift when idle.
+        this.lastActivityTime = performance.now();
+        const bump = () => { this.lastActivityTime = performance.now(); };
+
         if (!this.isMobile) {
             document.addEventListener('mousemove', (e) => {
                 this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                bump();
             });
         } else {
             // Touch: drag finger to pan the camera through the stars
@@ -339,6 +346,7 @@ class Starfield {
                 if (!t) return;
                 this.mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
                 this.mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
+                bump();
             }, { passive: true });
 
             // Scroll-synced forward boost using scroll position (wheel events rarely fire on mobile)
@@ -348,6 +356,7 @@ class Starfield {
                 const delta = y - lastScrollY;
                 lastScrollY = y;
                 this.targetVelocity.z += delta * 0.0008;
+                bump();
             }, { passive: true });
         }
 
@@ -366,6 +375,7 @@ class Starfield {
             // Sync with Lenis scroll speed (0.35)
             // Original factor was 0.05. New factor: 0.05 * 0.35 = 0.0175
             this.targetVelocity.z += e.deltaY * (this.isMobile ? 0.00045 : 0.00075);
+            bump();
         }, { passive: true });
     }
 
@@ -404,7 +414,14 @@ class Starfield {
     animate(now = 0) {
         requestAnimationFrame((time) => this.animate(time));
 
-        if (now - this.lastFrameTime < this.frameInterval) {
+        // Idle throttle: after 2s with no wheel/scroll/mousemove/touch input,
+        // drop from 60fps → 30fps on desktop. At this drift speed the passive
+        // motion is indistinguishable between the two rates; the moment
+        // the user touches the page we're back to full-rate via bump().
+        const idleFor = now - (this.lastActivityTime || 0);
+        const isIdle = idleFor > 2000;
+        const interval = (isIdle && !this.isMobile) ? 1000 / 30 : this.frameInterval;
+        if (now - this.lastFrameTime < interval) {
             return;
         }
         this.lastFrameTime = now;
@@ -418,14 +435,16 @@ class Starfield {
         this.velocity.lerp(this.targetVelocity, 0.05);
         this.targetVelocity.multiplyScalar(this.friction);
 
-        // Constant ambient drift — always flying gently through space, stronger on mobile
-        // where pointer-driven look is subtle
-        const ambientDrift = this.isMobile ? 0.35 : 0.18;
-        this.velocity.z += ambientDrift * 0.01;
-        // Slight sideways shimmer so the field doesn't look like a straight tunnel
-        const t = performance.now() * 0.0002;
-        this.velocity.x += Math.sin(t) * 0.004;
-        this.velocity.y += Math.cos(t * 0.8) * 0.003;
+        // Ambient drift only runs while the user is active. Once idle, velocity
+        // decays via friction → stars gently settle to stationary → the
+        // dirty-flag check below skips the GPU draw. Any input wakes it back up.
+        if (!isIdle) {
+            const ambientDrift = this.isMobile ? 0.35 : 0.18;
+            this.velocity.z += ambientDrift * 0.01;
+            const t = performance.now() * 0.0002;
+            this.velocity.x += Math.sin(t) * 0.004;
+            this.velocity.y += Math.cos(t * 0.8) * 0.003;
+        }
 
         // Camera Look — stronger on mobile so touch panning has presence
         const lookX = this.mouse.y * (this.isMobile ? 0.75 : 1.0);
@@ -453,7 +472,25 @@ class Starfield {
         // Update Comets (throttled on mobile via spawn rates in updateComets)
         this.updateComets();
 
-        this.renderer.render(this.scene, this.camera);
+        // Dirty-flag render: if the universe isn't moving, nothing has changed
+        // on screen, so skip the WebGL draw call entirely. The scene is dirty
+        // when velocity is non-trivial, camera is still settling, or a comet
+        // is alive (comets move independently of velocity).
+        const velLenSq =
+            this.velocity.x * this.velocity.x +
+            this.velocity.y * this.velocity.y +
+            this.velocity.z * this.velocity.z;
+        const camMoved =
+            this._lastCamX === undefined ||
+            Math.abs(this.camera.rotation.x - this._lastCamX) > 0.00015 ||
+            Math.abs(this.camera.rotation.y - this._lastCamY) > 0.00015;
+        const hasLiveComets = (this.comets && this.comets.length > 0);
+
+        if (velLenSq > 0.00004 || camMoved || hasLiveComets) {
+            this._lastCamX = this.camera.rotation.x;
+            this._lastCamY = this.camera.rotation.y;
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 }
 
