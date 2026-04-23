@@ -30,7 +30,9 @@ class ParallaxManager {
         // Scroll reveal animations
         this.initScrollReveal();
         
-        // Start animation loop
+        // Start animation loop. wake() arms the loop only if there's content
+        // to animate; otherwise it stays idle until a scroll/mousemove wakes it.
+        this.isAnimating = true;
         this.animate();
     }
     
@@ -139,16 +141,24 @@ class ParallaxManager {
         // Track scroll
         window.addEventListener('scroll', () => {
             this.targetScrollY = window.pageYOffset;
+            this.wake();
         }, { passive: true });
     }
-    
+
     initMouseParallax() {
         // Elements that react to mouse movement
         this.mouseElements = document.querySelectorAll('[data-mouse-parallax]');
-        
+
+        // Only bind the global mousemove listener if there's anything to move.
+        // Previously it bound unconditionally and the RAF ran every frame
+        // regardless — now both are skipped on pages that don't use mouse
+        // parallax.
+        if (this.mouseElements.length === 0) return;
+
         window.addEventListener('mousemove', (e) => {
             this.targetMouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
             this.targetMouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
+            this.wake();
         });
     }
     
@@ -176,17 +186,17 @@ class ParallaxManager {
     animate() {
         // Smooth scroll interpolation
         this.scrollY += (this.targetScrollY - this.scrollY) * 0.1;
-        
+
         // Smooth mouse interpolation
         this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.08;
         this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.08;
-        
+
         // Apply parallax to elements (vanilla fallback)
         this.parallaxElements.forEach(({ element, speed }) => {
             const y = this.scrollY * speed;
             element.style.transform = `translateY(${y}px)`;
         });
-        
+
         // Apply mouse parallax
         this.mouseElements.forEach(element => {
             const strength = parseFloat(element.dataset.mouseParallax) || 20;
@@ -194,7 +204,29 @@ class ParallaxManager {
             const y = this.mouse.y * strength;
             element.style.transform = `translate(${x}px, ${y}px)`;
         });
-        
+
+        // Event-driven RAF: stop looping once the interpolation has converged.
+        // Previously this ran at 60 fps forever, even when the page was idle.
+        // On-demand wake() re-arms it on the next scroll or mousemove.
+        const EPS = 0.05;
+        const scrollConverged = Math.abs(this.scrollY - this.targetScrollY) < EPS;
+        const mouseConverged =
+            Math.abs(this.mouse.x - this.targetMouse.x) < EPS * 0.01 &&
+            Math.abs(this.mouse.y - this.targetMouse.y) < EPS * 0.01;
+        if (scrollConverged && mouseConverged) {
+            this.scrollY = this.targetScrollY;
+            this.mouse.x = this.targetMouse.x;
+            this.mouse.y = this.targetMouse.y;
+            this.isAnimating = false;
+            return;
+        }
+
+        requestAnimationFrame(() => this.animate());
+    }
+
+    wake() {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
         requestAnimationFrame(() => this.animate());
     }
 }

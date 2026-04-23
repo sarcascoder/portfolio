@@ -22,7 +22,7 @@ html, body, * {
     border-radius: 0;
     pointer-events: none;
     z-index: 99999;
-    transform: translate(-50%, -50%) rotate(-45deg);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg);
     transition: transform 0.1s ease; /* Smooth rotation if we add it later */
     mix-blend-mode: normal;
 }
@@ -51,7 +51,7 @@ html, body, * {
     border-radius: 999px;
     pointer-events: none;
     z-index: 99998;
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) scale(0);
     opacity: 0;
     display: flex;
     align-items: center;
@@ -65,11 +65,11 @@ html, body, * {
     will-change: transform, left, top;
 }
 .cursor-ring.active {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) scale(1);
     opacity: 1;
 }
 .cursor-ring.pressing {
-    transform: translate(-50%, -50%) scale(0.82);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) scale(0.82);
     border-color: rgba(0, 225, 255, 1);
 }
 .cursor-ring-label {
@@ -95,19 +95,19 @@ html, body, * {
 /* When the ring is active the rocket dims + shrinks so the ring is the focal cursor */
 .cursor-dot.morph-hidden {
     opacity: 0.15 !important;
-    transform: translate(-50%, -50%) rotate(-45deg) scale(0.45) !important;
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(0.45) !important;
 }
 
 /* Cursor states */
 
 /* Hover state - on interactive elements */
 .cursor-dot.hover {
-    transform: translate(-50%, -50%) rotate(-45deg) scale(1.1); /* Slight pulse */
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(1.1); /* Slight pulse */
 }
 
 /* Click/Active state */
 .cursor-dot.active {
-    transform: translate(-50%, -50%) rotate(-45deg) scale(0.9);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(0.9);
 }
 
 /* Text hover state */
@@ -118,14 +118,14 @@ html, body, * {
 
 /* Link hover state */
 .cursor-dot.link {
-    transform: translate(-50%, -50%) rotate(-45deg) scale(1.2);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(1.2);
     border: none;
     background-color: transparent;
 }
 
 /* Button hover state */
 .cursor-dot.button {
-    transform: translate(-50%, -50%) rotate(-45deg) scale(1.2);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(1.2);
     border: none;
     background-color: transparent;
 }
@@ -137,20 +137,20 @@ html, body, * {
 /* Hidden state */
 .cursor-dot.hidden {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) scale(0);
 }
 
 /* Scrolling state - FIRE CURSOR */
 .cursor-dot.scrolling {
     background-image: url('/shuttle-cursor-fire.webp');
-    transform: translate(-50%, -50%) rotate(-45deg) scale(1.05);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(1.05);
 }
 
 /* Scrolling + hover combinations */
 .cursor-dot.scrolling.hover,
 .cursor-dot.scrolling.link,
 .cursor-dot.scrolling.button {
-    transform: translate(-50%, -50%) rotate(-45deg) scale(1.15);
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) translate(-50%, -50%) rotate(-45deg) scale(1.15);
 }
 
 /* ========================================

@@ -67,6 +67,7 @@ class SmoothCursor {
     // per second during scroll-triggered reveal animations and was the main
     // JS-side heat source on desktop. Removed. If content is injected after
     // load, call window.smoothCursor.refresh() once to pick it up.
+    this.isAnimating = true;
     this.animate();
 
     this.cursorDot.style.opacity = "0";
@@ -82,11 +83,13 @@ class SmoothCursor {
       this.cursorDot.style.opacity = "1";
       if (this.cursorOutline) this.cursorOutline.style.opacity = "0.5";
     }
+    this.wake();
   }
 
   onMouseDown() {
     this.cursorDot.classList.add("active");
     if (this.cursorRing) this.cursorRing.classList.add("pressing");
+    this.wake();
   }
 
   onMouseUp() {
@@ -143,6 +146,7 @@ class SmoothCursor {
     // with magnetism feel weird because the snap target is far away).
     const magEl = element.closest("[data-cursor-magnetic='true']");
     if (magEl) this.magneticEl = magEl;
+    this.wake();
   }
 
   onHoverLeave(element) {
@@ -172,6 +176,18 @@ class SmoothCursor {
     return start + (end - start) * factor;
   }
 
+  // Write position via CSS variables that feed the existing transform chain
+  // in cursor.css. This avoids touching `left`/`top` (which triggers layout
+  // recalculation every frame). Pure compositor work now.
+  writePos() {
+    this.cursorDot.style.setProperty('--x', `${this.dotX}px`);
+    this.cursorDot.style.setProperty('--y', `${this.dotY}px`);
+    if (this.cursorRing) {
+      this.cursorRing.style.setProperty('--x', `${this.ringX}px`);
+      this.cursorRing.style.setProperty('--y', `${this.ringY}px`);
+    }
+  }
+
   animate() {
     // Compute the target for the ring: blend 30% toward the magnetic element's centre
     let ringTargetX = this.mouseX;
@@ -189,13 +205,38 @@ class SmoothCursor {
     this.ringX = this.lerp(this.ringX, ringTargetX, this.ringSpeed);
     this.ringY = this.lerp(this.ringY, ringTargetY, this.ringSpeed);
 
-    this.cursorDot.style.left = `${this.dotX}px`;
-    this.cursorDot.style.top = `${this.dotY}px`;
-    if (this.cursorRing) {
-      this.cursorRing.style.left = `${this.ringX}px`;
-      this.cursorRing.style.top = `${this.ringY}px`;
+    this.writePos();
+
+    // Idle-sleep: if the lerps have converged AND there's no magnetic target
+    // (which is a moving target tied to an element's geometry), stop the RAF
+    // loop. It will be resumed on the next mousemove. Previously this ran at
+    // 60fps forever — even with the user motionless — costing measurable CPU.
+    const CONVERGED = 0.3;
+    const dotConverged =
+      Math.abs(this.dotX - this.mouseX) < CONVERGED &&
+      Math.abs(this.dotY - this.mouseY) < CONVERGED;
+    const ringConverged =
+      Math.abs(this.ringX - ringTargetX) < CONVERGED &&
+      Math.abs(this.ringY - ringTargetY) < CONVERGED;
+
+    if (dotConverged && ringConverged && !this.magneticEl) {
+      // Snap to exact target and park until woken
+      this.dotX = this.mouseX;
+      this.dotY = this.mouseY;
+      this.ringX = ringTargetX;
+      this.ringY = ringTargetY;
+      this.writePos();
+      this.isAnimating = false;
+      return;
     }
 
+    requestAnimationFrame(() => this.animate());
+  }
+
+  // Wake up the RAF loop; called from onMouseMove / state-change handlers.
+  wake() {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
     requestAnimationFrame(() => this.animate());
   }
 

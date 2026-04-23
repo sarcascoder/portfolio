@@ -24,7 +24,11 @@ class PortalEffect {
     init() {
         this.createPortalDOM();
         this.bindEvents();
-        this.animate();
+        // No RAF at startup — the portal only needs to animate while the
+        // user is hovering one of the trigger elements. hover handlers
+        // call wake() to start the loop, which self-terminates when the
+        // size has settled back to zero.
+        this.isAnimating = false;
     }
 
     createPortalDOM() {
@@ -56,8 +60,11 @@ class PortalEffect {
     }
 
     bindEvents() {
-        // Mouse move
+        // Mouse move — only update cursor coords while the portal is
+        // actually animating. When the portal is closed there's no
+        // reason to track cursor position.
         window.addEventListener('mousemove', (e) => {
+            if (!this.isAnimating) return;
             this.cursor.x = e.clientX;
             this.cursor.y = e.clientY;
         });
@@ -68,16 +75,22 @@ class PortalEffect {
             trigger.style.zIndex = '10'; // Above local content
             trigger.style.mixBlendMode = 'difference'; // Contrast effect
 
-            trigger.addEventListener('mouseenter', () => {
+            trigger.addEventListener('mouseenter', (e) => {
                 this.isHovering = true;
                 this.targetSize = this.maxSize;
                 document.body.classList.add('portal-active');
+                // Seed cursor position from the enter event so the first
+                // frame is at the right place.
+                this.cursor.x = e.clientX;
+                this.cursor.y = e.clientY;
+                this.wake();
             });
 
             trigger.addEventListener('mouseleave', () => {
                 this.isHovering = false;
                 this.targetSize = 0;
                 document.body.classList.remove('portal-active');
+                this.wake(); // keep the loop running while it shrinks back to 0
             });
         });
     }
@@ -92,12 +105,31 @@ class PortalEffect {
             const rect = this.portal.parentElement.getBoundingClientRect();
             const relX = this.cursor.x - rect.left;
             const relY = this.cursor.y - rect.top;
-            
+
             this.portal.style.transform = `translate(${relX}px, ${relY}px) translate(-50%, -50%)`;
             this.portal.style.width = `${this.portalSize}px`;
             this.portal.style.height = `${this.portalSize}px`;
         }
 
+        // Self-terminate: if the size has settled (open or fully closed),
+        // stop looping. Wake() re-arms on the next hover event.
+        const settled = Math.abs(this.portalSize - this.targetSize) < 0.2;
+        if (settled && !this.isHovering && this.portalSize < 0.5) {
+            this.portalSize = 0;
+            if (this.portal) {
+                this.portal.style.width = '0px';
+                this.portal.style.height = '0px';
+            }
+            this.isAnimating = false;
+            return;
+        }
+
+        requestAnimationFrame(() => this.animate());
+    }
+
+    wake() {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
         requestAnimationFrame(() => this.animate());
     }
 }

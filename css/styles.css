@@ -298,8 +298,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   max-width: 90vw; /* Responsive for small screens */
   height: 100%;
   background-color: rgba(10, 10, 10, 0.6); /* Dark semi-transparent */
-  backdrop-filter: blur(20px); /* Glassmorphism */
-  -webkit-backdrop-filter: blur(20px);
+  /* Reduced from blur(20px) → blur(10px). Same glass look, ~4x cheaper
+     to composite. At this panel's dark-tint opacity (0.6) the extra
+     blur radius was imperceptible anyway. */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
@@ -2421,8 +2424,11 @@ body.mobile-optimized .about-moon-overlay {
     border-radius: 8px;
     padding: 10px 14px;
     min-width: 230px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* Reduced blur(8px) → blur(4px). This is the ONLY always-on backdrop-
+       filter on the hero, so its per-frame cost used to compound with every
+       mercury/starfield/teaser frame update. Still reads as frosted glass. */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     font-size: 10px;
     letter-spacing: 0.16em;
     line-height: 1.5;
