@@ -52,10 +52,23 @@ export default defineConfig({
       global: false,
       exclude: [/node_modules/],
       options: {
+        // Obfuscation is kept for IP protection, but the three runtime-hot
+        // options below were dropped because they burn CPU on every function
+        // call — invisible to users but a major continuous-heat source on
+        // interactive sites like this one. The bundle still looks obfuscated
+        // (hex identifiers, encoded string array, number expressions,
+        // splitStrings, rotated array, selfDefending) — just without the
+        // execution-path mangling that turned every function into a
+        // switch-state machine.
         compact: true,
-        controlFlowFlattening: true,
-        deadCodeInjection: true,
-        debugProtection: true,
+        // controlFlowFlattening:  was true — dropped. Turned every function
+        //                          into a switch(state) loop that costs
+        //                          ~2-3× per call.
+        // deadCodeInjection:      was true — dropped. Padded every function
+        //                          with unreachable branches the engine still
+        //                          had to parse + JIT.
+        // debugProtection:        was true — dropped. Ran a polling anti-
+        //                          debugger check loop in the background.
         disableConsoleOutput: true,
         identifierNamesGenerator: 'hexadecimal',
         log: false,
@@ -64,7 +77,9 @@ export default defineConfig({
         rotateStringArray: true,
         selfDefending: true,
         stringArray: true,
-        stringArrayEncoding: ['rc4'],
+        // RC4 decoded strings at every access; base64 is trivially cheaper
+        // and strings are still not directly readable.
+        stringArrayEncoding: ['base64'],
         splitStrings: true,
       },
     }),

@@ -698,8 +698,13 @@
               aria-label="Scroll up to zoom into the universe reveal"
               data-cursor-label="SCROLL UP" data-cursor-magnetic="true">
         <div class="universe-teaser-clip">
+          <!-- Dedicated teaser file — 360x640 portrait crop of the same video,
+               ~200KB instead of the 6MB 1920x1080 source. Browser decodes at
+               the smaller resolution so CPU/GPU cost drops ~9x while the
+               slice is always-on in the hero. The real reveal still uses
+               the full-HD universe_zoom.mp4. -->
           <video class="universe-teaser-video" muted loop playsinline preload="metadata" autoplay data-pause-offscreen="true">
-            <source src="universe_zoom.mp4" type="video/mp4">
+            <source src="/universe_teaser.mp4" type="video/mp4">
           </video>
           <div class="universe-teaser-vignette" aria-hidden="true"></div>
         </div>
