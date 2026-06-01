@@ -38,19 +38,20 @@
   --color-text-muted: #cccccc;
 }
 
+/* Light mode disabled — selector commented so it never matches and never contributes to style recalc.
 [data-theme="light"] {
   --color-black: #f0f2f5;
   --color-white: #1a1a1a;
-  --color-neon-green: #0077aa; /* Darker Blue for contrast (was Green) */
+  --color-neon-green: #0077aa;
   --color-neon-green-dim: #005580;
   --color-electric-blue: #0044cc;
   --color-blue-glow: rgba(0, 68, 204, 0.1);
   --color-gray-dark: #e0e0e0;
-  --color-gray-mid: #111111; /* Was #cccccc, make it black/dark for borders/text */
-  --color-gray-light: #000000; /* Was #444444, make it pure black for text */
-  
-  --color-text-muted: #000000; /* Strong black for light mode */
+  --color-gray-mid: #111111;
+  --color-gray-light: #000000;
+  --color-text-muted: #000000;
 }
+*/
 
 /* Theme Toggle Button */
 #theme-toggle {
@@ -74,6 +75,7 @@
     transform: rotate(15deg);
 }
 
+/* Light mode disabled
 [data-theme="light"] #theme-toggle {
     background: rgba(0, 0, 0, 0.05);
     border-color: var(--color-gray-mid);
@@ -86,6 +88,7 @@
 [data-theme="light"] #theme-toggle:hover {
      border-color: var(--color-neon-green);
 }
+*/
 
 /* Reset & Base Styles */
 *,
@@ -165,9 +168,11 @@ img {
     inset 0 0 300px 100px rgba(0, 0, 0, 0.4);
 }
 
+/* Light mode disabled
 [data-theme="light"] .vignette-frame {
     box-shadow: none;
 }
+*/
 
 /* ========================================
    Header Styles
@@ -238,9 +243,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   z-index: 1002; /* Ensure above panel */
 }
 
+/* Light mode disabled
 [data-theme="light"] .menu-toggle {
-    color: #000000; /* Force black for maximum contrast */
+    color: #000000;
 }
+*/
 
 /* Close button style for menu toggle when active */
 .menu-toggle.active {
@@ -298,11 +305,8 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   max-width: 90vw; /* Responsive for small screens */
   height: 100%;
   background-color: rgba(10, 10, 10, 0.6); /* Dark semi-transparent */
-  /* Reduced from blur(20px) → blur(10px). Same glass look, ~4x cheaper
-     to composite. At this panel's dark-tint opacity (0.6) the extra
-     blur radius was imperceptible anyway. */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px); /* Glassmorphism */
+  -webkit-backdrop-filter: blur(20px);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
@@ -319,11 +323,13 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Light mode disabled
 [data-theme="light"] .nav-menu {
     background-color: rgba(255, 255, 255, 0.9);
     border-left-color: var(--color-gray-light);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
 }
+*/
 
 .nav-menu.active {
   opacity: 1;
@@ -381,9 +387,11 @@ body.menu-open .header-right > *:not(.menu-toggle) {
   text-transform: uppercase;
 }
 
+/* Light mode disabled
 [data-theme="light"] .nav-link {
     color: var(--color-white);
 }
+*/
 
 .nav-link:hover,
 .nav-link.active {
@@ -849,9 +857,11 @@ body.universe-mode .universe-credit {
   padding-bottom: 14vw;
 }
 
+/* Light mode disabled
 [data-theme="light"] .about-preview {
   background-color: transparent;
 }
+*/
 
 .about-text {
   max-width: 70vw;
@@ -902,6 +912,7 @@ body.mobile-optimized .about-moon-overlay {
   background-image: url('/man_on_moon.webp');
   background-position: center 56%;
   background-repeat: no-repeat;
+  
   background-size: cover;
   opacity: 0;
   transform: scale(1.08) translate3d(0, 18px, 0);
@@ -916,6 +927,7 @@ body.mobile-optimized .about-moon-overlay {
   will-change: opacity;
 }
 
+/* Light mode disabled
 [data-theme="light"] .about-moon-image {
   filter: none;
 }
@@ -923,6 +935,7 @@ body.mobile-optimized .about-moon-overlay {
 [data-theme="light"] .about-moon-overlay {
   background: transparent;
 }
+*/
 
 @media (max-width: 1024px) {
   .about-preview {
@@ -1205,11 +1218,13 @@ body.mobile-optimized .about-moon-overlay {
   transform: translateX(100%);
 }
 
+/* Light mode disabled
 [data-theme="light"] .project-card:hover {
   box-shadow:
     0 18px 45px -14px rgba(0, 0, 0, 0.25),
     0 0 30px -8px rgba(0, 119, 170, 0.3);
 }
+*/
 
 .project-image {
   position: relative;
@@ -1234,10 +1249,12 @@ body.mobile-optimized .about-moon-overlay {
   transition: border-color 0.3s ease;
 }
 
+/* Light mode disabled
 [data-theme="light"] .project-placeholder {
     background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
     border-color: var(--color-gray-mid);
 }
+*/
 
 .project-card:hover .project-placeholder {
   border-color: var(--color-neon-green);
@@ -1310,10 +1327,12 @@ body.mobile-optimized .about-moon-overlay {
     box-shadow var(--dur-reveal) var(--ease-reveal);
 }
 
+/* Light mode disabled
 [data-theme="light"] .view-all-link {
     color: var(--color-black);
     border-color: var(--color-gray-light);
 }
+*/
 
 .view-all-link::before {
   /* Gradient wash that slides in from the left on hover */
@@ -1400,10 +1419,12 @@ body.mobile-optimized .about-moon-overlay {
     transform 0.3s ease;
 }
 
+/* Light mode disabled
 [data-theme="light"] .service-item {
   background: rgba(255, 255, 255, 0.6);
   border-color: var(--color-gray-light);
 }
+*/
 
 .service-item:hover {
   border-color: var(--color-neon-green);
@@ -1481,11 +1502,13 @@ body.mobile-optimized .about-moon-overlay {
   transition: all 0.3s ease;
 }
 
+/* Light mode disabled
 [data-theme="light"] .contact-email {
     color: #000000;
     background: rgba(0,0,0,0.05);
     border-color: var(--color-gray-mid);
 }
+*/
 
 .contact-email:hover {
   border-color: var(--color-neon-green);
@@ -1714,13 +1737,15 @@ body.mobile-optimized .about-moon-overlay {
 }
 
 #contact-earth-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
+    position: relative;
+    /* Globe shrunk inside the wrapper so the rotating "CONTACT" text ring
+       keeps its original size; flex-centering on the wrapper handles layout.
+       Sized to leave a clear gap between the globe's cyan rim halo and the
+       inner edge of the rotating text. */
+    width: 42%;
+    height: 42%;
     border-radius: 50%;
-    overflow: hidden;
+    overflow: visible;
     z-index: 2;
 }
 
@@ -2075,6 +2100,7 @@ body.mobile-optimized .about-moon-overlay {
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
+/* Light mode disabled
 [data-theme="light"] .call-btn {
     color: var(--color-black);
     border-color: var(--color-black);
@@ -2084,6 +2110,7 @@ body.mobile-optimized .about-moon-overlay {
     background-color: var(--color-black);
     color: var(--color-white);
 }
+*/
 
 
 
@@ -2424,11 +2451,8 @@ body.mobile-optimized .about-moon-overlay {
     border-radius: 8px;
     padding: 10px 14px;
     min-width: 230px;
-    /* Reduced blur(8px) → blur(4px). This is the ONLY always-on backdrop-
-       filter on the hero, so its per-frame cost used to compound with every
-       mercury/starfield/teaser frame update. Still reads as frosted glass. */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     font-size: 10px;
     letter-spacing: 0.16em;
     line-height: 1.5;
@@ -2556,9 +2580,8 @@ body.mobile-optimized .about-moon-overlay {
     border-radius: 999px;
     opacity: 0;
     pointer-events: none;
-    /* blur(8px) → blur(4px): visible for ~6.5s during intro, same visual read. */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     transition: opacity 0.6s var(--transition-smooth, ease), transform 0.6s var(--transition-smooth, ease);
     z-index: 15;
     white-space: nowrap;
@@ -2592,3 +2615,176 @@ body.mobile-optimized .about-moon-overlay {
         letter-spacing: 0.22em;
     }
 }
+
+/* ========================================
+   Tech Stack Section
+   ======================================== */
+.tech-stack-section {
+  position: relative;
+}
+
+.tech-stack-section .section-content {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Soft cyan ambient glow behind the grid — no JS, GPU-cheap */
+.tech-stack-section .section-content::before {
+  content: "";
+  position: absolute;
+  inset: 4% -8% 0 -8%;
+  background:
+    radial-gradient(ellipse 50% 40% at 25% 25%, rgba(0, 255, 213, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 75% 75%, rgba(0, 119, 170, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.tech-stack-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3vw;
+  margin-top: 2vw;
+}
+
+.tech-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+
+.tech-group-label {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 0.95vw, 14px);
+  letter-spacing: 0.28em;
+  color: var(--color-neon-green);
+  opacity: 0.7;
+  padding-left: 4px;
+}
+
+.tech-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 14px;
+}
+
+.tech-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 8px;
+  background: transparent;
+  border: 0;
+  cursor: none;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Soft cursor-follow halo behind the icon (no card chrome, just a glow on hover).
+   Fed by the inline spotlight script via CSS vars --mx / --my. */
+.tech-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(0, 255, 213, 0.18),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 0;
+}
+
+.tech-card:hover { transform: translateY(-3px); }
+.tech-card:hover::before { opacity: 1; }
+
+.tech-icon {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 213, 0.15));
+  transition:
+    transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    filter 0.45s ease;
+}
+
+.tech-card:hover .tech-icon {
+  transform: scale(1.10) translateY(-1px);
+  filter: drop-shadow(0 0 14px rgba(0, 255, 213, 0.55));
+}
+
+.tech-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--color-white);
+  opacity: 0.78;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease, color 0.3s ease;
+  white-space: nowrap;
+}
+
+.tech-card:hover .tech-label {
+  opacity: 1;
+  color: var(--color-neon-green);
+}
+
+@media (max-width: 768px) {
+  /* Force at least 3 columns even on narrow phones — auto-fill with a smaller
+     minmax keeps tiles dense instead of stretching to 2 wide cards per row. */
+  .tech-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px 4px;
+  }
+  .tech-card { padding: 8px 4px; gap: 6px; }
+  .tech-icon { width: 28px; height: 28px; }
+  .tech-label { font-size: 9.5px; letter-spacing: 0.08em; }
+  .tech-group { gap: 6px; }
+  .tech-group-label { font-size: 10px; letter-spacing: 0.22em; }
+  .tech-stack-grid { gap: 22px; margin-top: 18px; }
+}
+
+@media (max-width: 420px) {
+  .tech-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px 2px;
+  }
+  .tech-icon { width: 24px; height: 24px; }
+  .tech-label { font-size: 9px; letter-spacing: 0.05em; }
+  .tech-card { padding: 6px 2px; gap: 5px; }
+}
+
+/* Mobile viewport (<=820px): kill the universe zoom reveal completely.
+   main.js strips the elements from the DOM in JS, but the JS-side check uses
+   isMobileViewport (a pure width test), and the same width check here is the
+   belt-and-braces guard for the brief moment before main.js runs and for
+   the case where the script fails to load at all. Hides:
+     - the universe video container (revealed via scroll-up)
+     - the universe audio element (no sound)
+     - the universe teaser button on the hero ("SCROLL UP" trapezium-shaped
+       widget) which previously triggered the reveal on click
+*/
+@media (max-width: 820px) {
+  #universe-video-container,
+  #universe-audio,
+  .universe-teaser {
+    display: none !important;
+  }
+}
+
+/* On mobile the mercury globe has no scroll timeline for the Tech Stack
+   section, so it gets stranded mid-viewport. Hide it while the tech stack
+   is in view. The inline tech-stack script toggles body.in-tech-stack via an
+   IntersectionObserver. Desktop is unaffected. */
+body.mobile-optimized.in-tech-stack #mercury-container {
+  visibility: hidden;
+}
+

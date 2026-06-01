@@ -14,7 +14,9 @@
     <link rel="stylesheet" href="css/typography.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/cursor.css">
-    <script type="module" src="js/theme.js"></script>
+    <!-- Light mode disabled: theme.js is intentionally not loaded so the glitch/TV-static animation never runs.
+         <script type="module" src="js/theme.js"></script> -->
+
 </head>
 <body>
     <!-- Starfield Background -->
@@ -39,9 +41,11 @@
         </div>
         <div class="header-right">
             <span class="header-text">WHAT WE DO</span>
+            <!-- Light mode disabled — toggle button removed so no click can re-enable it.
             <button id="theme-toggle" aria-label="Toggle Theme">
                 <span>☀️</span>
             </button>
+            -->
             <a href="index.html" class="home-icon-link" aria-label="Home">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="home-icon">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -253,7 +257,6 @@
     <script type="module" src="js/hover-preview.js"></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/scroll-reveal.js"></script>
-    <script type="module" src="js/smiley-face.js"></script>
     <script type="module" src="js/contact-modal.js"></script>
 
     <style>
@@ -297,10 +300,12 @@
             transition: background 0.3s ease;
         }
 
+        /* Light mode disabled
         [data-theme="light"] .service-block {
              background: rgba(255, 255, 255, 0.5);
              border: 1px solid var(--color-gray-mid);
         }
+        */
         
         .service-block:hover {
             background: rgba(17, 17, 17, 0.8);
@@ -510,7 +515,38 @@
     <!-- MODIFIED: Now contains the Smiley Earth -->
     <div id="contact-earth-wrapper" style="position: fixed; bottom: 10px; right: 10px; z-index: 100;">
         <div id="contact-earth-container" style="width: 100%; height: 100%;">
-            <!-- SmileyFace will inject canvas here -->
+            <!-- Lightweight 2D earth — replaces the old Three.js scene to cut load time. -->
+            <svg class="earth-2d" viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true" focusable="false">
+                <defs>
+                    <radialGradient id="earth2dFill" cx="35%" cy="35%" r="75%">
+                        <stop offset="0%" stop-color="#0e3a5c"/>
+                        <stop offset="55%" stop-color="#05182c"/>
+                        <stop offset="100%" stop-color="#00060d"/>
+                    </radialGradient>
+                    <radialGradient id="earth2dRim" cx="50%" cy="50%" r="50%">
+                        <stop offset="80%" stop-color="rgba(80,255,220,0)"/>
+                        <stop offset="100%" stop-color="rgba(80,255,220,0.45)"/>
+                    </radialGradient>
+                    <clipPath id="earth2dClip"><circle cx="50" cy="50" r="40"/></clipPath>
+                </defs>
+                <circle cx="50" cy="50" r="46" fill="url(#earth2dRim)"/>
+                <circle cx="50" cy="50" r="40" fill="url(#earth2dFill)" stroke="var(--color-neon-green, #00ffd5)" stroke-width="0.9" stroke-opacity="0.65"/>
+                <g clip-path="url(#earth2dClip)" stroke="var(--color-neon-green, #00ffd5)" stroke-opacity="0.32" fill="none" stroke-width="0.55">
+                    <ellipse cx="50" cy="50" rx="40" ry="8"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="20"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="32"/>
+                    <ellipse cx="50" cy="50" rx="8"  ry="40"/>
+                    <ellipse cx="50" cy="50" rx="20" ry="40"/>
+                    <ellipse cx="50" cy="50" rx="32" ry="40"/>
+                </g>
+                <g clip-path="url(#earth2dClip)" fill="var(--color-neon-green, #00ffd5)" opacity="0.55">
+                    <path d="M28 38 q4 -4 9 -2 q4 2 3 8 q1 5 -2 8 q-3 4 -1 8 q2 4 -3 6 q-6 0 -8 -6 q-2 -7 1 -12 q-2 -6 1 -10z"/>
+                    <path d="M52 30 q6 1 7 7 q1 5 -2 8 q3 3 2 8 q-2 6 -7 6 q-4 -1 -4 -6 q-1 -5 1 -9 q-2 -4 0 -9 q1 -4 3 -5z"/>
+                    <ellipse cx="68" cy="62" rx="6" ry="4"/>
+                    <ellipse cx="62" cy="72" rx="3.2" ry="2.2"/>
+                </g>
+                <ellipse cx="38" cy="38" rx="11" ry="6" fill="rgba(255,255,255,0.10)"/>
+            </svg>
         </div>
         
         <!-- Rotating Text Ring Overlay -->

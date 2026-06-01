@@ -541,8 +541,46 @@ class App {
     initUniverseReveal() {
         const videoContainer = document.getElementById('universe-video-container');
         const video = document.getElementById('universe-video');
-        
+
         if (!videoContainer || !video) return;
+
+        // Mobile viewport (<=820px) kill-switch.
+        // Use isMobileViewport (pure width check) instead of isMobileOptimized,
+        // because DevTools' responsive view may not set touch capability — the
+        // user can be at phone width without the touch flag, and we still
+        // never want the universe reveal in that case.
+        // We strip the universe-video container, the audio element, AND the
+        // hero teaser button so no source can load, no decoder spins up,
+        // no soundtrack plays, and nothing can re-trigger the reveal.
+        if (this.isMobileViewport) {
+            const audioEl = document.getElementById('universe-audio');
+            if (audioEl && audioEl.parentNode) audioEl.parentNode.removeChild(audioEl);
+            if (videoContainer.parentNode) videoContainer.parentNode.removeChild(videoContainer);
+            const teaserEl = document.getElementById('universe-teaser');
+            if (teaserEl && teaserEl.parentNode) teaserEl.parentNode.removeChild(teaserEl);
+            // No-op the public entry points so anything else that calls them is harmless.
+            this.revealUniverse = () => {};
+            this.applyUniverseProgress = () => {};
+            return;
+        }
+
+        // Desktop only — lazy-inject the <source> tags now. The HTML omits them
+        // so mobile parsers never touch the network for these assets.
+        const attachSource = (el) => {
+            if (!el || el.querySelector('source')) return;
+            const src = el.dataset.src;
+            if (!src) return;
+            const source = document.createElement('source');
+            source.src = src;
+            source.type = el.dataset.type || '';
+            el.appendChild(source);
+            el.load();
+        };
+        attachSource(video);
+        const audioElDesktop = document.getElementById('universe-audio');
+        attachSource(audioElDesktop);
+        video.preload = 'metadata';
+
         this.universeVideo = video;
         this.universeContainer = videoContainer;
         this.universeProgress = 0;
@@ -553,11 +591,6 @@ class App {
         this.universeRaf = null;
         this.universeTouchY = null;
         this.universeLastAppliedTime = -1;
-
-        if (this.isMobileOptimized) {
-            video.preload = 'metadata';
-            video.setAttribute('fetchpriority', 'auto');
-        }
 
         video.muted = true;
         video.pause();
@@ -753,6 +786,11 @@ class App {
     // ==========================================
 
     initUniverseAudio() {
+        // Mobile viewport: universe reveal is disabled, no audio either.
+        // initUniverseReveal already removed the <audio> element from the DOM
+        // on mobile, but guard here too in case the element somehow survives.
+        if (this.isMobileViewport) return;
+
         const audio = document.getElementById('universe-audio');
         if (!audio) return;
 

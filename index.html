@@ -23,7 +23,9 @@
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/cursor.css" />
     <link rel="stylesheet" href="css/video-reveal.css" />
-    <script type="module" src="js/theme.js"></script>
+    <!-- Light mode disabled: theme.js is intentionally not loaded so the glitch/TV-static animation never runs.
+         <script type="module" src="js/theme.js"></script> -->
+
     <!-- Preload Universe Video for fast playback on larger screens only -->
     <link rel="preload" as="video" href="universe_zoom.mp4" type="video/mp4" media="(min-width: 821px)">
     <!-- Preload the hero 3D model so its 6.5 MB fetch runs in parallel with
@@ -567,10 +569,14 @@
     </script>
     -->
 
-    <!-- Universe Zoom Video Section (Hidden by default) -->
-    <div id="universe-video-container" class="universe-video-container">
-      <video id="universe-video" muted playsinline preload="metadata" fetchpriority="auto">
-        <source src="universe_zoom.mp4" type="video/mp4">
+    <!-- Universe Zoom Video Section (Hidden by default).
+         Video/audio sources are NOT inlined — they're lazy-injected by main.js
+         only on desktop (>=821px). On mobile we skip the reveal entirely:
+         no preload, no decoder cost, no bandwidth. -->
+    <div id="universe-video-container" class="universe-video-container" data-desktop-only>
+      <video id="universe-video" muted playsinline preload="none" fetchpriority="auto"
+             data-src="universe_zoom.mp4" data-type="video/mp4">
+        <!-- <source> attached dynamically by main.js on desktop only -->
       </video>
       <div class="universe-overlay-gradient"></div>
       <!-- Video attribution — universe_zoom.mp4 is sourced from the
@@ -595,9 +601,11 @@
           <span>Scroll down — drift deeper into the universe</span>
         </div>
       </div>
-      <!-- Separate audio element for scroll-synced soundtrack -->
-      <audio id="universe-audio" preload="metadata" loop="false">
-        <source src="universe_zoom_audio.mp3" type="audio/mpeg">
+      <!-- Separate audio element for scroll-synced soundtrack.
+           Source is lazy-injected by main.js on desktop only. -->
+      <audio id="universe-audio" preload="none" loop="false"
+             data-src="universe_zoom_audio.mp3" data-type="audio/mpeg">
+        <!-- <source> attached dynamically by main.js on desktop only -->
       </audio>
     </div>
 
@@ -623,9 +631,11 @@
         </a>
       </div>
       <div class="header-right">
+        <!-- Light mode disabled — toggle button removed so no click can re-enable it.
         <button id="theme-toggle" aria-label="Toggle Theme">
           <span>☀️</span>
         </button>
+        -->
         <a href="index.html" class="home-icon-link" aria-label="Home">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="home-icon">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -896,11 +906,171 @@
       </div>
     </section>
 
+    <!-- Tech Stack Section -->
+    <section class="section tech-stack-section" id="tech-stack">
+      <div class="section-content">
+        <div class="section-label">
+          <span class="label-number">04</span>
+          <span class="label-text">TECH STACK</span>
+        </div>
+        <h2 class="section-heading">Tools, frameworks, and infrastructure.</h2>
+
+        <div class="tech-stack-grid" data-tech-grid>
+          <div class="tech-group">
+            <div class="tech-group-label no-typewriter">// LANGUAGES</div>
+            <div class="tech-cards">
+              <div class="tech-card" data-cursor-label="PYTHON"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/python/00ffd5"><span class="tech-label no-typewriter">Python</span></div>
+              <div class="tech-card" data-cursor-label="TYPESCRIPT"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/typescript/00ffd5"><span class="tech-label no-typewriter">TypeScript</span></div>
+              <div class="tech-card" data-cursor-label="JAVASCRIPT"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/javascript/00ffd5"><span class="tech-label no-typewriter">JavaScript</span></div>
+              <div class="tech-card" data-cursor-label="C++"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/cplusplus/00ffd5"><span class="tech-label no-typewriter">C++</span></div>
+              <div class="tech-card" data-cursor-label="RUST"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/rust/00ffd5"><span class="tech-label no-typewriter">Rust</span></div>
+              <div class="tech-card" data-cursor-label="GO"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/go/00ffd5"><span class="tech-label no-typewriter">Go</span></div>
+              <div class="tech-card" data-cursor-label="JAVA"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/openjdk/00ffd5"><span class="tech-label no-typewriter">Java</span></div>
+              <div class="tech-card" data-cursor-label="KOTLIN"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/kotlin/00ffd5"><span class="tech-label no-typewriter">Kotlin</span></div>
+              <div class="tech-card" data-cursor-label="DART"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/dart/00ffd5"><span class="tech-label no-typewriter">Dart</span></div>
+            </div>
+          </div>
+
+          <div class="tech-group">
+            <div class="tech-group-label no-typewriter">// AI · ML · VISION</div>
+            <div class="tech-cards">
+              <div class="tech-card" data-cursor-label="PYTORCH"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/pytorch/00ffd5"><span class="tech-label no-typewriter">PyTorch</span></div>
+              <div class="tech-card" data-cursor-label="TENSORFLOW"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/tensorflow/00ffd5"><span class="tech-label no-typewriter">TensorFlow</span></div>
+              <div class="tech-card" data-cursor-label="HUGGING FACE"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/huggingface/00ffd5"><span class="tech-label no-typewriter">Hugging&nbsp;Face</span></div>
+              <div class="tech-card" data-cursor-label="ONNX"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/onnx/00ffd5"><span class="tech-label no-typewriter">ONNX</span></div>
+              <div class="tech-card" data-cursor-label="OPENCV"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/opencv/00ffd5"><span class="tech-label no-typewriter">OpenCV</span></div>
+              <div class="tech-card" data-cursor-label="NUMPY"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/numpy/00ffd5"><span class="tech-label no-typewriter">NumPy</span></div>
+              <div class="tech-card" data-cursor-label="PANDAS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/pandas/00ffd5"><span class="tech-label no-typewriter">Pandas</span></div>
+              <div class="tech-card" data-cursor-label="SCIKIT-LEARN"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/scikitlearn/00ffd5"><span class="tech-label no-typewriter">scikit-learn</span></div>
+            </div>
+          </div>
+
+          <div class="tech-group">
+            <div class="tech-group-label no-typewriter">// FRONTEND</div>
+            <div class="tech-cards">
+              <div class="tech-card" data-cursor-label="REACT"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/react/00ffd5"><span class="tech-label no-typewriter">React</span></div>
+              <div class="tech-card" data-cursor-label="NEXT.JS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/nextdotjs/00ffd5"><span class="tech-label no-typewriter">Next.js</span></div>
+              <div class="tech-card" data-cursor-label="VUE"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/vuedotjs/00ffd5"><span class="tech-label no-typewriter">Vue.js</span></div>
+              <div class="tech-card" data-cursor-label="FLUTTER"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/flutter/00ffd5"><span class="tech-label no-typewriter">Flutter</span></div>
+              <div class="tech-card" data-cursor-label="THREE.JS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/threedotjs/00ffd5"><span class="tech-label no-typewriter">Three.js</span></div>
+              <div class="tech-card" data-cursor-label="TAILWIND"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/tailwindcss/00ffd5"><span class="tech-label no-typewriter">Tailwind</span></div>
+              <div class="tech-card" data-cursor-label="VITE"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/vite/00ffd5"><span class="tech-label no-typewriter">Vite</span></div>
+              <div class="tech-card" data-cursor-label="FRAMER MOTION"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/framer/00ffd5"><span class="tech-label no-typewriter">Framer</span></div>
+              <div class="tech-card" data-cursor-label="GSAP"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/greensock/00ffd5"><span class="tech-label no-typewriter">GSAP</span></div>
+            </div>
+          </div>
+
+          <div class="tech-group">
+            <div class="tech-group-label no-typewriter">// BACKEND · FRAMEWORKS</div>
+            <div class="tech-cards">
+              <div class="tech-card" data-cursor-label="NODE.JS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/nodedotjs/00ffd5"><span class="tech-label no-typewriter">Node.js</span></div>
+              <div class="tech-card" data-cursor-label="EXPRESS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/express/00ffd5"><span class="tech-label no-typewriter">Express</span></div>
+              <div class="tech-card" data-cursor-label="FASTAPI"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/fastapi/00ffd5"><span class="tech-label no-typewriter">FastAPI</span></div>
+              <div class="tech-card" data-cursor-label="FLASK"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/flask/00ffd5"><span class="tech-label no-typewriter">Flask</span></div>
+              <div class="tech-card" data-cursor-label="SPRING"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/spring/00ffd5"><span class="tech-label no-typewriter">Spring</span></div>
+              <div class="tech-card" data-cursor-label="PRISMA"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/prisma/00ffd5"><span class="tech-label no-typewriter">Prisma</span></div>
+              <div class="tech-card" data-cursor-label="TAURI"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/tauri/00ffd5"><span class="tech-label no-typewriter">Tauri</span></div>
+            </div>
+          </div>
+
+          <div class="tech-group">
+            <div class="tech-group-label no-typewriter">// DATABASES</div>
+            <div class="tech-cards">
+              <div class="tech-card" data-cursor-label="POSTGRESQL"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/postgresql/00ffd5"><span class="tech-label no-typewriter">PostgreSQL</span></div>
+              <div class="tech-card" data-cursor-label="REDIS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/redis/00ffd5"><span class="tech-label no-typewriter">Redis</span></div>
+              <div class="tech-card" data-cursor-label="MONGODB"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/mongodb/00ffd5"><span class="tech-label no-typewriter">MongoDB</span></div>
+              <div class="tech-card" data-cursor-label="SQLITE"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/sqlite/00ffd5"><span class="tech-label no-typewriter">SQLite</span></div>
+              <div class="tech-card" data-cursor-label="ELASTICSEARCH"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/elasticsearch/00ffd5"><span class="tech-label no-typewriter">Elasticsearch</span></div>
+              <div class="tech-card" data-cursor-label="NEO4J"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/neo4j/00ffd5"><span class="tech-label no-typewriter">Neo4j</span></div>
+            </div>
+          </div>
+
+          <div class="tech-group">
+            <div class="tech-group-label no-typewriter">// DEVOPS · TOOLS</div>
+            <div class="tech-cards">
+              <div class="tech-card" data-cursor-label="DOCKER"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/docker/00ffd5"><span class="tech-label no-typewriter">Docker</span></div>
+              <div class="tech-card" data-cursor-label="KUBERNETES"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/kubernetes/00ffd5"><span class="tech-label no-typewriter">Kubernetes</span></div>
+              <div class="tech-card" data-cursor-label="LINUX"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/linux/00ffd5"><span class="tech-label no-typewriter">Linux</span></div>
+              <div class="tech-card" data-cursor-label="NGINX"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/nginx/00ffd5"><span class="tech-label no-typewriter">Nginx</span></div>
+              <div class="tech-card" data-cursor-label="GITHUB ACTIONS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/githubactions/00ffd5"><span class="tech-label no-typewriter">GH&nbsp;Actions</span></div>
+              <div class="tech-card" data-cursor-label="AWS"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/amazonwebservices/00ffd5"><span class="tech-label no-typewriter">AWS</span></div>
+              <div class="tech-card" data-cursor-label="VERCEL"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/vercel/00ffd5"><span class="tech-label no-typewriter">Vercel</span></div>
+              <div class="tech-card" data-cursor-label="GIT"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/git/00ffd5"><span class="tech-label no-typewriter">Git</span></div>
+              <div class="tech-card" data-cursor-label="GITHUB"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/github/00ffd5"><span class="tech-label no-typewriter">GitHub</span></div>
+              <div class="tech-card" data-cursor-label="CUDA"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/nvidia/00ffd5"><span class="tech-label no-typewriter">CUDA</span></div>
+              <div class="tech-card" data-cursor-label="RASPBERRY PI"><img class="tech-icon" loading="lazy" decoding="async" alt="" src="https://cdn.simpleicons.org/raspberrypi/00ffd5"><span class="tech-label no-typewriter">Raspberry&nbsp;Pi</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech stack spotlight + section-visibility flag.
+         (1) Spotlight: feed CSS vars from the pointer so the cyan radial-gradient
+             on each tile tracks the cursor. Coarse pointers skip the binding.
+         (2) Visibility flag: while the tech-stack section is on screen, toggle
+             body.in-tech-stack so mobile CSS can hide the stranded Mercury
+             globe canvas. Uses a single IntersectionObserver. -->
+    <script>
+      (function () {
+        var section = document.getElementById('tech-stack');
+        if (section && 'IntersectionObserver' in window) {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              document.body.classList.toggle('in-tech-stack', entry.isIntersecting);
+            });
+          }, { threshold: 0.04 });
+          io.observe(section);
+        }
+
+        if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
+        var grid = document.querySelector('[data-tech-grid]');
+        if (!grid) return;
+        var lastCard = null;
+        var ticking = false;
+        var pendingX = 0, pendingY = 0, pendingTarget = null;
+
+        function flush() {
+          ticking = false;
+          if (pendingTarget) {
+            pendingTarget.style.setProperty('--mx', pendingX + 'px');
+            pendingTarget.style.setProperty('--my', pendingY + 'px');
+          }
+        }
+
+        grid.addEventListener('pointermove', function (e) {
+          var card = e.target.closest && e.target.closest('.tech-card');
+          if (!card) return;
+          if (lastCard && lastCard !== card) {
+            lastCard.style.removeProperty('--mx');
+            lastCard.style.removeProperty('--my');
+          }
+          lastCard = card;
+          var rect = card.getBoundingClientRect();
+          pendingX = e.clientX - rect.left;
+          pendingY = e.clientY - rect.top;
+          pendingTarget = card;
+          if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(flush);
+          }
+        });
+
+        grid.addEventListener('pointerleave', function () {
+          if (lastCard) {
+            lastCard.style.removeProperty('--mx');
+            lastCard.style.removeProperty('--my');
+            lastCard = null;
+          }
+        });
+      })();
+    </script>
+
     <!-- Contact Section -->
     <section class="section contact-section" id="contact">
       <div class="section-content">
         <div class="section-label">
-          <span class="label-number">04</span>
+          <span class="label-number">05</span>
           <span class="label-text">CONTACT</span>
         </div>
 
@@ -951,7 +1121,6 @@
 
     <script type="module" src="js/starfield.js"></script>
     <script type="module" src="js/hover-preview.js"></script>
-    <script type="module" src="js/smiley-face.js"></script>
     <script type="module" src="js/mercury-globe.js"></script>
     <script type="module" src="js/portal-effect.js"></script>
     
@@ -978,7 +1147,38 @@
     <!-- MODIFIED: Now contains the Smiley Earth -->
   <div id="contact-earth-wrapper" style="position: fixed; bottom: 10px; right: 10px; z-index: 100;">
         <div id="contact-earth-container" style="width: 100%; height: 100%;">
-            <!-- SmileyFace will inject canvas here -->
+            <!-- Lightweight 2D earth — replaces the old Three.js scene to cut load time. -->
+            <svg class="earth-2d" viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true" focusable="false">
+                <defs>
+                    <radialGradient id="earth2dFill" cx="35%" cy="35%" r="75%">
+                        <stop offset="0%" stop-color="#0e3a5c"/>
+                        <stop offset="55%" stop-color="#05182c"/>
+                        <stop offset="100%" stop-color="#00060d"/>
+                    </radialGradient>
+                    <radialGradient id="earth2dRim" cx="50%" cy="50%" r="50%">
+                        <stop offset="80%" stop-color="rgba(80,255,220,0)"/>
+                        <stop offset="100%" stop-color="rgba(80,255,220,0.45)"/>
+                    </radialGradient>
+                    <clipPath id="earth2dClip"><circle cx="50" cy="50" r="40"/></clipPath>
+                </defs>
+                <circle cx="50" cy="50" r="46" fill="url(#earth2dRim)"/>
+                <circle cx="50" cy="50" r="40" fill="url(#earth2dFill)" stroke="var(--color-neon-green, #00ffd5)" stroke-width="0.9" stroke-opacity="0.65"/>
+                <g clip-path="url(#earth2dClip)" stroke="var(--color-neon-green, #00ffd5)" stroke-opacity="0.32" fill="none" stroke-width="0.55">
+                    <ellipse cx="50" cy="50" rx="40" ry="8"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="20"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="32"/>
+                    <ellipse cx="50" cy="50" rx="8"  ry="40"/>
+                    <ellipse cx="50" cy="50" rx="20" ry="40"/>
+                    <ellipse cx="50" cy="50" rx="32" ry="40"/>
+                </g>
+                <g clip-path="url(#earth2dClip)" fill="var(--color-neon-green, #00ffd5)" opacity="0.55">
+                    <path d="M28 38 q4 -4 9 -2 q4 2 3 8 q1 5 -2 8 q-3 4 -1 8 q2 4 -3 6 q-6 0 -8 -6 q-2 -7 1 -12 q-2 -6 1 -10z"/>
+                    <path d="M52 30 q6 1 7 7 q1 5 -2 8 q3 3 2 8 q-2 6 -7 6 q-4 -1 -4 -6 q-1 -5 1 -9 q-2 -4 0 -9 q1 -4 3 -5z"/>
+                    <ellipse cx="68" cy="62" rx="6" ry="4"/>
+                    <ellipse cx="62" cy="72" rx="3.2" ry="2.2"/>
+                </g>
+                <ellipse cx="38" cy="38" rx="11" ry="6" fill="rgba(255,255,255,0.10)"/>
+            </svg>
         </div>
         
         <!-- Rotating Text Ring Overlay -->
