@@ -1444,21 +1444,21 @@ body.mobile-optimized .about-moon-overlay {
   pointer-events: none;
   background:
     /* top-left horizontal leg */
-    linear-gradient(to right, var(--accent) 0, var(--accent) 22px, transparent 22px) top left / 100% 1.5px no-repeat,
+    linear-gradient(to right, var(--accent) 0, var(--accent) 18px, transparent 18px) top left / 100% 1px no-repeat,
     /* top-left vertical leg */
-    linear-gradient(to bottom, var(--accent) 0, var(--accent) 22px, transparent 22px) top left / 1.5px 100% no-repeat,
+    linear-gradient(to bottom, var(--accent) 0, var(--accent) 18px, transparent 18px) top left / 1px 100% no-repeat,
     /* top-right horizontal */
-    linear-gradient(to left, var(--accent) 0, var(--accent) 22px, transparent 22px) top right / 100% 1.5px no-repeat,
+    linear-gradient(to left, var(--accent) 0, var(--accent) 18px, transparent 18px) top right / 100% 1px no-repeat,
     /* top-right vertical */
-    linear-gradient(to bottom, var(--accent) 0, var(--accent) 22px, transparent 22px) top right / 1.5px 100% no-repeat,
+    linear-gradient(to bottom, var(--accent) 0, var(--accent) 18px, transparent 18px) top right / 1px 100% no-repeat,
     /* bottom-left horizontal */
-    linear-gradient(to right, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom left / 100% 1.5px no-repeat,
+    linear-gradient(to right, var(--accent) 0, var(--accent) 18px, transparent 18px) bottom left / 100% 1px no-repeat,
     /* bottom-left vertical */
-    linear-gradient(to top, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom left / 1.5px 100% no-repeat,
+    linear-gradient(to top, var(--accent) 0, var(--accent) 18px, transparent 18px) bottom left / 1px 100% no-repeat,
     /* bottom-right horizontal */
-    linear-gradient(to left, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom right / 100% 1.5px no-repeat,
+    linear-gradient(to left, var(--accent) 0, var(--accent) 18px, transparent 18px) bottom right / 100% 1px no-repeat,
     /* bottom-right vertical */
-    linear-gradient(to top, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom right / 1.5px 100% no-repeat;
+    linear-gradient(to top, var(--accent) 0, var(--accent) 18px, transparent 18px) bottom right / 1px 100% no-repeat;
   opacity: 0.7;
   transition: opacity 0.4s ease;
 }
@@ -1605,21 +1605,30 @@ body.mobile-optimized .about-moon-overlay {
   transition: color 0.3s ease, transform 0.3s ease;
 }
 
-/* Numbered chip prefix — 01 02 03 in accent colour, mono, bordered */
+/* Numbered chip prefix — 01 02 03 in accent colour. Restrained
+   border + minimal padding so it reads as a marker, not a button. */
 .service-list li::before {
   content: counter(svc-cap, decimal-leading-zero);
   flex: 0 0 auto;
+  min-width: 22px;
+  text-align: center;
   font-family: var(--font-mono);
-  font-size: clamp(9px, 0.7vw, 11px);
+  font-size: clamp(9px, 0.68vw, 10.5px);
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   color: var(--accent);
-  padding: 4px 8px;
-  border: 1px solid var(--accent);
-  border-radius: 2px;
-  background: var(--accent-soft);
+  padding: 3px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.02);
   line-height: 1;
-  transition: transform 0.3s ease, background 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.service-item:hover .service-list li::before {
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .svc-cap { flex: 1 1 auto; }
@@ -1631,18 +1640,20 @@ body.mobile-optimized .about-moon-overlay {
 .service-item:hover .service-list li:nth-child(4)::before { transition-delay: 120ms; }
 .service-item:hover .service-list li:nth-child(5)::before { transition-delay: 160ms; }
 
-/* Status footer — mock telemetry strip beneath the capability list,
-   separated by a thin accent-tinted hairline. Reinforces the
-   "instrument panel" reading and gives each card a unique signature. */
+/* Status footer — mock telemetry strip beneath the capability list.
+   Two intentional rows (status / stack) achieved by turning the
+   separator into a forced flex line-break so the layout reads as a
+   decision rather than an accidental wrap. */
 .svc-foot {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  row-gap: 6px;
+  column-gap: 8px;
   padding-top: clamp(12px, 1.1vw, 18px);
   border-top: 1px dashed rgba(255, 255, 255, 0.1);
   font-family: var(--font-mono);
-  font-size: clamp(9px, 0.7vw, 11px);
+  font-size: clamp(9px, 0.68vw, 10.5px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.4);
@@ -1663,9 +1674,30 @@ body.mobile-optimized .about-moon-overlay {
   50%      { opacity: 0.35; }
 }
 
-.svc-foot-key { color: rgba(255, 255, 255, 0.32); }
-.svc-foot-val { color: var(--accent); font-weight: 600; margin-left: 4px; }
-.svc-foot-sep { color: rgba(255, 255, 255, 0.18); margin: 0 4px; }
+.svc-foot-key { color: rgba(255, 255, 255, 0.3); }
+/* Status value full accent; stack value muted so it doesn't compete with
+   the capability chips above. .svc-foot :nth-of-type(3) targets the first
+   svc-foot-val (after dot + key); :nth-of-type(5) the second one. */
+.svc-foot-val {
+  font-weight: 600;
+  margin-left: 4px;
+  color: var(--accent);
+}
+.svc-foot-val + .svc-foot-sep ~ .svc-foot-val {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+
+/* The separator becomes an invisible 100%-wide flex break, forcing the
+   "STACK · ..." pair onto a clean second line. */
+.svc-foot-sep {
+  flex-basis: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  margin: 0;
+}
 
 /* ========================================
    Contact Section
