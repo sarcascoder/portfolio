@@ -2628,138 +2628,248 @@ body.mobile-optimized .about-moon-overlay {
   isolation: isolate;
 }
 
-/* Soft cyan ambient glow behind the grid — no JS, GPU-cheap */
-.tech-stack-section .section-content::before {
-  content: "";
-  position: absolute;
-  inset: 4% -8% 0 -8%;
-  background:
-    radial-gradient(ellipse 50% 40% at 25% 25%, rgba(0, 255, 213, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 75% 75%, rgba(0, 119, 170, 0.06) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: -1;
-}
+/* ============================================================
+   STACK MANIFEST  —  telemetry-channel composition
+   ------------------------------------------------------------
+   Constrained width (1040px) + 6 horizontal "channels". Each
+   channel has a labeled head on the left and a marquee-scrolling
+   strip of icons on the right with edge-fade masks, like packets
+   crossing a mission-control monitor. Multi-color brand SVGs
+   from Devicon sit against the dark backdrop so they punch
+   visually without the cyan tint overriding them.
+   ============================================================ */
 
-.tech-stack-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 3vw;
-  margin-top: 2vw;
-}
-
-.tech-group {
-  display: flex;
-  flex-direction: column;
-  gap: 1vw;
-}
-
-.tech-group-label {
-  font-family: var(--font-mono);
-  font-size: clamp(11px, 0.95vw, 14px);
-  letter-spacing: 0.28em;
-  color: var(--color-neon-green);
-  opacity: 0.7;
-  padding-left: 4px;
-}
-
-.tech-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
-  gap: 14px;
-}
-
-.tech-card {
+/* Left-anchored section content — manifest hugs the left edge and is
+   constrained to ~60% of the viewport width so the rows visibly STOP
+   before reaching the Mercury globe area on the right of the screen. */
+.tech-stack-section .section-content {
+  max-width: clamp(640px, 60vw, 1080px);
+  margin-left: 0;
+  margin-right: auto;
   position: relative;
+}
+
+.tech-manifest {
+  margin-top: clamp(20px, 3vw, 36px);
+  position: relative;
+}
+
+/* --- Telemetry pill: STACK MANIFEST · 45 ENTRIES · 6 CHANNELS · LIVE -- */
+.tech-manifest-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 14px;
+  border: 1px solid rgba(0, 225, 255, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(0, 30, 38, 0.55), rgba(0, 14, 22, 0.55));
+  margin-bottom: clamp(24px, 3vw, 40px);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: rgba(255, 255, 255, 0.78);
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 8px 24px -10px rgba(0, 225, 255, 0.18);
+}
+.tech-meta-strong  { color: var(--color-neon-green); font-weight: 700; }
+.tech-meta-item    { opacity: 0.85; }
+.tech-meta-divider { opacity: 0.45; padding: 0 1px; }
+.tech-meta-live    { color: var(--color-neon-green); letter-spacing: 0.32em; }
+.tech-meta-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--color-neon-green);
+  box-shadow: 0 0 10px rgba(0, 225, 255, 0.85);
+  animation: tech-meta-pulse 1.4s ease-in-out infinite;
+  margin-right: 2px;
+}
+@keyframes tech-meta-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.65); }
+}
+
+/* --- Desktop default: HORIZONTAL channels, stacked vertically ------
+   Each channel = head on left (col 1) + horizontal scrolling icon strip
+   on right (col 2). No dividers, no bezel ticks, no vertical accent bars —
+   just clean rows of streaming icons. */
+.tech-channels {
   display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 3.4vw, 48px);
+  position: relative;
+}
+
+.tech-channel {
+  display: grid;
+  grid-template-columns: 196px 1fr;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  /* no border, no padding-bottom hairline */
+}
+
+/* Channel head: id stacked above the name, count beneath. No accent bar. */
+.tech-channel-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0;
+}
+.tech-channel-head::before { display: none; }
+.tech-channel-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-neon-green);
+  letter-spacing: 0.20em;
+  font-feature-settings: "tnum" 1;
+}
+.tech-channel-name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.20em;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.tech-channel-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(0, 225, 255, 0.55);
+  letter-spacing: 0.18em;
+  font-feature-settings: "tnum" 1;
+  margin-top: 1px;
+}
+
+/* The track is the horizontal scrolling window with a horizontal edge-fade
+   mask so icons drift in from the right and out the left. */
+.tech-channel-track {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+}
+
+/* Strip: horizontal flex of tiles + their dupes; translateX(-50%) for
+   a seamless loop over `--speed` seconds. */
+.tech-channel-strip {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(28px, 3vw, 44px);
+  padding-right: clamp(28px, 3vw, 44px);
+  white-space: nowrap;
+  animation: tech-stream var(--speed, 36s) linear infinite;
+  will-change: transform;
+}
+.tech-channel:hover .tech-channel-strip { animation-play-state: paused; }
+
+/* Reversed direction: icons enter from the LEFT and exit on the RIGHT.
+   Starting at -50% means the duplicate half is shown first, and animating
+   back to 0 reveals the original half — visually a left→right scroll. */
+@keyframes tech-stream {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* --- Tile -------------------------------------------------------- */
+.tech-tile {
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 14px 8px;
-  background: transparent;
-  border: 0;
+  gap: 10px;
+  min-width: 96px;
+  flex-shrink: 0;
   cursor: none;
-  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-
-/* Soft cursor-follow halo behind the icon (no card chrome, just a glow on hover).
-   Fed by the inline spotlight script via CSS vars --mx / --my. */
-.tech-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    120px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(0, 255, 213, 0.18),
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  z-index: 0;
-}
-
-.tech-card:hover { transform: translateY(-3px); }
-.tech-card:hover::before { opacity: 1; }
-
-.tech-icon {
-  width: 38px;
-  height: 38px;
+.tech-tile img {
+  width: 52px;
+  height: 52px;
   object-fit: contain;
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 0 6px rgba(0, 255, 213, 0.15));
-  transition:
-    transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
-    filter 0.45s ease;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease;
 }
-
-.tech-card:hover .tech-icon {
-  transform: scale(1.10) translateY(-1px);
-  filter: drop-shadow(0 0 14px rgba(0, 255, 213, 0.55));
-}
-
-.tech-label {
+.tech-tile span {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
-  color: var(--color-white);
-  opacity: 0.78;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-  transition: opacity 0.3s ease, color 0.3s ease;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
   white-space: nowrap;
+  transition: color 0.3s ease, opacity 0.3s ease;
 }
-
-.tech-card:hover .tech-label {
-  opacity: 1;
-  color: var(--color-neon-green);
+.tech-tile:hover { transform: translateY(-3px); }
+.tech-tile:hover img {
+  transform: scale(1.10);
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.45))
+          drop-shadow(0 0 18px rgba(0, 225, 255, 0.35));
 }
+.tech-tile:hover span { color: var(--color-neon-green); }
 
+/* === MOBILE: switch to side-by-side VERTICAL columns =================
+   On phones, narrow viewport means horizontal rows would compress the
+   tiles into a tiny strip. Instead, flip the whole layout: each channel
+   becomes a vertical column with icons scrolling top-to-bottom, columns
+   arranged 2-per-row. Reuses the same DOM, just remaps grid + animation. */
 @media (max-width: 768px) {
-  /* Force at least 3 columns even on narrow phones — auto-fill with a smaller
-     minmax keeps tiles dense instead of stretching to 2 wide cards per row. */
-  .tech-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px 4px;
+  .tech-channels {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 22px 16px;
   }
-  .tech-card { padding: 8px 4px; gap: 6px; }
-  .tech-icon { width: 28px; height: 28px; }
-  .tech-label { font-size: 9.5px; letter-spacing: 0.08em; }
-  .tech-group { gap: 6px; }
-  .tech-group-label { font-size: 10px; letter-spacing: 0.22em; }
-  .tech-stack-grid { gap: 22px; margin-top: 18px; }
+  .tech-channel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 12px;
+    width: calc((100% - 16px) / 2); /* 2 columns per row */
+    align-items: stretch;
+  }
+  .tech-channel-head {
+    align-items: flex-start;
+  }
+  .tech-channel-name { font-size: 12px; letter-spacing: 0.16em; }
+  .tech-channel-num,
+  .tech-channel-count { font-size: 9.5px; }
+
+  /* Vertical scrolling track + mask */
+  .tech-channel-track {
+    height: clamp(280px, 42vh, 380px);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  }
+  .tech-channel-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-right: 0;
+    padding-bottom: 22px;
+    white-space: normal;
+    animation-name: tech-stream-vertical;
+  }
+  .tech-tile { min-width: 0; width: 100%; }
+  .tech-tile img { width: 42px; height: 42px; }
+  .tech-tile span { font-size: 10px; letter-spacing: 0.10em; }
+
+  .tech-manifest-meta {
+    font-size: 9.5px;
+    padding: 7px 12px;
+    letter-spacing: 0.20em;
+    gap: 8px;
+  }
 }
 
-@media (max-width: 420px) {
-  .tech-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px 2px;
-  }
-  .tech-icon { width: 24px; height: 24px; }
-  .tech-label { font-size: 9px; letter-spacing: 0.05em; }
-  .tech-card { padding: 6px 2px; gap: 5px; }
+/* Reversed vertical direction: icons enter from the TOP and exit at the
+   BOTTOM. Starting at -50% reveals the duplicate set first; animating to
+   0 shows the original — visually a top→bottom scroll. */
+@keyframes tech-stream-vertical {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
 }
 
 /* Mobile viewport (<=820px): kill the universe zoom reveal completely.
