@@ -2180,7 +2180,7 @@ body.mobile-optimized .about-moon-overlay {
         height: 80vmin;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.4;
+        opacity: 1;
     }
 
     .section-heading {
@@ -2237,7 +2237,7 @@ body.mobile-optimized .about-moon-overlay {
         height: 100vmin;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.3; /* Fade out wireframe on mobile to prioritize text */
+        opacity: 1; /* Full brightness at rest — fade now happens only via scroll timelines */
     }
 
     .section {

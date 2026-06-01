@@ -1165,7 +1165,10 @@
           height: 80vmin;
           left: 50%;
           transform: translate(-50%, -50%);
-          opacity: 0.4;
+          /* Full opacity at rest — user wants the globe to read bright on
+             mobile. Scroll-based fade still happens via the GSAP mobile
+             timelines (see mercury-globe.js setupScrollAnimation). */
+          opacity: 1;
         }
       }
 
@@ -1176,7 +1179,7 @@
           left: 50%;
           top: 35%; /* Moved lower */
           transform: translate(-50%, -50%);
-          opacity: 0.3;
+          opacity: 1;
         }
       }
     </style>

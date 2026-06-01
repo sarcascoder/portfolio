@@ -1334,7 +1334,7 @@ class MercuryGlobe {
         // Subtract a small constant bias on phones so the rest pose looks
         // slightly upward instead of slightly downward. The orientation tilt
         // response on top of this is unchanged.
-        const phoneRestTiltBias = this.isMobile ? 0.45 : 0;
+        const phoneRestTiltBias = this.isMobile ? 0.30 : 0;
         this.targetRotation.x = offsetY * this.config.maxRotation - phoneRestTiltBias;
 
         this.currentRotation.x = this.lerp(this.currentRotation.x, this.targetRotation.x, this.config.smoothing);
