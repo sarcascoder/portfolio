@@ -1071,7 +1071,15 @@ class MercuryGlobe {
         if (this.isMobileLayout) {
             this.orientationBaseline = null;
             this.orientationWarmupStart = 0;
+            this.orientationSamples = []; // rolling 500ms window for stillness detection
             const ORIENTATION_WARMUP_MS = 250;
+            // Auto-rebaseline parameters: when the user holds the phone steady
+            // at a new orientation for STILL_WINDOW_MS, that new orientation
+            // becomes the rest pose. Prevents the globe from staying tilted
+            // forever after the user reorients (lying down → sitting up, etc).
+            const STILL_WINDOW_MS = 500;
+            const STILL_RANGE_DEG = 3;   // max beta/gamma variation over the window to count as "still"
+            const REBASELINE_DIFF_DEG = 5; // must be at least this far from current baseline to re-baseline
 
             // Reset the baseline when the device orientation changes (portrait <-> landscape),
             // because beta/gamma swap meaning and the old zero-point no longer reflects the
@@ -1079,6 +1087,7 @@ class MercuryGlobe {
             const resetBaseline = () => {
                 this.orientationBaseline = null;
                 this.orientationWarmupStart = 0;
+                this.orientationSamples = [];
             };
             window.addEventListener('orientationchange', resetBaseline);
             if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
@@ -1100,6 +1109,42 @@ class MercuryGlobe {
                     this.orientationBaseline = { beta: e.beta, gamma: e.gamma };
                     return; // the baseline reading itself produces zero rotation — skip emitting it
                 }
+
+                // --- Auto-rebaseline on a new sustained rest pose ---------------
+                // Push current reading into the rolling window and trim old samples.
+                const now = performance.now();
+                this.orientationSamples.push({ beta: e.beta, gamma: e.gamma, t: now });
+                while (this.orientationSamples.length && now - this.orientationSamples[0].t > STILL_WINDOW_MS) {
+                    this.orientationSamples.shift();
+                }
+                // Need a full window of samples and the oldest must be at least
+                // STILL_WINDOW_MS ago — otherwise we don't have 500ms of evidence yet.
+                if (this.orientationSamples.length >= 3
+                    && (now - this.orientationSamples[0].t) >= STILL_WINDOW_MS) {
+                    let bMin = Infinity, bMax = -Infinity, gMin = Infinity, gMax = -Infinity;
+                    for (const s of this.orientationSamples) {
+                        if (s.beta  < bMin) bMin = s.beta;
+                        if (s.beta  > bMax) bMax = s.beta;
+                        if (s.gamma < gMin) gMin = s.gamma;
+                        if (s.gamma > gMax) gMax = s.gamma;
+                    }
+                    const isStill = (bMax - bMin) < STILL_RANGE_DEG
+                                 && (gMax - gMin) < STILL_RANGE_DEG;
+                    if (isStill) {
+                        const dBeta  = e.beta  - this.orientationBaseline.beta;
+                        const dGamma = e.gamma - this.orientationBaseline.gamma;
+                        const drift  = Math.hypot(dBeta, dGamma);
+                        if (drift > REBASELINE_DIFF_DEG) {
+                            // User has settled at a meaningfully different angle.
+                            // Snap the baseline; the existing lerp on this.mouse
+                            // smooths the visual rotation transition.
+                            this.orientationBaseline = { beta: e.beta, gamma: e.gamma };
+                            // Reset the window so we don't immediately re-trigger.
+                            this.orientationSamples = [{ beta: e.beta, gamma: e.gamma, t: now }];
+                        }
+                    }
+                }
+                // ----------------------------------------------------------------
 
                 // Deltas from the captured baseline. 30° tilt in either axis = full response.
                 const clamp11 = (v) => Math.max(-1, Math.min(1, v));
