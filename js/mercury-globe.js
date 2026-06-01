@@ -101,13 +101,24 @@ class MercuryGlobe {
         this.canvas.id = 'mercury-canvas';
         // Ensure no debug border/outline shows up around the hero globe canvas
         this.canvas.style.cssText = 'width:100%;height:100%;display:block;border:0;outline:none;box-shadow:none;background:transparent;';
-        this.container.appendChild(this.canvas);
+
+        // Mount inside #mercury-inner if present (the new wrapper architecture).
+        // Falls back to the container itself so older markup still works.
+        this.innerEl = document.getElementById('mercury-inner');
+        if (!this.innerEl) {
+            this.innerEl = document.createElement('div');
+            this.innerEl.id = 'mercury-inner';
+            this.innerEl.className = 'smiley-globe-inner';
+            this.innerEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;transform-origin:center center;pointer-events:none;';
+            this.container.appendChild(this.innerEl);
+        }
+        this.innerEl.appendChild(this.canvas);
 
         // Safety net: if the container ever had a debug outline/border, kill it too
         this.container.style.outline = 'none';
         this.container.style.border = '0';
         this.container.style.boxShadow = 'none';
-        
+
         const rect = this.container.getBoundingClientRect();
         this.width = rect.width || 100;
         this.height = rect.height || 100;
@@ -256,15 +267,19 @@ class MercuryGlobe {
                 });
             } else {
                 console.log("MercuryGlobe: Applying MOBILE initial state");
+                // MOBILE: CSS owns the container's position (translate(-50%,-50%)
+                // centering via media queries). We explicitly strip any GSAP
+                // transform/position state from the container so a previous
+                // desktop matchMedia branch can't leave behind stale inline
+                // styles that would override the CSS centering during scroll.
                 gsap.set(this.container, {
-                    left: "50%",
-                    top: "35%",
-                    xPercent: -50,
-                    yPercent: -50,
-                    x: 0, // Clear any potential pixel values parsed from CSS
-                    y: 0, // Clear any potential pixel values parsed from CSS
-                    scale: 1,
-                    opacity: 1
+                    clearProps: "transform,left,top,xPercent,yPercent,x,y,scale"
+                });
+                // Inner element: neutral state. ALL mobile GSAP work targets
+                // this element from here on, so the container is untouched.
+                gsap.set(this.innerEl, {
+                    x: 0, y: 0, scale: 1, opacity: 1,
+                    filter: "blur(0px)"
                 });
             }
             console.log("MercuryGlobe: Container style after init:", this.container.style.cssText);
@@ -466,17 +481,24 @@ class MercuryGlobe {
         });
 
         // === MOBILE / TABLET ANIMATION (<= 1024px) ===
-        // Matches the CSS breakpoint that centers the globe.
+        // CSS owns the container's centering on this breakpoint (see the
+        // inline <style> in index.html plus the @media rules in styles.css).
+        // GSAP is restricted to scale/opacity/filter on #mercury-inner so it
+        // can never override the CSS translate(-50%,-50%) centering. This
+        // architectural split is what fixes the "globe drifts to the left
+        // during fast mobile scroll" bug — there's no way for an incomplete
+        // GSAP transform write to clobber centering anymore.
         mm.add("(max-width: 1024px)", () => {
 
-            // Initial State Check (mobile) — matches the original working behavior
+            // Strip any stale transform/position GSAP may have written onto
+            // the container while a desktop matchMedia branch was active.
+            // After this, the container's position is purely CSS.
             gsap.set(this.container, {
-                left: "50%",
-                top: "35%",
-                xPercent: -50,
-                yPercent: -50,
-                scale: 1,
-                opacity: 1,
+                clearProps: "transform,left,top,xPercent,yPercent,x,y,scale"
+            });
+            // Inner element initial state — neutral.
+            gsap.set(this.innerEl, {
+                x: 0, y: 0, scale: 1, opacity: 1, z: 0,
                 filter: "blur(0px)",
                 transformPerspective: 1200,
                 transformOrigin: "50% 50%"
@@ -491,15 +513,13 @@ class MercuryGlobe {
                 }
             });
 
-            // Pin xPercent/left in every mobile tween so horizontal center is never lost
-            // even if a desktop timeline was previously active or GSAP has stale state.
-            tlMobileAbout.to(this.container, {
+            // ALL mobile tweens target this.innerEl — never the container.
+            // No left/top/xPercent/yPercent properties anywhere, so the CSS
+            // centering on the container is untouchable.
+            tlMobileAbout.to(this.innerEl, {
                 scale: 0.42,
                 opacity: 0,
                 z: -500,
-                left: "50%",
-                xPercent: -50,
-                yPercent: -50,
                 filter: "blur(10px)",
                 ease: "power2.inOut"
             });
@@ -513,10 +533,7 @@ class MercuryGlobe {
                 }
             });
 
-            tlMobileProjects.to(this.container, {
-                left: "50%",
-                top: "50%",
-                xPercent: -50,
+            tlMobileProjects.to(this.innerEl, {
                 scale: 0.6,
                 opacity: 0.3,
                 z: 0,
@@ -1132,6 +1149,10 @@ class MercuryGlobe {
 
         // Universe Video Toggle Listener
         window.addEventListener('universeToggle', (e) => {
+            // Mobile: universe reveal is disabled at this viewport (see main.js).
+            // Skip entirely so we never write a transform to the container —
+            // that's what kept the globe drifting to the left on fast scroll.
+            if (this.isMobileLayout) return;
             const isActive = e.detail.active;
             console.log('MercuryGlobe: universeToggle', isActive);
             this.isUniverseActive = isActive;

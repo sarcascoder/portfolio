@@ -580,8 +580,17 @@
         </div>
       </button>
 
-      <!-- Mercury Globe (Replce Smiley) -->
-      <div class="smiley-globe-container" id="mercury-container" data-cursor-label="EXPLORE"></div>
+      <!-- Mercury Globe (Replce Smiley).
+           Container is the CSS-positioned anchor (position+centering live in
+           the inline <style> below + css/styles.css media queries).
+           #mercury-inner is the GSAP target on mobile — it carries the
+           canvas and receives all scale/opacity/filter tweens. Splitting the
+           two prevents GSAP's transform writes from clobbering the CSS
+           translate(-50%,-50%) centering, which was the root cause of the
+           globe drifting to the left edge during fast mobile scroll. -->
+      <div class="smiley-globe-container" id="mercury-container" data-cursor-label="EXPLORE">
+        <div class="smiley-globe-inner" id="mercury-inner"></div>
+      </div>
 
       <!-- Interaction affordance: fades out on first pointer/touch/tilt
            or after a short visible window. See js/hero-hint.js. -->
@@ -1127,6 +1136,19 @@
         height: 42vw;
         z-index: 10; /* Ensure it's above background but below text initially */
         pointer-events: none;
+      }
+      /* Inner element holds the canvas and receives all GSAP scale/opacity
+         tweens. By keeping ALL transform writes on this child (never the
+         positioned parent), GSAP cannot wipe out the parent's CSS
+         translate(-50%,-50%) centering on mobile during scrub interpolation. */
+      .smiley-globe-inner {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transform-origin: center center;
+        pointer-events: none;
+        will-change: transform, opacity;
       }
 
       /* Make hero content sit above the smiley */
