@@ -646,7 +646,11 @@ class MercuryGlobe {
                 }
             });
             tlMobileContact.to(this.innerEl, {
-                scale: 1.4,
+                // Smaller scale than the hero because on mobile the
+                // container is shifted to top:85% (body.in-contact) so the
+                // globe sits BELOW the contact copy. A full-size globe at
+                // that anchor would clip the viewport bottom.
+                scale: 0.9,
                 opacity: 1,
                 z: 0,
                 filter: "blur(0px)",
@@ -1617,7 +1621,10 @@ class MercuryGlobe {
         const dyAngry = this.mouse.y - globeCenterY;
         const distSq = dxAngry * dxAngry + dyAngry * dyAngry;
         const ANGRY_RADIUS_PX = 260;
-        const isAngry = distSq < ANGRY_RADIUS_PX * ANGRY_RADIUS_PX;
+        // Phones have no cursor, so the angry-near-face trigger can fire
+        // spuriously from leftover this.mouse coords (touch end, scroll, etc.).
+        // Force-disable angry mode on mobile so the smiley always smiles.
+        const isAngry = !this.isMobile && distSq < ANGRY_RADIUS_PX * ANGRY_RADIUS_PX;
         const isDarkTheme = document.documentElement.getAttribute('data-theme') !== 'light';
         if (isAngry && isDarkTheme) {
             if (this.happyExpressionParts) {
