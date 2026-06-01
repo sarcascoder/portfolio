@@ -1327,7 +1327,15 @@ class MercuryGlobe {
         const offsetY = (this.mouse.y - globeCenterY) / (window.innerHeight / 2);
         
         this.targetRotation.y = offsetX * this.config.maxRotation;
-        this.targetRotation.x = offsetY * this.config.maxRotation;
+        // Phones place the globe at top:35% (CSS @media ≤768), so globeCenterY
+        // sits ABOVE the viewport center. That makes offsetY positive even when
+        // the user is holding the phone perfectly still at the orientation
+        // baseline, which would otherwise tilt the smiley downward.
+        // Subtract a small constant bias on phones so the rest pose looks
+        // slightly upward instead of slightly downward. The orientation tilt
+        // response on top of this is unchanged.
+        const phoneRestTiltBias = this.isMobile ? 0.45 : 0;
+        this.targetRotation.x = offsetY * this.config.maxRotation - phoneRestTiltBias;
 
         this.currentRotation.x = this.lerp(this.currentRotation.x, this.targetRotation.x, this.config.smoothing);
         this.currentRotation.y = this.lerp(this.currentRotation.y, this.targetRotation.y, this.config.smoothing);

@@ -16,7 +16,12 @@ class PortalEffect {
         
         // Configuration
         this.maxSize = 120; // Maximum radius of the portal
-        this.IMAGE_URL = new URL('../portal_image.webp', import.meta.url).href;
+        // Asset lives in public/ so Vite copies it verbatim to dist root —
+        // a root-absolute path works the same in dev and production. The
+        // previous `new URL('../portal_image.webp', import.meta.url)` form
+        // was not being picked up by the build, so the file never landed
+        // in dist and the portal rendered without an image in production.
+        this.IMAGE_URL = '/portal_image.webp';
         
         this.init();
     }

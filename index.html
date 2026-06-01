@@ -26,8 +26,10 @@
     <!-- Light mode disabled: theme.js is intentionally not loaded so the glitch/TV-static animation never runs.
          <script type="module" src="js/theme.js"></script> -->
 
-    <!-- Preload Universe Video for fast playback on larger screens only -->
-    <link rel="preload" as="video" href="universe_zoom.mp4" type="video/mp4" media="(min-width: 821px)">
+    <!-- Preload Universe Video for fast playback on larger screens only.
+         Root path so it matches the public/ asset that's copied verbatim
+         to the dist root by Vite (no hash, predictable URL in production). -->
+    <link rel="preload" as="video" href="/universe_zoom.mp4" type="video/mp4" media="(min-width: 821px)">
     <!-- Preload the hero 3D model so its 6.5 MB fetch runs in parallel with
          the CSS/JS parse. Saves ~150-300 ms of perceived load time — the
          rocket loader waits for this file before dismissing. -->
@@ -431,7 +433,7 @@
          no preload, no decoder cost, no bandwidth. -->
     <div id="universe-video-container" class="universe-video-container" data-desktop-only>
       <video id="universe-video" muted playsinline preload="none" fetchpriority="auto"
-             data-src="universe_zoom.mp4" data-type="video/mp4">
+             data-src="/universe_zoom.mp4" data-type="video/mp4">
         <!-- <source> attached dynamically by main.js on desktop only -->
       </video>
       <div class="universe-overlay-gradient"></div>
@@ -460,7 +462,7 @@
       <!-- Separate audio element for scroll-synced soundtrack.
            Source is lazy-injected by main.js on desktop only. -->
       <audio id="universe-audio" preload="none" loop="false"
-             data-src="universe_zoom_audio.mp3" data-type="audio/mpeg">
+             data-src="/universe_zoom_audio.mp3" data-type="audio/mpeg">
         <!-- <source> attached dynamically by main.js on desktop only -->
       </audio>
     </div>
