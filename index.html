@@ -33,7 +33,7 @@
     <!-- Preload the hero 3D model so its 6.5 MB fetch runs in parallel with
          the CSS/JS parse. Saves ~150-300 ms of perceived load time — the
          rocket loader waits for this file before dismissing. -->
-    <link rel="preload" as="fetch" href="/mercury.glb" type="model/gltf-binary" crossorigin>
+    <link rel="preload" as="fetch" href="/blackhole.glb" type="model/gltf-binary" crossorigin>
   </head>
   <body>
     <!-- Loading Screen — direct port of red1-for-hek.vercel.app's intro:
@@ -204,42 +204,93 @@
         to   { transform: translateX(-50%); }
       }
 
-      /* Center black pill button.
-         - Solid black bg, white uppercase label
-         - Violet glow leaking out the LEFT edge (drop-shadows)
-         - Deep drop shadow below for the "floating" look in the reference
-         - Border-radius: 100px keeps it pill-shaped until the exit transition
-           re-radius's it to 5000px for the full-screen curtain. */
+      /* Center pill — macOS Control Center "liquid glass":
+         Apple's actual implementation is far more restrained than what
+         most "glassmorphism" tutorials produce. The recipe is essentially:
+           1. heavy backdrop blur with very high saturate (>180%) so the
+              colours behind the pill bloom through
+           2. a low-opacity neutral dark fill (around 30%) — not pure
+              black, so the backdrop reads through cleanly
+           3. a single ~1px hairline rim at ~10–15% white — no bright
+              "key light" highlight, no glossy sheen, no edge glow
+           4. a quiet drop shadow underneath
+         That's the whole vocabulary. Everything else fights the effect.
+         On data-state="exiting" we flip back to opaque dark so the
+         curtain wipe still covers the screen. */
       .ld-pill {
         position: relative;
         z-index: 5;
         appearance: none;
-        border: 0;
-        background: #000;
-        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        background:
+          /* primary specular — bright meniscus along the top edge,
+             like light catching the top of a water droplet */
+          radial-gradient(160% 120% at 50% -15%,
+            rgba(255, 255, 255, 0.28) 0%,
+            rgba(255, 255, 255, 0.04) 40%,
+            rgba(255, 255, 255, 0.00) 65%),
+          /* secondary specular — small offset highlight near upper-left,
+             reads as a tiny glint on a liquid surface */
+          radial-gradient(60% 80% at 25% 10%,
+            rgba(255, 255, 255, 0.16) 0%,
+            rgba(255, 255, 255, 0.00) 60%),
+          /* subtle bottom counter-shadow — gives the pill a 3D droplet body */
+          linear-gradient(180deg,
+            rgba(255, 255, 255, 0.00) 60%,
+            rgba(0, 0, 0, 0.10) 100%),
+          /* fill — very translucent so refraction of the content
+             behind the pill is what dominates the read */
+          rgba(20, 20, 28, 0.10);
+        /* Near-black ink — maximum contrast against the pale violet
+           wash and the refracted marquee. The label sits as a single
+           weighted statement instead of dissolving into the glow. */
+        color: #0a0a12;
         border-radius: 100px;
-        padding: clamp(22px, 2.4vw, 32px) clamp(40px, 5vw, 64px);
-        min-width: clamp(280px, 30vw, 420px);
+        padding: clamp(36px, 4vw, 56px) clamp(68px, 7.5vw, 108px);
+        min-width: clamp(420px, 44vw, 680px);
         font-family: 'Carlito', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
         font-weight: 700;
-        font-size: clamp(22px, 2.4vw, 34px);
-        letter-spacing: 3px;
+        font-size: clamp(32px, 3.6vw, 54px);
+        letter-spacing: 4px;
         text-transform: uppercase;
         cursor: none;
         overflow: hidden;
         isolation: isolate;
+        /* Very tight blur + maximum saturate + sharper contrast push:
+           the content behind the pill becomes a refracted, recoloured
+           wash — that's what reads as actual water rather than fog. */
+        backdrop-filter: blur(10px) saturate(450%) contrast(140%) brightness(112%);
+        -webkit-backdrop-filter: blur(10px) saturate(450%) contrast(140%) brightness(112%);
         box-shadow:
-          /* drop shadow underneath */
-          0 18px 30px rgba(0, 0, 0, 0.20),
-          /* violet edge glow — strong on the left, faint on the right */
-          -10px 0 28px rgba(168, 124, 255, 0.65),
-            8px 0 22px rgba(168, 124, 255, 0.18);
+          /* soft drop shadow underneath — anchors the pill in space */
+          0 14px 32px rgba(0, 0, 0, 0.22),
+          /* thin top rim — the only highlight Apple uses on these pills */
+          inset 0 1px 0 rgba(255, 255, 255, 0.18),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.22);
         transition:
           transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
           min-width 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
-          padding 0.5s ease;
+          padding 0.5s ease,
+          background 0.3s ease,
+          border-color 0.3s ease;
       }
-      .ld-pill:hover { transform: translateY(-1px); }
+
+      .ld-pill:hover {
+        transform: translateY(-1px);
+        background: rgba(20, 20, 28, 0.40);
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      /* During the curtain wipe, restore an opaque dark fill so the
+         inflating pill covers the viewport instead of staying glassy.
+         Also drop backdrop-filter — large transforms over a heavy
+         filter are expensive and the screen-cover doesn't need it. */
+      .ld-root[data-state="exiting"] .ld-pill {
+        background: #0b0a14;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-color: transparent;
+      }
 
       .ld-pill-loading,
       .ld-pill-ready {
@@ -266,9 +317,9 @@
       }
       .ld-pill-cursor {
         display: inline-block;
-        width: clamp(12px, 1vw, 16px);
-        height: clamp(26px, 2.4vw, 36px);
-        margin-left: 10px;
+        width: clamp(14px, 1.2vw, 20px);
+        height: clamp(32px, 2.9vw, 44px);
+        margin-left: 12px;
         background: #fff;
         vertical-align: middle;
         animation: ld-blink 1s steps(2, start) infinite;
@@ -277,10 +328,10 @@
       /* Small box-icon shown to the left of WELCOME */
       .ld-pill-icon {
         display: inline-block;
-        width: clamp(16px, 1.3vw, 22px);
-        height: clamp(16px, 1.3vw, 22px);
+        width: clamp(18px, 1.5vw, 26px);
+        height: clamp(18px, 1.5vw, 26px);
         background: #fff;
-        border-radius: 2px;
+        border-radius: 3px;
       }
 
       /* Ready state (after 100%): percent layer collapses, WELCOME fades in */
@@ -324,9 +375,9 @@
         .ld-topbar { top: 14px; left: 16px; right: 16px; }
         .ld-title  { font-size: 13px; }
         .ld-game   { transform: scale(0.85); transform-origin: right center; }
-        .ld-pill   { font-size: 18px; padding: 18px 34px; letter-spacing: 2px; min-width: 230px; }
-        .ld-pill-cursor { width: 11px; height: 22px; margin-left: 8px; }
-        .ld-pill-icon   { width: 14px; height: 14px; }
+        .ld-pill   { font-size: 22px; padding: 22px 42px; letter-spacing: 2.4px; min-width: 280px; }
+        .ld-pill-cursor { width: 13px; height: 27px; margin-left: 10px; }
+        .ld-pill-icon   { width: 17px; height: 17px; }
         .ld-marquee-track { font-size: clamp(42px, 14vw, 84px); }
       }
 
@@ -1259,15 +1310,18 @@
     <!-- Globes self-initialize from their module scripts -->
 
     <style>
-      /* Smiley Globe Container - Fixed position, moves with scroll */
+      /* Smiley Globe Container - full-viewport canvas so the black hole's
+         accretion disk can extend off the right side of the screen while the
+         void itself stays anchored on the left (shifted via THREE in
+         mercury-globe.js). */
       .smiley-globe-container {
         position: fixed;
-        top: 50%;
-        left: 4vw;
-        transform: translateY(-50%);
-        width: 42vw;
-        height: 42vw;
-        z-index: 10; /* Ensure it's above background but below text initially */
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10;
         pointer-events: none;
       }
       /* Inner element holds the canvas and receives all GSAP scale/opacity

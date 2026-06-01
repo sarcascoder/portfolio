@@ -40,8 +40,33 @@ class MercuryGlobe {
         this.centerX = window.innerWidth / 2;
         this.centerY = window.innerHeight / 2;
 
-        // Bigger Mercury globe
-        this.targetRadius = 2.5;
+        // Black hole disk — sized so the disk is a self-contained object in
+        // the canvas with transparent space around it. That's what makes the
+        // scroll-driven CSS shrink feel like the disk zooming out (rather
+        // than a rectangular box collapsing) — there's no disk material at
+        // the canvas edges to give away the box boundary.
+        this.targetRadius = 9.5;
+        // Scene-unit horizontal shift applied to the model and the smiley
+        // base position so the void sits on the left of the viewport.
+        this.diskShiftX = -3.6;
+        // Smiley sizing & placement on the central spherical singularity.
+        // smileyOffsetZ puts the face onto the sphere's front surface
+        // (createSmileyFace flattens the internal faceZ so this is the
+        // dominant z-position knob); Y offset stays 0 so the face centers
+        // vertically on the void; scale chooses how much of the sphere face
+        // the smiley covers.
+        this.smileyScale = 1.4;
+        this.smileyOffsetY = 0.0;
+        this.smileyOffsetZ = 0.0;
+        // How far the face translates with the cursor (world units per
+        // currentRotation radian). Position-based parallax — the face never
+        // rotates so it always reads as camera-facing.
+        this.smileyParallax = 0.7;
+        // Auto-rotation speed of the disk (radians/frame, applied around Y
+        // — the disk's perpendicular axis. The viewing tilt now comes from
+        // the camera being above the disk plane rather than from rotating
+        // the model itself, so the spin reads as natural rotation).
+        this.diskSpinSpeed = 0.005;
 
         // Theme Transition State
         this.themeProgress = 0; // 0 = Light, 1 = Dark
@@ -66,7 +91,15 @@ class MercuryGlobe {
         if (this.isMobileLayout) {
             this.config.maxRotation = 0.85;
             this.config.smoothing = 0.14;
-            this.targetRadius = 2.15;
+            this.targetRadius = 7.0;
+            // Mobile: keep the black hole horizontally centered always — no
+            // left/right movement across sections, only z-axis (scale/blur)
+            // animations via GSAP on this.innerEl. So diskShiftX = 0.
+            this.diskShiftX = 0;
+            this.smileyScale = 1.1;
+            this.smileyOffsetY = 0.0;
+            this.smileyOffsetZ = 0.0;
+            this.smileyParallax = 0.55;
         }
 
         // Idle auto-drift: keep the globe feeling alive when the user isn't interacting
@@ -128,7 +161,14 @@ class MercuryGlobe {
         this.scene = new Scene();
         
         this.camera = new PerspectiveCamera(50, this.width / this.height, 0.1, 1000);
-        this.camera.position.z = 6;
+        // Camera positioned just barely above the disk plane and aimed back
+        // at the origin so the horizontal accretion disk is seen nearly
+        // edge-on — the iconic Interstellar / Event-Horizon view where the
+        // lensed back of the disk arcs as a dome over the void. Keep y
+        // small (< 1) so the disk reads as a thin horizontal slice rather
+        // than a tilted plate.
+        this.camera.position.set(0, 0.55, 9);
+        this.camera.lookAt(0, 0, 0);
         
         this.renderer = new WebGLRenderer({
             canvas: this.canvas,
@@ -149,6 +189,19 @@ class MercuryGlobe {
 
         this.spinGroup = new Group();
         this.mercuryGroup.add(this.spinGroup);
+
+        // Dedicated group for the disk's continuous auto-rotation. Sits
+        // between spinGroup and mercuryPivot so the smileyGroup (also a child
+        // of spinGroup) is unaffected by the spin and keeps facing camera.
+        // The base rotation.x tilts the (horizontal) accretion disk forward
+        // so the camera sees the ring face instead of edge-on; rotation.y is
+        // then incremented every frame to spin the disk around its own
+        // perpendicular axis (natural black-hole rotation, visible swirl).
+        this.modelSpinGroup = new Group();
+        this.modelSpinGroup.position.x = this.diskShiftX;
+        // No manual base tilt — the viewing angle comes from the camera
+        // being above y=0, so the horizontal disk reads naturally.
+        this.spinGroup.add(this.modelSpinGroup);
     }
 
     createLighting() {
@@ -179,7 +232,7 @@ class MercuryGlobe {
         const loader = new GLTFLoader();
 
         loader.load(
-            '/mercury.glb',
+            '/blackhole.glb',
             (gltf) => {
                 this.mercuryModel = gltf.scene;
 
@@ -216,7 +269,7 @@ class MercuryGlobe {
                     }
                 });
 
-                this.spinGroup.add(this.mercuryPivot);
+                this.modelSpinGroup.add(this.mercuryPivot);
                 this.mercurySurface = this.mercuryModel;
 
                 // Model loaded — now set up scroll animations
@@ -373,7 +426,7 @@ class MercuryGlobe {
             color: 0xaaaaaa, roughness: 0.85, metalness: 0.08,
         });
         this.mesh = new Mesh(geometry, material);
-        this.spinGroup.add(this.mesh);
+        this.modelSpinGroup.add(this.mesh);
         this.mercurySurface = this.mesh;
     }
 
@@ -390,16 +443,21 @@ class MercuryGlobe {
         // Must match the CSS breakpoint so we don't fight the stylesheet on tablets/landscape phones.
         mm.add("(min-width: 1025px)", () => {
 
-            // Initial State Check (desktop) — keep consistent with the original movement
+            // Initial State (desktop) — container is left-anchored so any
+            // CSS scale shrinks the canvas TOWARD the left edge instead of
+            // centering it horizontally. Section tweens then only animate
+            // top (vertical drift) + scale + opacity, never `left` or
+            // `xPercent`, so the black hole stays glued to the left in
+            // every section.
             gsap.set(this.container, {
-                left: "4vw",
+                left: "0%",
                 top: "50%",
                 yPercent: -50,
                 scale: 1,
                 opacity: 1,
                 filter: "blur(0px)",
                 transformPerspective: 1200,
-                transformOrigin: "50% 50%"
+                transformOrigin: "0% 50%"
             });
 
             // --- Transition to About Section ---
@@ -413,15 +471,24 @@ class MercuryGlobe {
                 }
             });
 
+            // Keep opacity/blur on the container so the visual fades out,
+            // but DO NOT CSS-scale the canvas — that just shrinks the
+            // rendered image without revealing anything that was clipped at
+            // the camera level. Instead, pull the THREE camera back so the
+            // black hole actually zooms out in 3D and the previously-clipped
+            // accretion arms come into view.
             tl.to(this.container, {
-                scale: 0.38,
                 opacity: 0,
-                z: -700,
-                xPercent: -8,
                 filter: "blur(10px)",
                 duration: 1,
                 ease: "power2.inOut"
-            });
+            }, 0);
+            tl.to(this.camera.position, {
+                z: 22,
+                duration: 1,
+                ease: "power2.inOut",
+                onUpdate: () => this.camera.lookAt(0, 0, 0)
+            }, 0);
 
             // --- Transition to Featured/Projects Section ---
             const tlProjects = gsap.timeline({
@@ -433,13 +500,16 @@ class MercuryGlobe {
                     toggleActions: "play reverse play reverse"
                 }
             });
+            // Scale 1.2 from transformOrigin "0% 50%" makes the rendered
+            // canvas grow toward the right, drifting the disk toward screen
+            // center. A negative `left` shift compensates and keeps the
+            // void anchored on the LEFT in the projects section.
             tlProjects.to(this.container, {
-                left: "0%",
-                top: "50%",
-                scale: 0.5,
+                left: "-28%",
+                top: "40%",
+                scale: 1.2,
                 opacity: 1,
                 z: 0,
-                xPercent: 0,
                 filter: "blur(0px)",
                 ease: "power2.inOut"
             });
@@ -455,10 +525,15 @@ class MercuryGlobe {
                 }
             });
 
+            // Services section: slide the disk over to the RIGHT side of
+            // the viewport. transformOrigin "0% 50%" + scale 0.6 means a
+            // container left of ~56vw lands the void around the 75vw mark
+            // on screen — right-of-center.
             tlServices.to(this.container, {
-                left: "60%",
+                left: "10%",
                 top: "50%",
-                scale: 0.75,
+                scale: 1.8,
+                opacity: 1,
                 ease: "power2.inOut"
             });
 
@@ -473,9 +548,16 @@ class MercuryGlobe {
                 }
             });
 
+            // Contact section: disk grows bigger and nudges a touch toward
+            // the center, then holds there. transformOrigin "0% 50%" means
+            // scale > 1 also drifts the void rightward on its own; combined
+            // with the small `left` shift it lands slightly inboard of its
+            // default left-edge position.
             tlContact.to(this.container, {
-                scale: 0.9,
-                left: "50%",
+                left: "-35%",
+                top: "40%",
+                scale: 2.7,
+                opacity: 1,
                 ease: "power2.inOut"
             });
         });
@@ -513,16 +595,22 @@ class MercuryGlobe {
                 }
             });
 
-            // ALL mobile tweens target this.innerEl — never the container.
-            // No left/top/xPercent/yPercent properties anywhere, so the CSS
-            // centering on the container is untouchable.
+            // Mobile uses true 3D camera pull-back instead of CSS-scaling
+            // the canvas. The CSS scale was just shrinking an already-
+            // clipped image (disk wider than the square mobile canvas), so
+            // the user saw the sides of the disk stay cut while everything
+            // got smaller. Pulling the camera back widens the WebGL
+            // viewport so the full disk reveals itself as the user scrolls.
             tlMobileAbout.to(this.innerEl, {
-                scale: 0.42,
                 opacity: 0,
-                z: -500,
                 filter: "blur(10px)",
                 ease: "power2.inOut"
-            });
+            }, 0);
+            tlMobileAbout.to(this.camera.position, {
+                z: 20,
+                ease: "power2.inOut",
+                onUpdate: () => this.camera.lookAt(0, 0, 0)
+            }, 0);
 
             const tlMobileProjects = gsap.timeline({
                 scrollTrigger: {
@@ -540,6 +628,31 @@ class MercuryGlobe {
                 filter: "blur(0px)",
                 ease: "power2.inOut"
             });
+
+            // Contact section on mobile: grow the disk back so it reads big
+            // behind the "Let's create something amazing" copy. Pulls the
+            // camera closer (z back to ~8) while bumping innerEl scale and
+            // opacity to full.
+            const tlMobileContact = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#contact",
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: 0.5
+                }
+            });
+            tlMobileContact.to(this.innerEl, {
+                scale: 1.4,
+                opacity: 1,
+                z: 0,
+                filter: "blur(0px)",
+                ease: "power2.inOut"
+            }, 0);
+            tlMobileContact.to(this.camera.position, {
+                z: 8,
+                ease: "power2.inOut",
+                onUpdate: () => this.camera.lookAt(0, 0, 0)
+            }, 0);
         });
 
         // Force a refresh to ensure start positions are calculated correctly if starting mid-page
@@ -569,7 +682,11 @@ class MercuryGlobe {
 
         this.iceFaceTexture = generateIceTexture({ size: 512, repeat: 1.6 });
         const s = 0.99;
-        const faceZ = (this.targetRadius + 0.02) * 1.0;
+        // faceZ used to put the smiley parts on the surface of the mercury
+        // sphere (z ≈ targetRadius). For the black hole the face is now a
+        // flat decal positioned by smileyGroup.position.z onto the spherical
+        // singularity, so keep parts flat in local z.
+        const faceZ = 0.02;
 
         // === EYES ===
         const eyeGeometry = new SphereGeometry(0.32 * s, 25, 25);
@@ -979,9 +1096,12 @@ class MercuryGlobe {
         ];
         this.smileyParts.forEach(part => {
             if (part) {
+                // Render after the disk and disable depth testing so the
+                // face is always visible inside the central void instead of
+                // being occluded by the singularity sphere geometry.
                 part.renderOrder = 1;
-                if (part.material) part.material.depthTest = true;
-                
+                if (part.material) part.material.depthTest = false;
+
                 // Store initial max opacity for transition
                 if (part.material) {
                     part.userData.maxOpacity = part.material.opacity;
@@ -1028,6 +1148,19 @@ class MercuryGlobe {
         this.eyebrowParts.forEach(part => {
              if (part) part.userData.baseY = part.position.y;
         });
+
+        // Reparent every smiley part into a scaled wrapper group. Sits as a
+        // sibling of modelSpinGroup inside spinGroup so the disk's continuous
+        // rotation never touches the face — it stays camera-facing. The
+        // animate() loop drives smileyGroup.position to follow the cursor
+        // (position-based parallax instead of rotation).
+        this.smileyGroup = new Group();
+        this.smileyParts.forEach(part => {
+            if (part) this.smileyGroup.add(part);
+        });
+        this.smileyGroup.scale.setScalar(this.smileyScale);
+        this.smileyGroup.position.set(this.diskShiftX, this.smileyOffsetY, this.smileyOffsetZ);
+        this.spinGroup.add(this.smileyGroup);
 
         // Initialize theme state
         const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -1361,10 +1494,16 @@ class MercuryGlobe {
         this.mouse.x = this.lerp(this.mouse.x, this.targetMouse.x, 0.1);
         this.mouse.y = this.lerp(this.mouse.y, this.targetMouse.y, 0.1);
         
-        // Calculate center based on current container position
-        const rect = this.container.getBoundingClientRect();
-        const globeCenterX = rect.left + rect.width / 2;
-        const globeCenterY = rect.top + rect.height / 2;
+        // Reference point for cursor offset = the smiley's actual screen
+        // position (projected from its world anchor). The container is now
+        // full-viewport so rect.center collapses to screen center, but the
+        // smiley sits on the left side of the screen — using screen center
+        // as the reference made the face yaw toward the center even when
+        // the cursor was directly above the smiley.
+        const anchor = new Vector3(this.diskShiftX, this.smileyOffsetY, this.smileyOffsetZ || 0);
+        anchor.project(this.camera);
+        const globeCenterX = (anchor.x * 0.5 + 0.5) * window.innerWidth;
+        const globeCenterY = (-anchor.y * 0.5 + 0.5) * window.innerHeight;
 
         // Calculate offset relative to the globe's center
         // We use window dimensions for normalization to keep sensitivity consistent
@@ -1395,9 +1534,41 @@ class MercuryGlobe {
         this.idleRotation.x = this.lerp(this.idleRotation.x, driftX * idleAmount, 0.05);
         this.idleRotation.y = this.lerp(this.idleRotation.y, driftY * idleAmount, 0.05);
 
+        // Disk auto-rotates continuously around its own disk-plane axis (Y).
+        if (this.modelSpinGroup) {
+            this.modelSpinGroup.rotation.y += this.diskSpinSpeed;
+        }
+
+        // Subtle cursor parallax: tilt the whole scene a small amount with
+        // the cursor so the black hole reads as reactive. Magnitude is much
+        // smaller than the original mercury-globe behavior so it doesn't
+        // fight the smileyGroup translation parallax below.
         if (this.mercuryGroup) {
-            this.mercuryGroup.rotation.x = this.currentRotation.x + this.idleRotation.x;
-            this.mercuryGroup.rotation.y = this.currentRotation.y + this.idleRotation.y;
+            const sceneTilt = 0.18;
+            this.mercuryGroup.rotation.x = (this.currentRotation.x + this.idleRotation.x) * sceneTilt;
+            this.mercuryGroup.rotation.y = (this.currentRotation.y + this.idleRotation.y) * sceneTilt;
+        }
+
+        // Smiley turns to face the cursor: rotation tracks the cursor
+        // position via currentRotation (yaw) and -currentRotation (pitch).
+        // A small translation parallax is layered on top so the face also
+        // drifts subtly with the cursor — the rotation is what reads as
+        // "looking at" the cursor.
+        if (this.smileyGroup) {
+            const lookFactor = 0.9;
+            this.smileyGroup.rotation.y = (this.currentRotation.y + this.idleRotation.y) * lookFactor;
+            this.smileyGroup.rotation.x = (this.currentRotation.x + this.idleRotation.x) * lookFactor;
+
+            const px = (this.currentRotation.y + this.idleRotation.y) * this.smileyParallax * 0.3;
+            const py = -(this.currentRotation.x + this.idleRotation.x) * this.smileyParallax * 0.3;
+            this.smileyGroup.position.x = this.diskShiftX + px;
+            this.smileyGroup.position.y = this.smileyOffsetY + py;
+        }
+
+        // Keep the camera aimed at the origin regardless of GSAP-driven
+        // camera.position.z changes (scroll zoom-out animation).
+        if (this.camera) {
+            this.camera.lookAt(0, 0, 0);
         }
 
         // Dirty-flag render: compose every piece of state that contributes to
@@ -1411,7 +1582,9 @@ class MercuryGlobe {
             (this.currentRotation.x + this.idleRotation.x) * 1000 +
             (this.currentRotation.y + this.idleRotation.y) * 97 +
             this.themeProgress * 13 +
-            this.eyebrowOffset * 7;
+            this.eyebrowOffset * 7 +
+            (this.modelSpinGroup ? this.modelSpinGroup.rotation.y * 211 : 0) +
+            (this.camera ? this.camera.position.z * 53 : 0);
         if (this._lastRenderKey === undefined || Math.abs(key - this._lastRenderKey) > 0.0004) {
             this._lastRenderKey = key;
             this.renderer.render(this.scene, this.camera);

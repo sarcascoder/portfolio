@@ -18,7 +18,7 @@
          <script type="module" src="js/theme.js"></script> -->
 
 </head>
-<body>
+<body class="page-about">
     <!-- Starfield Background -->
     <canvas id="starfield-canvas"></canvas>
 
@@ -78,16 +78,30 @@
         </div>
     </nav>
 
-    <!-- Page Hero -->
-    <section class="about-hero">
-        <div class="about-hero-content">
-            <h1 class="dot-matrix-heading">
+    <!-- Page Hero — standardised page-opener pattern (matches /projects, /services). -->
+    <section class="about-hero page-opener">
+        <div class="about-hero-content opener-stack">
+            <div class="opener-label">
+                <span class="opener-label-num">00</span>
+                <span class="opener-label-bar" aria-hidden="true"></span>
+                <span class="opener-label-text">ABOUT</span>
+            </div>
+            <span class="meta-pill" aria-hidden="true">
+                <span class="meta-pill-dot"></span>
+                <span class="meta-pill-strong">PROFILE</span>
+                <span class="meta-pill-sep">·</span>
+                <span class="meta-pill-item">ANUPAM&nbsp;DEEP&nbsp;TRIPATHI</span>
+                <span class="meta-pill-sep">·</span>
+                <span class="meta-pill-live">ACTIVE</span>
+            </span>
+            <h1 class="dot-matrix-heading opener-display">
                 <span class="neon-glow">CREATIVE</span><br>
                 MINDS<br>
                 <span class="highlight-blue">UNITED</span>
             </h1>
+            <p class="opener-tagline">Engineer-of-record on AI systems, full-stack interfaces and the awkward hardware in between.</p>
         </div>
-        
+
         <!-- 3D Canvas Background -->
         <canvas id="three-canvas" class="about-canvas"></canvas>
     </section>
@@ -102,11 +116,11 @@
             
             <div class="mission-text">
                 <h2 class="large-text">
-                    WE BELIEVE THAT <span class="highlight">DIVERSITY AND INCLUSION</span> 
-                    ARE KEY TO CREATING IMPACTFUL AND INNOVATIVE DIGITAL EXPERIENCES. 
-                    OUR TEAM IS MADE UP OF INDIVIDUALS FROM A VARIETY OF BACKGROUNDS 
-                    AND PERSPECTIVES, WHICH ALLOWS US TO BRING 
-                    <span class="highlight">FRESH AND UNIQUE IDEAS</span> TO THE TABLE. 🎯
+                    We believe <span class="highlight">diversity and inclusion</span>
+                    are key to creating impactful, innovative digital experiences.
+                    Our team is made up of individuals from a variety of backgrounds
+                    and perspectives, which allows us to bring
+                    <span class="highlight">fresh, unique ideas</span> to every project. <span class="mission-mark">✦</span>
                 </h2>
             </div>
         </div>
@@ -121,106 +135,108 @@
             </div>
             
             <div class="values-grid">
-                <div class="value-item">
-                    <span class="value-number">01</span>
+                <article class="value-item" data-value="innovation">
+                    <header class="value-head">
+                        <span class="value-id">VAL // 01</span>
+                        <span class="value-tag">[ PRINCIPLE ]</span>
+                    </header>
+                    <span class="value-ghost" aria-hidden="true">01</span>
                     <h3 class="value-title">INNOVATION</h3>
                     <p class="value-desc">Pushing boundaries and exploring new possibilities in every project we undertake.</p>
-                </div>
-                
-                <div class="value-item">
-                    <span class="value-number">02</span>
+                    <footer class="value-foot">
+                        <span class="value-foot-dot"></span>
+                        <span class="value-foot-key">STATUS</span><span class="value-foot-val">ACTIVE</span>
+                    </footer>
+                </article>
+
+                <article class="value-item" data-value="quality">
+                    <header class="value-head">
+                        <span class="value-id">VAL // 02</span>
+                        <span class="value-tag">[ PRINCIPLE ]</span>
+                    </header>
+                    <span class="value-ghost" aria-hidden="true">02</span>
                     <h3 class="value-title">QUALITY</h3>
                     <p class="value-desc">Delivering excellence in every pixel, line of code, and creative decision.</p>
-                </div>
-                
-                <div class="value-item">
-                    <span class="value-number">03</span>
+                    <footer class="value-foot">
+                        <span class="value-foot-dot"></span>
+                        <span class="value-foot-key">STATUS</span><span class="value-foot-val">ACTIVE</span>
+                    </footer>
+                </article>
+
+                <article class="value-item" data-value="collaboration">
+                    <header class="value-head">
+                        <span class="value-id">VAL // 03</span>
+                        <span class="value-tag">[ PRINCIPLE ]</span>
+                    </header>
+                    <span class="value-ghost" aria-hidden="true">03</span>
                     <h3 class="value-title">COLLABORATION</h3>
                     <p class="value-desc">Working together with clients as partners to achieve extraordinary results.</p>
-                </div>
-                
-                <div class="value-item">
-                    <span class="value-number">04</span>
+                    <footer class="value-foot">
+                        <span class="value-foot-dot"></span>
+                        <span class="value-foot-key">STATUS</span><span class="value-foot-val">ACTIVE</span>
+                    </footer>
+                </article>
+
+                <article class="value-item" data-value="integrity">
+                    <header class="value-head">
+                        <span class="value-id">VAL // 04</span>
+                        <span class="value-tag">[ PRINCIPLE ]</span>
+                    </header>
+                    <span class="value-ghost" aria-hidden="true">04</span>
                     <h3 class="value-title">INTEGRITY</h3>
                     <p class="value-desc">Building trust through transparency, honesty, and ethical practices.</p>
-                </div>
+                    <footer class="value-foot">
+                        <span class="value-foot-dot"></span>
+                        <span class="value-foot-key">STATUS</span><span class="value-foot-val">ACTIVE</span>
+                    </footer>
+                </article>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
+    <!-- Stats Section — telemetry readout panel -->
     <section class="about-section stats-section">
-        <div class="about-content">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-number">50+</span>
-                    <span class="stat-label">PROJECTS COMPLETED</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">5+</span>
-                    <span class="stat-label">YEARS EXPERIENCE</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">30+</span>
-                    <span class="stat-label">HAPPY CLIENTS</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">∞</span>
-                    <span class="stat-label">CREATIVE IDEAS</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Careers Section -->
-    <section class="about-section careers-section">
         <div class="about-content">
             <div class="section-label">
                 <span class="label-number">03</span>
-                <span class="label-text">CAREERS</span>
+                <span class="label-text">SIGNALS</span>
             </div>
-            
-            <div class="careers-header">
-                <h2 class="careers-title">JOIN THE TEAM</h2>
-                <p class="careers-subtitle">We're always looking for talented individuals to join our crew.</p>
-            </div>
-            
-            <div class="jobs-list">
-                <a href="#" class="job-item">
-                    <div class="job-info">
-                        <h3 class="job-title">SENIOR UI/UX DESIGNER</h3>
-                        <div class="job-meta">
-                            <span>FULL TIME</span>
-                            <span>/</span>
-                            <span>REMOTE</span>
-                        </div>
+
+            <div class="stats-panel">
+                <header class="stats-panel-head">
+                    <span class="meta-pill" aria-hidden="true">
+                        <span class="meta-pill-dot"></span>
+                        <span class="meta-pill-strong">LIVE READOUT</span>
+                        <span class="meta-pill-sep">·</span>
+                        <span class="meta-pill-item">04 METRICS</span>
+                        <span class="meta-pill-sep">·</span>
+                        <span class="meta-pill-live">SYNCED</span>
+                    </span>
+                    <span class="stats-panel-timestamp" aria-hidden="true">AT-01 · MISSION CONTROL · UTC</span>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-key">M-01</span>
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">PROJECTS COMPLETED</span>
                     </div>
-                    <span class="job-arrow">→</span>
-                </a>
-                
-                <a href="#" class="job-item">
-                    <div class="job-info">
-                        <h3 class="job-title">CREATIVE DEVELOPER</h3>
-                        <div class="job-meta">
-                            <span>FULL TIME</span>
-                            <span>/</span>
-                            <span>REMOTE</span>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-key">M-02</span>
+                        <span class="stat-number">5+</span>
+                        <span class="stat-label">YEARS EXPERIENCE</span>
                     </div>
-                    <span class="job-arrow">→</span>
-                </a>
-                
-                <a href="#" class="job-item">
-                    <div class="job-info">
-                        <h3 class="job-title">MOTION DESIGNER</h3>
-                        <div class="job-meta">
-                            <span>CONTRACT</span>
-                            <span>/</span>
-                            <span>REMOTE</span>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-key">M-03</span>
+                        <span class="stat-number">30+</span>
+                        <span class="stat-label">HAPPY CLIENTS</span>
                     </div>
-                    <span class="job-arrow">→</span>
-                </a>
+                    <div class="stat-item">
+                        <span class="stat-key">M-04</span>
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">CREATIVE IDEAS</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -252,230 +268,19 @@
     <script src="js/scroll-reveal.js"></script>
 
     <style>
-        /* About Page Specific Styles */
-        .about-hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .about-hero-content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 4vw;
-        }
-        
-        .about-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-        
-        .highlight-blue {
-            color: var(--color-electric-blue);
-            text-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
-        }
-        
-        .about-section {
-            padding: 8vw 4vw;
-        }
-        
-        .about-content {
-            max-width: 92vw;
-            margin: 0 auto;
-        }
-        
-        /* Mission Section */
-        .mission-text {
-            margin-top: 4vw;
-        }
-        
-        .large-text {
-            font-family: var(--font-mono);
-            font-size: clamp(20px, 2.5vw, 42px);
-            font-weight: 400;
-            line-height: 1.6;
-            color: var(--color-white);
-        }
-        
-        /* Values Section */
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 3vw;
-            margin-top: 4vw;
-        }
-        
-        .value-item {
-            padding: 3vw;
-            border: 1px solid var(--color-gray-mid);
-            transition: border-color 0.3s ease;
-        }
-        
-        .value-item:hover {
-            border-color: var(--color-neon-green);
-        }
-        
-        .value-number {
-            font-family: var(--font-dot-matrix);
-            font-size: clamp(36px, 3.5vw, 64px);
-            color: var(--color-neon-green);
-            opacity: 0.3;
-        }
-        
-        .value-title {
-            font-family: var(--font-dot-matrix);
-            font-size: clamp(24px, 2.2vw, 40px);
-            margin: 1.5vw 0;
-        }
-        
-        .value-desc {
-            font-family: var(--font-mono);
-            font-size: clamp(14px, 1.2vw, 20px);
-            color: var(--color-gray-light);
-            line-height: 1.6;
-        }
-        
-        /* Stats Section */
-        .stats-section {
-            background: linear-gradient(to bottom, var(--color-black), var(--color-gray-dark));
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2.5vw;
-            text-align: center;
-        }
-        
-        .stat-item {
-            padding: 2.5vw;
-        }
-        
-        .stat-number {
-            font-family: var(--font-dot-matrix);
-            font-size: clamp(48px, 5.5vw, 100px);
-            color: var(--color-neon-green);
-            display: block;
-            text-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
-        }
-        
-        .stat-label {
-            font-family: var(--font-mono);
-            font-size: clamp(12px, 1.1vw, 18px);
-            letter-spacing: 0.1em;
-            color: var(--color-gray-light);
-            margin-top: 0.7vw;
-            display: block;
-        }
-        
-        /* Careers Section */
-        .careers-header {
-            margin: 4vw 0;
-        }
-        
-        .careers-title {
-            font-family: var(--font-dot-matrix);
-            font-size: clamp(32px, 4.5vw, 80px);
-            margin-bottom: 1.5vw;
-        }
-        
-        .careers-subtitle {
-            font-family: var(--font-mono);
-            font-size: clamp(14px, 1.3vw, 22px);
-            color: var(--color-gray-light);
-        }
-        
-        .jobs-list {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        
-        .job-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2vw 3vw;
-            background: var(--color-gray-dark);
-            border: 1px solid var(--color-gray-mid);
-            transition: all 0.3s ease;
-        }
-        
-        .job-item:hover {
-            background: var(--color-gray-mid);
-            border-color: var(--color-neon-green);
-        }
-        
-        .job-title {
-            font-family: var(--font-dot-matrix);
-            font-size: clamp(20px, 1.8vw, 32px);
-            margin-bottom: 0.7vw;
-            transition: color 0.3s ease;
-        }
-        
-        .job-item:hover .job-title {
-            color: var(--color-neon-green);
-        }
-        
-        .job-meta {
-            display: flex;
-            gap: 0.8vw;
-            font-family: var(--font-mono);
-            font-size: clamp(12px, 1vw, 16px);
-            color: var(--color-gray-light);
-            letter-spacing: 0.1em;
-        }
-        
-        .job-arrow {
-            font-family: var(--font-dot-matrix);
-            font-size: clamp(20px, 1.8vw, 32px);
-            color: var(--color-gray-light);
-            transition: all 0.3s ease;
-        }
-        
-        .job-item:hover .job-arrow {
-            color: var(--color-neon-green);
-            transform: translateX(10px);
-        }
-        
-        @media (max-width: 768px) {
-            .about-section {
-                padding: 60px 20px;
-            }
-            
-            .about-content {
-                max-width: 100%;
-            }
-            
-            .values-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .value-item {
-                padding: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-            
-            .job-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-                padding: 20px;
-            }
-        }
+      /* Page-local helpers only — full design system lives in css/styles.css
+         under .page-about. Keep this block small and additive. */
+      .about-canvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.7;
+      }
+      .highlight-blue {
+        color: var(--color-electric-blue);
+        text-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+      }
     </style>
     <!-- Fixed Globe Logo with Contact Text -->
     <!-- MODIFIED: Now contains the Smiley Earth -->
