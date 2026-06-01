@@ -34,435 +34,298 @@
     <link rel="preload" as="fetch" href="/mercury.glb" type="model/gltf-binary" crossorigin>
   </head>
   <body>
-    <!-- Loading Screen - prevents scroll until 3D assets are ready -->
-    <div id="loading-screen" style="
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: radial-gradient(ellipse at center, #06080f 0%, #020306 80%);
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      transition: opacity 0.6s ease;
-      pointer-events: all;
-      overflow: hidden;
-    ">
-      <!-- Starfield covers the full viewport so the whole loading screen feels like deep space.
-           Kept on #loading-screen rather than inside .launch-scene so it isn't clipped by the
-           scene's bounds. Three parallax layers for depth. -->
-      <div class="launch-stars star-layer-a" aria-hidden="true"></div>
-      <div class="launch-stars star-layer-b" aria-hidden="true"></div>
-      <div class="launch-stars star-layer-c" aria-hidden="true"></div>
-      <!-- Subtle cyan atmosphere glow centered on the pad for cinematic depth -->
-      <div class="launch-atmosphere" aria-hidden="true"></div>
+    <!-- Loading Screen — direct port of red1-for-hek.vercel.app's intro:
+         pale lavender backdrop (#eae5ec), bold black marquee strapline running
+         behind a center black pill button. The pill shows "LOADING n%" with a
+         blinking white cursor, then collapses to a small icon + "WELCOME" on
+         100%. Clicking inflates the pill into a full-screen curtain wipe. -->
+    <div id="loading-screen" class="ld-root" data-state="loading" aria-label="Loading">
 
-      <!-- Launch scene: circular progress ring, rocket rising on a pad with
-           3-layer flame and spark trail. Starfield is provided by the parent.
-           See the accompanying <style> block for layer composition and the
-           <script> below for progress binding. -->
-      <div class="launch-scene" id="launch-scene">
-        <svg class="launch-ring" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="launch-ring-track" cx="60" cy="60" r="54" />
-          <circle class="launch-ring-progress" id="rocket-progress" cx="60" cy="60" r="54" />
-        </svg>
+      <!-- Top bar: identity on the left, tiny Pong-style ball-and-bars on the right -->
+      <header class="ld-topbar">
+        <span class="ld-title">ANUPAM&nbsp;DEEP&nbsp;TRIPATHI</span>
+        <div class="ld-game" aria-hidden="true">
+          <span class="ld-game-bar"></span>
+          <span class="ld-game-bar"></span>
+          <span class="ld-game-bar"></span>
+          <span class="ld-game-bar"></span>
+          <span class="ld-game-bar"></span>
+          <span class="ld-game-ball"></span>
+        </div>
+      </header>
 
-        <div class="pad-glow"></div>
-
-        <div class="rocket-wrapper" id="rocket-icon">
-          <!-- Vertical rocket SVG: fins, white-blue body with a subtle gradient,
-               glowing cyan porthole and a dark engine ring. Nose points up. -->
-          <svg class="rocket-svg" viewBox="0 0 60 110" width="44" height="80" aria-hidden="true">
-            <defs>
-              <linearGradient id="rocket-body-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#cdd7f5"/>
-                <stop offset="45%" stop-color="#ffffff"/>
-                <stop offset="100%" stop-color="#8ea3d8"/>
-              </linearGradient>
-              <radialGradient id="rocket-window-grad" cx="40%" cy="40%" r="60%">
-                <stop offset="0%" stop-color="#eaffff"/>
-                <stop offset="60%" stop-color="#00e1ff"/>
-                <stop offset="100%" stop-color="#0066a0"/>
-              </radialGradient>
-            </defs>
-            <!-- Fins -->
-            <path d="M18 70 L6 98 L18 92 Z" fill="#00a6c7"/>
-            <path d="M42 70 L54 98 L42 92 Z" fill="#00a6c7"/>
-            <!-- Body -->
-            <path d="M30 4 L18 32 L18 84 L42 84 L42 32 Z"
-                  fill="url(#rocket-body-grad)" stroke="#6a82c0" stroke-width="0.6"/>
-            <!-- Porthole -->
-            <circle cx="30" cy="40" r="6" fill="#0a1a3c"/>
-            <circle cx="30" cy="40" r="4.6" fill="url(#rocket-window-grad)"/>
-            <circle cx="28.2" cy="38.2" r="1.1" fill="#ffffff" opacity="0.9"/>
-            <!-- Body seam -->
-            <line x1="18" y1="56" x2="42" y2="56" stroke="#6a82c0" stroke-width="0.5" opacity="0.4"/>
-            <!-- Engine -->
-            <rect x="20" y="84" width="20" height="5" rx="1" fill="#3a4a6d"/>
-            <rect x="22" y="87" width="16" height="3" fill="#23304e"/>
-          </svg>
-
-          <!-- Three-layer flame: each layer flickers at a different rate for realism -->
-          <div class="flame">
-            <span class="flame-outer"></span>
-            <span class="flame-mid"></span>
-            <span class="flame-core"></span>
-          </div>
-          <!-- Falling-spark trail: animated gradient gives a continuous particle feel -->
-          <div class="rocket-trail"></div>
+      <!-- Huge sliding marquee strapline rendered behind the pill button.
+           Duplicated track so translateX(-50%) loops seamlessly. -->
+      <div class="ld-marquee" aria-hidden="true">
+        <div class="ld-marquee-track">
+          <span class="ld-mq-item">AI&nbsp;ENGINEER</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">FULL&nbsp;STACK&nbsp;DEVELOPER</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">COMPUTER&nbsp;VISION</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">INFERENCE</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">AI&nbsp;ENGINEER</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">FULL&nbsp;STACK&nbsp;DEVELOPER</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">COMPUTER&nbsp;VISION</span><span class="ld-mq-sep">●</span>
+          <span class="ld-mq-item">INFERENCE</span><span class="ld-mq-sep">●</span>
         </div>
       </div>
 
-      <p id="loading-text" class="launch-caption">LOADING 0%</p>
+      <!-- Center black pill button. Two content layers stack and swap: -->
+      <!--   .ld-pill-loading — "LOADING n%" + blinking cursor block       -->
+      <!--   .ld-pill-ready   — small box icon + "WELCOME" (after 100%)    -->
+      <button type="button" id="ld-pill" class="ld-pill" aria-live="polite" aria-label="Loading">
+        <span class="ld-pill-loading">
+          <span class="ld-pill-label">LOADING&nbsp;</span>
+          <span class="ld-pill-percent" id="ld-percent">0%</span>
+          <span class="ld-pill-cursor" aria-hidden="true"></span>
+        </span>
+        <span class="ld-pill-ready" aria-hidden="true">
+          <span class="ld-pill-icon"></span>
+          <span class="ld-pill-label">WELCOME</span>
+        </span>
+      </button>
     </div>
     <style>
       /* ============================================================
-         LAUNCH LOADER
+         INTRO LOADER  (direct port of red1-for-hek.vercel.app)
          ------------------------------------------------------------
-         Layers, bottom → top:
-           1. Two parallax star layers (CSS box-shadow stars)
-           2. Circular progress ring (SVG stroke-dashoffset bound to %)
-           3. Pad glow (radial gradient) pulsing at the base
-           4. Rocket wrapper — translates up with progress, ignites + shakes
-           5. 3-layer flame (orange > yellow > white core), each with its own flicker
-           6. Spark trail (animated gradient falling beneath the rocket)
-         On completion, .launch-scene.launching kicks off the blast-off.
+         Background  : pale lavender #eae5ec
+         Marquee     : huge bold black sans-serif sliding behind the pill
+         Pill        : solid black with a violet edge-glow on the left
+         Top-left    : identity title (ANUPAM DEEP TRIPATHI)
+         Top-right   : Pong-style mini animation — 5 black bars + purple ball
+         On 100%     : percent collapses, "WELCOME" + a box icon fade in
+         On click    : pill inflates to a full-screen curtain wipe
          ============================================================ */
 
-      /* Launch scene is now unframed: it's a centered focal column (ring + rocket
-         + caption-spacer). The starfield behind it is rendered on the parent
-         #loading-screen so it fills the full viewport. */
-      .launch-scene {
-        position: relative;
-        width: 300px;
-        height: 280px;
-        max-width: 80vw;
+      /* Root container */
+      .ld-root {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
-        z-index: 2; /* keep rocket + ring above the starfield */
+        background: #eae5ec;
+        color: #000;
+        overflow: hidden;
+        opacity: 1;
+        transition: opacity 0.55s ease;
+        pointer-events: all;
+        cursor: none; /* site uses a custom cursor; suppress the default arrow here too */
       }
-      .launch-caption {
-        position: relative;
-        z-index: 2;
-      }
+      .ld-root[data-state="dismissed"] { opacity: 0; pointer-events: none; }
 
-      /* ============================================================
-         Full-viewport parallax starfield (three layers)
-         ------------------------------------------------------------
-         CSS-only: each layer's ::before is a single 1-2px dot plus a
-         huge box-shadow list that paints every other "star". We offset
-         the list into a large virtual canvas (2000x2000) and drift it
-         upward to simulate rocket ascent through space.
-         ============================================================ */
-      .launch-stars {
-        position: absolute;
-        top: -50vh;
-        left: 0;
-        right: 0;
-        height: 200vh; /* tall so drift doesn't reveal an edge */
-        pointer-events: none;
-        z-index: 0;
-      }
-      .launch-stars::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 2px;
-        height: 2px;
-        border-radius: 50%;
-        background: #fff;
-      }
-
-      /* Back layer — many tiny dim stars, slow drift */
-      .star-layer-a::before {
-        width: 1px;
-        height: 1px;
-        box-shadow:
-          3vw 12vh rgba(255,255,255,0.55),
-          8vw 42vh rgba(255,255,255,0.4),
-          14vw 72vh rgba(0,225,255,0.45),
-          21vw 28vh rgba(255,255,255,0.6),
-          27vw 88vh rgba(255,255,255,0.35),
-          33vw 18vh rgba(255,255,255,0.55),
-          39vw 62vh rgba(255,255,255,0.5),
-          46vw 8vh  rgba(0,225,255,0.4),
-          52vw 38vh rgba(255,255,255,0.45),
-          58vw 78vh rgba(255,255,255,0.5),
-          64vw 24vh rgba(255,255,255,0.55),
-          71vw 52vh rgba(0,225,255,0.5),
-          77vw 14vh rgba(255,255,255,0.6),
-          83vw 68vh rgba(255,255,255,0.4),
-          89vw 44vh rgba(255,255,255,0.55),
-          95vw 82vh rgba(255,255,255,0.5),
-          6vw 58vh  rgba(255,255,255,0.45),
-          18vw 48vh rgba(255,255,255,0.35),
-          30vw 98vh rgba(255,255,255,0.4),
-          42vw 72vh rgba(0,225,255,0.5),
-          56vw 16vh rgba(255,255,255,0.55),
-          68vw 94vh rgba(255,255,255,0.45),
-          74vw 34vh rgba(255,255,255,0.5),
-          86vw 24vh rgba(255,255,255,0.4),
-          10vw 96vh rgba(255,255,255,0.5),
-          24vw 64vh rgba(255,255,255,0.45);
-        animation: star-drift-slow 40s linear infinite;
-      }
-
-      /* Mid layer — medium brightness, cyan-tinted accents */
-      .star-layer-b::before {
-        width: 1.5px;
-        height: 1.5px;
-        box-shadow:
-          11vw 22vh rgba(255,255,255,0.85),
-          25vw 52vh rgba(0,225,255,0.8),
-          37vw 14vh rgba(255,255,255,0.9),
-          48vw 78vh rgba(255,255,255,0.8),
-          60vw 36vh rgba(0,225,255,0.75),
-          73vw 66vh rgba(255,255,255,0.85),
-          81vw 10vh rgba(0,225,255,0.7),
-          92vw 48vh rgba(255,255,255,0.8),
-          15vw 80vh rgba(255,255,255,0.75),
-          28vw 30vh rgba(255,255,255,0.85),
-          44vw 60vh rgba(0,225,255,0.7),
-          57vw 88vh rgba(255,255,255,0.8),
-          66vw 20vh rgba(255,255,255,0.85),
-          85vw 74vh rgba(255,255,255,0.75);
-        filter: drop-shadow(0 0 3px rgba(0,225,255,0.5));
-        animation: star-drift-mid 22s linear infinite;
-      }
-
-      /* Front layer — few bright flare stars, fast drift, strong glow */
-      .star-layer-c::before {
-        width: 2.5px;
-        height: 2.5px;
-        box-shadow:
-          18vw 16vh rgba(255,255,255,1),
-          42vw 68vh rgba(0,225,255,0.95),
-          62vw 24vh rgba(255,255,255,1),
-          78vw 58vh rgba(255,255,255,0.95),
-          32vw 90vh rgba(0,225,255,0.9);
-        filter: drop-shadow(0 0 6px rgba(0,225,255,0.9));
-        animation: star-drift-fast 12s linear infinite;
-      }
-
-      @keyframes star-drift-slow { to { transform: translateY(-50vh); } }
-      @keyframes star-drift-mid  { to { transform: translateY(-60vh); } }
-      @keyframes star-drift-fast { to { transform: translateY(-80vh); } }
-
-      /* Cyan atmosphere glow centered on the pad — gives cinematic horizon feel */
-      .launch-atmosphere {
-        position: absolute;
-        bottom: -25vh;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 120vw;
-        height: 80vh;
-        background: radial-gradient(ellipse at center top,
-          rgba(0, 225, 255, 0.18) 0%,
-          rgba(0, 102, 255, 0.08) 30%,
-          transparent 65%);
-        pointer-events: none;
-        z-index: 0;
-        filter: blur(30px);
-      }
-
-      /* Circular progress ring behind the rocket */
-      .launch-ring {
+      /* Top bar */
+      .ld-topbar {
         position: absolute;
         top: 22px;
-        left: 50%;
-        width: 230px;
-        height: 230px;
-        transform: translateX(-50%) rotate(-90deg); /* start at 12 o'clock */
-        pointer-events: none;
-      }
-      .launch-ring-track {
-        fill: none;
-        stroke: rgba(255, 255, 255, 0.08);
-        stroke-width: 1.2;
-      }
-      .launch-ring-progress {
-        fill: none;
-        stroke: #00e1ff;
-        stroke-width: 1.6;
-        stroke-linecap: round;
-        stroke-dasharray: 339.29; /* 2 * PI * 54 */
-        stroke-dashoffset: 339.29; /* starts empty */
-        filter: drop-shadow(0 0 6px rgba(0, 225, 255, 0.7));
-        transition: stroke-dashoffset 0.15s linear;
-      }
-
-      /* Glow under the rocket — pulses during ignition */
-      .pad-glow {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 220px;
-        height: 70px;
-        transform: translateX(-50%);
-        background: radial-gradient(ellipse at center, rgba(255, 120, 30, 0.55) 0%, rgba(255, 80, 0, 0.2) 40%, transparent 75%);
-        filter: blur(4px);
-        opacity: 0.55;
-        animation: pad-pulse 1.4s ease-in-out infinite;
-      }
-      @keyframes pad-pulse {
-        0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(0.9); }
-        50%      { opacity: 0.85; transform: translateX(-50%) scale(1.05); }
-      }
-
-      /* Rocket — translated upward by JS as progress grows. Ignition shake
-         is a CSS keyframe that layers on top of the JS-driven translate via
-         a nested element approach: the wrapper handles translate, the inner
-         .rocket-svg handles shake. */
-      .rocket-wrapper {
-        position: absolute;
-        bottom: 40px;
-        left: 50%;
-        width: 60px;
-        transform: translate(-50%, 0);
-        transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1);
-        z-index: 3;
+        left: 28px;
+        right: 28px;
         display: flex;
-        flex-direction: column;
         align-items: center;
+        justify-content: space-between;
+        z-index: 4;
       }
-      .rocket-svg {
+      .ld-title {
+        font-family: 'Carlito', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+        font-weight: 800;
+        font-size: 16px;
+        letter-spacing: 0.3px;
+        color: #000;
+      }
+
+      /* Top-right mini Pong animation: 5 thin black bars + a purple ball bouncing.
+         Replicates the .loaderGame element from the reference site. */
+      .ld-game {
         position: relative;
-        z-index: 3;
-        filter: drop-shadow(0 0 6px rgba(0, 225, 255, 0.35));
-        animation: rocket-shake 0.06s infinite alternate;
+        width: 60px;
+        height: 28px;
+        overflow: visible;
       }
-      @keyframes rocket-shake {
-        from { transform: translateX(-0.4px) rotate(-0.5deg); }
-        to   { transform: translateX(0.4px)  rotate(0.5deg); }
+      .ld-game-bar {
+        position: absolute;
+        width: 2px;
+        height: 14px;
+        background: #000;
+        border-radius: 1px;
+      }
+      .ld-game-bar:nth-child(1) { left: 2px;  top: 2px;  }
+      .ld-game-bar:nth-child(2) { left: 14px; top: 12px; }
+      .ld-game-bar:nth-child(3) { left: 26px; top: 2px;  }
+      .ld-game-bar:nth-child(4) { left: 38px; top: 12px; }
+      .ld-game-bar:nth-child(5) { left: 50px; top: 4px;  }
+      .ld-game-ball {
+        position: absolute;
+        width: 5px; height: 5px;
+        background: #a87cff;
+        border-radius: 50%;
+        top: 12px;
+        left: 8px;
+        animation: ld-game-bounce 2.4s cubic-bezier(0.3, 1.18, 0.63, 1.28) infinite alternate;
+      }
+      @keyframes ld-game-bounce {
+        0%   { left: 4px;  top: 4px;  }
+        25%  { left: 20px; top: 18px; }
+        50%  { left: 32px; top: 4px;  }
+        75%  { left: 44px; top: 18px; }
+        100% { left: 54px; top: 8px;  }
       }
 
-      /* Flame: three stacked ellipses. Each layer has its own flicker timing
-         so they don't move in lockstep (realism trick). */
-      .flame {
+      /* Huge sliding marquee — bold black sans, runs behind the pill */
+      .ld-marquee {
         position: absolute;
-        top: 100%;
-        left: 50%;
-        width: 40px;
-        height: 70px;
-        transform: translate(-50%, -6px);
+        top: 50%;
+        left: 0;
+        right: 0;
+        transform: translateY(-50%);
+        overflow: hidden;
         pointer-events: none;
-        z-index: 2;
-      }
-      .flame span {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        border-radius: 50% 50% 45% 45% / 30% 30% 70% 70%;
-        transform-origin: top center;
-        filter: blur(3px);
-      }
-      .flame-outer {
-        width: 36px;
-        height: 62px;
-        margin-left: -18px;
-        background: radial-gradient(ellipse at center top, rgba(255, 160, 60, 0.95) 0%, rgba(255, 80, 0, 0.55) 55%, transparent 85%);
-        animation: flicker-outer 0.18s infinite alternate ease-in-out;
-      }
-      .flame-mid {
-        width: 22px;
-        height: 48px;
-        margin-left: -11px;
-        background: radial-gradient(ellipse at center top, rgba(255, 230, 120, 0.95) 0%, rgba(255, 160, 50, 0.6) 50%, transparent 90%);
-        animation: flicker-mid 0.12s infinite alternate ease-in-out;
-      }
-      .flame-core {
-        width: 10px;
-        height: 32px;
-        margin-left: -5px;
-        background: radial-gradient(ellipse at center top, #ffffff 0%, rgba(255, 240, 180, 0.9) 45%, transparent 90%);
-        filter: blur(1.5px);
-        animation: flicker-core 0.08s infinite alternate ease-in-out;
-      }
-      @keyframes flicker-outer {
-        from { transform: translate(-0px, 0) scaleY(1.0) scaleX(1.0); opacity: 0.8; }
-        to   { transform: translate(1px, 0) scaleY(1.2) scaleX(0.88); opacity: 1; }
-      }
-      @keyframes flicker-mid {
-        from { transform: translate(-1px, 0) scaleY(0.9)  scaleX(1.1); opacity: 0.9; }
-        to   { transform: translate(1px, 2px) scaleY(1.15) scaleX(0.9); opacity: 1; }
-      }
-      @keyframes flicker-core {
-        from { transform: scaleY(0.95); opacity: 0.9; }
-        to   { transform: scaleY(1.15); opacity: 1;   }
-      }
-
-      /* Spark trail: a vertical gradient with animated radial highlights that
-         drift downward to suggest particles shedding from the engine. */
-      .rocket-trail {
-        position: absolute;
-        top: calc(100% + 40px);
-        left: 50%;
-        width: 6px;
-        height: 110px;
-        transform: translateX(-50%);
-        background: linear-gradient(180deg,
-          rgba(255, 200, 100, 0.85) 0%,
-          rgba(255, 120, 20, 0.5) 35%,
-          rgba(255, 80, 0, 0.25) 65%,
-          transparent 100%);
-        -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
-                mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
-        filter: blur(1.5px);
-        opacity: 0.85;
         z-index: 1;
       }
-      .rocket-trail::before {
-        content: '';
-        position: absolute;
-        inset: -4px;
-        background:
-          radial-gradient(1.5px at 50% 10%, rgba(255, 230, 150, 0.95), transparent 60%),
-          radial-gradient(1px   at 30% 35%, rgba(255, 180, 80, 0.8),   transparent 70%),
-          radial-gradient(1.5px at 65% 55%, rgba(255, 120, 40, 0.7),   transparent 70%),
-          radial-gradient(1px   at 40% 78%, rgba(255, 90, 20, 0.5),    transparent 80%);
-        animation: spark-fall 0.6s linear infinite;
-      }
-      @keyframes spark-fall {
-        0%   { transform: translateY(-10px); opacity: 1; }
-        100% { transform: translateY(30px);  opacity: 0; }
-      }
-
-      /* Launch caption */
-      .launch-caption {
-        margin-top: 28px;
-        font-family: 'Space Mono', monospace;
-        font-size: 12px;
-        letter-spacing: 0.45em;
-        color: rgba(255, 255, 255, 0.75);
-        text-shadow: 0 0 12px rgba(0, 225, 255, 0.35);
+      .ld-marquee-track {
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        animation: ld-marquee 22s linear infinite;
+        font-family: 'Carlito', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+        font-weight: 800;
+        font-size: clamp(56px, 10vw, 150px);
+        letter-spacing: -0.02em;
+        line-height: 1;
+        color: #000;
         text-transform: uppercase;
       }
+      .ld-mq-item { padding: 0 30px; }
+      .ld-mq-sep  { font-size: 0.5em; line-height: 1; padding: 0 4px; }
+      @keyframes ld-marquee {
+        from { transform: translateX(0%); }
+        to   { transform: translateX(-50%); }
+      }
 
-      /* === Blast-off: triggered on 100% via the .launching class === */
-      .launch-scene.launching .rocket-wrapper {
-        transform: translate(-50%, -360px); /* shoots past the top */
-        transition: transform 0.7s cubic-bezier(0.5, 0, 0.2, 1);
+      /* Center black pill button.
+         - Solid black bg, white uppercase label
+         - Violet glow leaking out the LEFT edge (drop-shadows)
+         - Deep drop shadow below for the "floating" look in the reference
+         - Border-radius: 100px keeps it pill-shaped until the exit transition
+           re-radius's it to 5000px for the full-screen curtain. */
+      .ld-pill {
+        position: relative;
+        z-index: 5;
+        appearance: none;
+        border: 0;
+        background: #000;
+        color: #fff;
+        border-radius: 100px;
+        padding: 16px 28px;
+        min-width: 200px;
+        font-family: 'Carlito', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: none;
+        overflow: hidden;
+        isolation: isolate;
+        box-shadow:
+          /* drop shadow underneath */
+          0 18px 30px rgba(0, 0, 0, 0.20),
+          /* violet edge glow — strong on the left, faint on the right */
+          -10px 0 28px rgba(168, 124, 255, 0.65),
+            8px 0 22px rgba(168, 124, 255, 0.18);
+        transition:
+          transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+          min-width 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+          padding 0.5s ease;
       }
-      .launch-scene.launching .flame {
-        transform: translate(-50%, -6px) scaleY(1.6);
-        transition: transform 0.4s ease-out;
+      .ld-pill:hover { transform: translateY(-1px); }
+
+      .ld-pill-loading,
+      .ld-pill-ready {
+        display: inline-flex;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+        transition: opacity 0.35s ease, max-width 0.55s cubic-bezier(0.5, 0, 0.2, 1);
       }
-      .launch-scene.launching .rocket-trail {
-        height: 260px;
+      .ld-pill-loading { opacity: 1; }
+      .ld-pill-ready {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
         opacity: 0;
-        transition: height 0.6s ease-out, opacity 0.6s ease-out 0.15s;
+        pointer-events: none;
+        gap: 10px;
       }
-      .launch-scene.launching .launch-ring-progress {
-        stroke-dashoffset: 0 !important;
-        filter: drop-shadow(0 0 14px rgba(0, 225, 255, 0.95));
+
+      .ld-pill-percent {
+        display: inline-block;
+        min-width: 2.6em;
+        text-align: left;
       }
-      .launch-scene.launching .pad-glow {
-        transform: translateX(-50%) scale(2.2);
+      .ld-pill-cursor {
+        display: inline-block;
+        width: 10px;
+        height: 20px;
+        margin-left: 8px;
+        background: #fff;
+        vertical-align: middle;
+        animation: ld-blink 1s steps(2, start) infinite;
+      }
+
+      /* Small box-icon shown to the left of WELCOME */
+      .ld-pill-icon {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 1px;
+      }
+
+      /* Ready state (after 100%): percent layer collapses, WELCOME fades in */
+      .ld-root[data-state="ready"] .ld-pill-loading {
         opacity: 0;
-        transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        max-width: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .ld-root[data-state="ready"] .ld-pill-ready { opacity: 1; pointer-events: auto; }
+      .ld-root[data-state="ready"] .ld-pill-cursor {
+        animation: none;
+        opacity: 1;
+      }
+
+      /* Curtain wipe: inflate the pill to cover the entire viewport.
+         These end-state numbers (min-width: 100vw + 5000px,
+         border-radius: 5000px) match the reference site exactly. */
+      .ld-root[data-state="exiting"] .ld-pill {
+        min-width: calc(100vw + 5000px);
+        min-height: calc(100vh + 500px);
+        border-radius: 5000px;
+        transition:
+          min-width 0.85s cubic-bezier(0.33, 0.11, 1, 0.72),
+          min-height 0.85s cubic-bezier(0.33, 0.11, 1, 0.72),
+          border-radius 0.85s cubic-bezier(0.33, 0.11, 1, 0.72);
+      }
+      .ld-root[data-state="exiting"] .ld-pill-loading,
+      .ld-root[data-state="exiting"] .ld-pill-ready {
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+
+      @keyframes ld-blink {
+        0%, 49%  { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+
+      /* Mobile — keep the personality, shrink the chrome */
+      @media (max-width: 768px) {
+        .ld-topbar { top: 14px; left: 16px; right: 16px; }
+        .ld-title  { font-size: 13px; }
+        .ld-game   { transform: scale(0.85); transform-origin: right center; }
+        .ld-pill   { font-size: 12px; padding: 13px 22px; letter-spacing: 1.4px; min-width: 170px; }
+        .ld-pill-cursor { width: 8px; height: 16px; margin-left: 6px; }
+        .ld-pill-icon   { width: 10px; height: 10px; }
+        .ld-marquee-track { font-size: clamp(42px, 14vw, 84px); }
       }
 
       body.loading-active {
@@ -477,97 +340,90 @@
 
     <script>
       // ==========================================================
-      // LAUNCH LOADER — progress binding + blast-off sequence
+      // INTRO LOADER — progress binding + click-to-enter curtain
       // ==========================================================
-      (function() {
+      (function () {
+        const root      = document.getElementById('loading-screen');
+        const pill      = document.getElementById('ld-pill');
+        const percentEl = document.getElementById('ld-percent');
+        if (!root || !pill || !percentEl) return;
+
         let progress = 0;
-        let isLoaded = false;
+        let phase = 1;
+        let isReady = false;
+        let isExiting = false;
+        let tickHandle = null;
 
-        const ring          = document.getElementById('rocket-progress');   // <circle>
-        const rocket        = document.getElementById('rocket-icon');       // .rocket-wrapper
-        const scene         = document.getElementById('launch-scene');
-        const loadingText   = document.getElementById('loading-text');
-        const loadingScreen = document.getElementById('loading-screen');
+        // Two-phase pacing like the reference site:
+        //   phase 1: fast random bumps until 50
+        //   phase 2: slow random bumps until ~91 (stalls waiting for assets)
+        function scheduleTick() {
+          tickHandle = setTimeout(function tick() {
+            if (isReady || isExiting) return;
+            if (phase === 1) {
+              progress += Math.max(1, Math.round(Math.random() * 6));
+              if (progress >= 50) { progress = 50; phase = 2; }
+            } else if (phase === 2 && progress < 91) {
+              progress += Math.random() < 0.55 ? 1 : 0; // ~55% chance of +1 per tick
+            }
+            percentEl.textContent = Math.min(progress, 91) + '%';
+            scheduleTick();
+          }, phase === 1 ? 120 : 180);
+        }
+        scheduleTick();
 
-        // 2 * PI * r (r=54 in the viewBox) — must match the CSS dasharray
-        const RING_CIRCUM = 339.29;
-
-        // How far the rocket can rise within the scene before blast-off.
-        // Measured in px; keeps it inside the 280px scene with some headroom.
-        const MAX_RISE = 190;
-
-        // Fast initial progress, decelerating past 80% (psychological pacing
-        // identical to the previous loader so the rest of the app's timing is unchanged).
-        const interval = setInterval(() => {
-          if (isLoaded) return;
-          if (progress < 80) {
-            let increment = (80 - progress) * 0.05;
-            if (increment < 0.1) increment = 0.1;
-            progress += increment;
-          } else if (progress < 95) {
-            progress += 0.05;
-          }
-          updateVisuals();
-        }, 50);
-
-        function updateVisuals() {
-          const clamped = Math.max(0, Math.min(100, progress));
-          if (ring) {
-            ring.style.strokeDashoffset = RING_CIRCUM * (1 - clamped / 100);
-          }
-          if (rocket) {
-            const rise = (clamped / 100) * MAX_RISE;
-            rocket.style.transform = `translate(-50%, ${-rise}px)`;
-          }
-          if (loadingText) {
-            loadingText.innerText = `LOADING ${Math.round(clamped)}%`;
-          }
+        // Dismiss: curtain-wipe + fade. Fires on the WELCOME click, or after
+        // a safety timeout so users who ignore the affordance still get in.
+        function dismiss() {
+          if (isExiting) return;
+          isExiting = true;
+          root.setAttribute('data-state', 'exiting');
+          // After the pill has inflated to fill the screen, fade the whole
+          // root to transparent and detach so the site behind is interactive.
+          setTimeout(() => {
+            root.setAttribute('data-state', 'dismissed');
+            setTimeout(() => {
+              root.style.display = 'none';
+              document.body.classList.remove('loading-active');
+              window.dispatchEvent(new Event('loading-complete'));
+            }, 580);
+          }, 880);
         }
 
-        // Called once the app's assets are ready — drive the blast-off.
-        window.finishLoading = function() {
-          if (isLoaded) return;
-          isLoaded = true;
-          clearInterval(interval);
+        pill.addEventListener('click', () => {
+          if (isReady) dismiss();
+        });
 
-          // Snap ring to full and caption to 100% immediately for polish
+        // Called from mercury-globe.js (and the main.js safety timeout) once
+        // 3D assets are ready. Snap to 100 and flip to "ready" so the user
+        // can click WELCOME. Safety auto-dismiss after ~2.6s so users who
+        // miss the affordance still get into the site.
+        window.finishLoading = function () {
+          if (isReady || isExiting) return;
+          isReady = true;
+          clearTimeout(tickHandle);
           progress = 100;
-          updateVisuals();
-
-          // Trigger blast-off class (rocket shoots upward, trail stretches & fades)
-          if (scene) scene.classList.add('launching');
-
-          // Fade screen out after the blast plays (~700ms)
-          setTimeout(() => {
-            if (loadingScreen) {
-              loadingScreen.style.opacity = '0';
-              setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                document.body.classList.remove('loading-active');
-                window.dispatchEvent(new Event('loading-complete'));
-              }, 600);
-            }
-          }, 800);
+          percentEl.textContent = '100%';
+          root.setAttribute('data-state', 'ready');
+          setTimeout(() => { if (!isExiting) dismiss(); }, 2600);
         };
 
-        // Block scrolling while loading
-        var block = function(e) { if (document.body.classList.contains('loading-active')) { e.preventDefault(); e.stopPropagation(); } };
-        document.addEventListener('wheel', block, { passive: false, capture: true });
+        // Block scrolling while the loader is up
+        const block = (e) => {
+          if (document.body.classList.contains('loading-active')) {
+            e.preventDefault(); e.stopPropagation();
+          }
+        };
+        document.addEventListener('wheel', block,    { passive: false, capture: true });
         document.addEventListener('touchmove', block, { passive: false, capture: true });
-        document.addEventListener('keydown', function(e) {
-          if (document.body.classList.contains('loading-active') && [32, 33, 34, 35, 36, 38, 40].indexOf(e.keyCode) !== -1) {
+        document.addEventListener('keydown', (e) => {
+          if (document.body.classList.contains('loading-active')
+              && [32, 33, 34, 35, 36, 38, 40].indexOf(e.keyCode) !== -1) {
             e.preventDefault();
           }
         }, { capture: true });
       })();
     </script>
-    
-    <!-- Old Script (Commented out to avoid conflict) -->
-    <!-- 
-    <script>
-       // ... old blocker code ...
-    </script>
-    -->
 
     <!-- Universe Zoom Video Section (Hidden by default).
          Video/audio sources are NOT inlined — they're lazy-injected by main.js
