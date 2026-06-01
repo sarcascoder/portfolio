@@ -8,6 +8,7 @@ import {
     ACESFilmicToneMapping, AmbientLight, BackSide, Box3, Color, DirectionalLight, DoubleSide, Group, HemisphereLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera, QuadraticBezierCurve3, SRGBColorSpace, Scene, Shape, ShapeGeometry, SphereGeometry, TubeGeometry, Vector3, WebGLRenderer
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { generateIceTexture } from './ice-texture.js';
 
 class MercuryGlobe {
@@ -230,6 +231,9 @@ class MercuryGlobe {
 
     loadMercuryModel() {
         const loader = new GLTFLoader();
+        // Meshopt decoder is required to read the meshopt-compressed
+        // blackhole.glb (geometry was crunched ~10× via gltf-transform).
+        loader.setMeshoptDecoder(MeshoptDecoder);
 
         loader.load(
             '/blackhole.glb',
