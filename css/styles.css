@@ -3061,19 +3061,38 @@ body.mobile-optimized .about-moon-overlay {
   .tech-channels {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 22px 16px;
+    gap: 22px 14px;
   }
+  /* Two columns per row. `min-width: 0` is essential: grid/flex items
+     default to min-width: auto, which lets long children (the channel
+     name like "BACKEND · FRAMEWORKS") push the cell wider than its
+     allotted half and overflow the viewport. */
   .tech-channel {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
-    gap: 12px;
-    width: calc((100% - 16px) / 2); /* 2 columns per row */
+    gap: 10px;
+    width: calc((100% - 14px) / 2);
+    min-width: 0;
     align-items: stretch;
   }
   .tech-channel-head {
     align-items: flex-start;
+    min-width: 0;
+    width: 100%;
   }
-  .tech-channel-name { font-size: 12px; letter-spacing: 0.16em; }
+  /* Allow long channel names to wrap onto two lines so they stay inside
+     the narrow mobile column. Drop the ellipsis truncation that was
+     inherited from the desktop rule. */
+  .tech-channel-name {
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.25;
+    word-break: break-word;
+    max-width: 100%;
+  }
   .tech-channel-num,
   .tech-channel-count { font-size: 9.5px; }
 
