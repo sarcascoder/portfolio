@@ -1057,6 +1057,68 @@ class MercuryGlobe {
         this.smirkCapRInner.visible = !isDark;
         this.spinGroup.add(this.smirkCapRInner);
         
+        // === ANGRY EXPRESSION (cursor-near-face state) ===
+        // V-angled brows (outer-high → inner-low) and an inverted "frown"
+        // mouth. Hidden by default; animate() flips visibility when the
+        // cursor is within ANGRY_RADIUS_PX of the smiley's screen position.
+
+        // Angry left brow: outer point HIGH, inner point LOW
+        const angryLeftBrowCurve = new QuadraticBezierCurve3(
+            new Vector3(-0.78 * s, 1.18 * s, faceZ - 0.15 * s),
+            new Vector3(-0.50 * s, 1.00 * s, faceZ - 0.05 * s),
+            new Vector3(-0.18 * s, 0.72 * s, faceZ - 0.15 * s)
+        );
+        this.angryLeftBrow = new Mesh(
+            new TubeGeometry(angryLeftBrowCurve, 20, 0.05 * s, 8, false), browMaterial.clone()
+        );
+        this.angryLeftBrow.visible = false;
+        this.spinGroup.add(this.angryLeftBrow);
+
+        this.angryLeftBrowGlow = new Mesh(
+            new TubeGeometry(angryLeftBrowCurve, 20, 0.065 * s, 8, false),
+            browGlowMaterial.clone()
+        );
+        this.angryLeftBrowGlow.visible = false;
+        this.spinGroup.add(this.angryLeftBrowGlow);
+
+        // Angry right brow: mirror — outer point HIGH on the right, inner LOW
+        const angryRightBrowCurve = new QuadraticBezierCurve3(
+            new Vector3(0.18 * s, 0.72 * s, faceZ - 0.15 * s),
+            new Vector3(0.50 * s, 1.00 * s, faceZ - 0.05 * s),
+            new Vector3(0.78 * s, 1.18 * s, faceZ - 0.15 * s)
+        );
+        this.angryRightBrow = new Mesh(
+            new TubeGeometry(angryRightBrowCurve, 20, 0.05 * s, 8, false), browMaterial.clone()
+        );
+        this.angryRightBrow.visible = false;
+        this.spinGroup.add(this.angryRightBrow);
+
+        this.angryRightBrowGlow = new Mesh(
+            new TubeGeometry(angryRightBrowCurve, 20, 0.065 * s, 8, false),
+            browGlowMaterial.clone()
+        );
+        this.angryRightBrowGlow.visible = false;
+        this.spinGroup.add(this.angryRightBrowGlow);
+
+        // Frown mouth: corners DOWN, middle UP — inverted arc.
+        const frownCurve = new QuadraticBezierCurve3(
+            new Vector3(-0.80 * s, -1.05 * s, faceZ - 0.25 * s),
+            new Vector3(0.00 * s, -0.55 * s, faceZ),
+            new Vector3(0.80 * s, -1.05 * s, faceZ - 0.25 * s)
+        );
+        this.frownMouth = new Mesh(
+            new TubeGeometry(frownCurve, 40, 0.065 * s, 10, false), smileMaterial.clone()
+        );
+        this.frownMouth.visible = false;
+        this.spinGroup.add(this.frownMouth);
+
+        this.frownMouthGlow = new Mesh(
+            new TubeGeometry(frownCurve, 40, 0.09 * s, 10, false),
+            smileGlowMaterial.clone()
+        );
+        this.frownMouthGlow.visible = false;
+        this.spinGroup.add(this.frownMouthGlow);
+
         // === TONGUE ===
         const tongueShape = new Shape();
         const tw = 0.38 * s;
@@ -1096,7 +1158,35 @@ class MercuryGlobe {
             this.lightCapL, this.lightCapLInner, this.lightCapR, this.lightCapRInner,
             this.smirkSmile, this.smirkLeftHook, this.smirkRightHook,
             this.smirkCapL, this.smirkCapLInner, this.smirkCapR, this.smirkCapRInner,
-            this.tongue
+            this.tongue,
+            this.angryLeftBrow, this.angryLeftBrowGlow,
+            this.angryRightBrow, this.angryRightBrowGlow,
+            this.frownMouth, this.frownMouthGlow
+        ];
+
+        // Happy-expression parts that get HIDDEN when the cursor enters the
+        // smiley's hover radius. Mirrors what gets shown via angryParts.
+        // Light-mode parts (wink/smirk/tongue) are not in this list — they
+        // already obey the theme toggle elsewhere.
+        this.happyExpressionParts = [
+            this.leftEyebrow, this.leftEyebrowGlow,
+            this.leftBrowCapL, this.leftBrowCapLGlow,
+            this.leftBrowCapR, this.leftBrowCapRGlow,
+            this.rightEyebrow, this.rightEyebrowGlow,
+            this.rightBrowCapL, this.rightBrowCapLGlow,
+            this.rightBrowCapR, this.rightBrowCapRGlow,
+            this.smile, this.smileGlow,
+            this.leftHook, this.leftHookGlow,
+            this.rightHook, this.rightHookGlow,
+            this.lightCapL, this.lightCapLInner,
+            this.lightCapR, this.lightCapRInner
+        ];
+
+        // Angry-expression parts shown when the cursor is near the smiley.
+        this.angryParts = [
+            this.angryLeftBrow, this.angryLeftBrowGlow,
+            this.angryRightBrow, this.angryRightBrowGlow,
+            this.frownMouth, this.frownMouthGlow
         ];
         this.smileyParts.forEach(part => {
             if (part) {
@@ -1499,21 +1589,68 @@ class MercuryGlobe {
         this.mouse.y = this.lerp(this.mouse.y, this.targetMouse.y, 0.1);
         
         // Reference point for cursor offset = the smiley's actual screen
-        // position (projected from its world anchor). The container is now
-        // full-viewport so rect.center collapses to screen center, but the
-        // smiley sits on the left side of the screen — using screen center
-        // as the reference made the face yaw toward the center even when
-        // the cursor was directly above the smiley.
+        // position. Project the world anchor into the camera's NDC, then
+        // map that into container coordinates using getBoundingClientRect
+        // — that way any GSAP-driven CSS transform on the container
+        // (scale, translate, scroll-section movement) is reflected in the
+        // cursor reference position, so hover detection and yaw/pitch
+        // tracking stay correct in every section.
         const anchor = new Vector3(this.diskShiftX, this.smileyOffsetY, this.smileyOffsetZ || 0);
         anchor.project(this.camera);
-        const globeCenterX = (anchor.x * 0.5 + 0.5) * window.innerWidth;
-        const globeCenterY = (-anchor.y * 0.5 + 0.5) * window.innerHeight;
+        const containerRect = this.container.getBoundingClientRect();
+        const fracX = (anchor.x + 1) * 0.5;
+        const fracY = (1 - anchor.y) * 0.5;
+        const globeCenterX = containerRect.left + fracX * containerRect.width;
+        const globeCenterY = containerRect.top + fracY * containerRect.height;
 
         // Calculate offset relative to the globe's center
         // We use window dimensions for normalization to keep sensitivity consistent
         const offsetX = (this.mouse.x - globeCenterX) / (window.innerWidth / 2);
         const offsetY = (this.mouse.y - globeCenterY) / (window.innerHeight / 2);
-        
+
+        // Angry mode: swap the happy brows + smile for V-angled brows + a
+        // frown when the cursor is within ANGRY_RADIUS_PX of the smiley's
+        // screen position. Runs EVERY frame (not edge-triggered) because
+        // the theme-transition loop above rewrites visibility on darkParts
+        // every frame — we have to keep overriding it back.
+        const dxAngry = this.mouse.x - globeCenterX;
+        const dyAngry = this.mouse.y - globeCenterY;
+        const distSq = dxAngry * dxAngry + dyAngry * dyAngry;
+        const ANGRY_RADIUS_PX = 260;
+        const isAngry = distSq < ANGRY_RADIUS_PX * ANGRY_RADIUS_PX;
+        const isDarkTheme = document.documentElement.getAttribute('data-theme') !== 'light';
+        if (isAngry && isDarkTheme) {
+            if (this.happyExpressionParts) {
+                this.happyExpressionParts.forEach(p => {
+                    if (p) p.visible = false;
+                });
+            }
+            if (this.angryParts) {
+                this.angryParts.forEach(p => {
+                    if (p) p.visible = true;
+                });
+            }
+        } else {
+            // Restore the "always visible in dark" happy brows + caps; the
+            // theme-transition loop above already restored opacity-driven
+            // visibility for the darkParts subset (smile/hooks/right brow).
+            if (this.angryParts) {
+                this.angryParts.forEach(p => {
+                    if (p) p.visible = false;
+                });
+            }
+            // Re-show the always-visible happy brow set (left brow + caps)
+            // in case angry mode toggled them off.
+            const alwaysVisibleHappy = [
+                this.leftEyebrow, this.leftEyebrowGlow,
+                this.leftBrowCapL, this.leftBrowCapLGlow,
+                this.leftBrowCapR, this.leftBrowCapRGlow
+            ];
+            alwaysVisibleHappy.forEach(p => {
+                if (p) p.visible = true;
+            });
+        }
+
         this.targetRotation.y = offsetX * this.config.maxRotation;
         // Phones place the globe at top:35% (CSS @media ≤768), so globeCenterY
         // sits ABOVE the viewport center. That makes offsetY positive even when
