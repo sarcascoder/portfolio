@@ -1379,92 +1379,293 @@ body.mobile-optimized .about-moon-overlay {
 /* ========================================
    Services Grid
    ======================================== */
+/* OPERATIONAL CAPABILITIES — five capability "dossiers".
+   Each .service-item shares one chassis but carries its own
+   --accent, surfaced via the SVC index, role tag, ghost numeral,
+   arrow glyphs, accent rail and hover state. Layout: first card
+   spans both columns, then a 2x2 beneath. Constrained to ~50vw
+   so it sits left of the mercury globe. */
+
 .services-section .section-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Align content to left */
+  align-items: flex-start;
   margin-right: auto;
   margin-left: 0;
-  max-width: 50vw; /* Limit width to keep right side clear for globe */
+  max-width: 50vw;
 }
 
 .services-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2.5vw;
+  gap: clamp(18px, 1.6vw, 28px);
   width: 100%;
 }
 
-/* 1st item on first row, left column */
 .services-grid .service-item:nth-child(1) {
-    grid-column: 1;
+  grid-column: 1 / -1;
 }
 
-/* Force 2nd item to start new row (left column), so 3rd item goes to right column */
-.services-grid .service-item:nth-child(2) {
-    grid-column: 1;
-}
-
-/* 4th item starts new row (left column), 5th item goes to right column naturally */
-.services-grid .service-item:nth-child(4) {
-    grid-column: 1;
-}
+/* Per-service accent palette */
+.service-item[data-service="knowledge"] { --accent: #f5a623; --accent-soft: rgba(245, 166, 35, 0.14); }
+.service-item[data-service="fullstack"] { --accent: #00e1ff; --accent-soft: rgba(0, 225, 255, 0.14); }
+.service-item[data-service="vision"]    { --accent: #ff5dbf; --accent-soft: rgba(255, 93, 191, 0.14); }
+.service-item[data-service="creative"]  { --accent: #a3f344; --accent-soft: rgba(163, 243, 68, 0.14); }
+.service-item[data-service="llm"]       { --accent: #ff6a4d; --accent-soft: rgba(255, 106, 77, 0.14); }
 
 .service-item {
-  padding: 2.5vw;
-  border: 1px solid var(--color-gray-mid);
-  background: rgba(50, 50, 50, 0.4); /* Greyish semi-transparent background */
-  transition:
-    border-color 0.3s ease,
-    transform 0.3s ease;
+  position: relative;
+  isolation: isolate;
+  padding: clamp(26px, 2.4vw, 40px) clamp(28px, 2.6vw, 44px) clamp(24px, 2.2vw, 38px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    /* faint scanline texture so the card reads like an instrument panel */
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.018) 0px,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 55%),
+    rgba(10, 10, 14, 0.62);
+  overflow: hidden;
+  transition: border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+  counter-reset: svc-cap;
 }
 
-/* Light mode disabled
-[data-theme="light"] .service-item {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: var(--color-gray-light);
+/* Four L-shaped corner brackets in the accent colour — defines the
+   "instrument panel" frame. Drawn with eight tiny gradients, one for
+   each leg of each corner. */
+.service-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    /* top-left horizontal leg */
+    linear-gradient(to right, var(--accent) 0, var(--accent) 22px, transparent 22px) top left / 100% 1.5px no-repeat,
+    /* top-left vertical leg */
+    linear-gradient(to bottom, var(--accent) 0, var(--accent) 22px, transparent 22px) top left / 1.5px 100% no-repeat,
+    /* top-right horizontal */
+    linear-gradient(to left, var(--accent) 0, var(--accent) 22px, transparent 22px) top right / 100% 1.5px no-repeat,
+    /* top-right vertical */
+    linear-gradient(to bottom, var(--accent) 0, var(--accent) 22px, transparent 22px) top right / 1.5px 100% no-repeat,
+    /* bottom-left horizontal */
+    linear-gradient(to right, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom left / 100% 1.5px no-repeat,
+    /* bottom-left vertical */
+    linear-gradient(to top, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom left / 1.5px 100% no-repeat,
+    /* bottom-right horizontal */
+    linear-gradient(to left, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom right / 100% 1.5px no-repeat,
+    /* bottom-right vertical */
+    linear-gradient(to top, var(--accent) 0, var(--accent) 22px, transparent 22px) bottom right / 1.5px 100% no-repeat;
+  opacity: 0.7;
+  transition: opacity 0.4s ease;
 }
-*/
+
+/* Glowing accent dot — registration mark in top-right of the bracket */
+.service-item::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  border-radius: 50%;
+  z-index: 1;
+}
 
 .service-item:hover {
-  border-color: var(--color-neon-green);
-  transform: translateY(-5px);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 52px -28px var(--accent);
 }
 
-.service-icon {
-  font-size: 24px;
-  color: var(--color-neon-green);
-  margin-bottom: 20px;
+.service-item:hover::before { opacity: 1; }
+
+/* Header row — index + role tag */
+.svc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: clamp(16px, 1.6vw, 26px);
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.82vw, 13px);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.svc-id {
+  color: var(--accent);
+  font-weight: 700;
+  text-shadow: 0 0 14px var(--accent-soft);
+}
+
+.svc-tag {
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+/* Ghost numeral — large faded number anchored to the right edge */
+.svc-ghost {
+  position: absolute;
+  top: clamp(-28px, -2.2vw, -14px);
+  right: clamp(-6px, 0.5vw, 18px);
+  font-family: var(--font-dot-matrix);
+  font-size: clamp(150px, 16vw, 280px);
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.09;
+  pointer-events: none;
+  user-select: none;
+  z-index: -1;
+  letter-spacing: -0.05em;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.service-item:hover .svc-ghost {
+  opacity: 0.18;
+  transform: translateY(-6px);
 }
 
 .service-title {
   font-family: var(--font-dot-matrix);
-  font-size: clamp(20px, 2.2vw, 38px);
-  margin-bottom: 2vw;
+  font-size: clamp(26px, 2.4vw, 40px);
+  line-height: 1.08;
+  letter-spacing: 0.005em;
+  color: var(--color-white);
+  margin: 0 0 clamp(14px, 1.1vw, 20px);
   transition: color 0.3s ease;
+  max-width: 18ch;
+}
+
+/* Wide first card — title breathes much larger */
+.services-grid .service-item:nth-child(1) .service-title {
+  font-size: clamp(32px, 3.2vw, 54px);
+  max-width: 16ch;
 }
 
 .service-item:hover .service-title {
-  color: var(--color-neon-green);
+  color: var(--accent);
+}
+
+.svc-blurb {
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 0.95vw, 15px);
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 clamp(18px, 1.7vw, 28px);
+  max-width: 42ch;
+}
+
+/* Divider row — short accent dash + capability count */
+.svc-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(14px, 1.2vw, 20px);
+}
+
+.svc-divider-line {
+  flex: 0 0 40px;
+  height: 1.5px;
+  background: var(--accent);
+  opacity: 0.9;
+}
+
+.svc-divider-meta {
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.78vw, 12px);
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
 }
 
 .service-list {
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.7vw;
+  gap: clamp(10px, 0.85vw, 14px);
+  margin: 0 0 clamp(18px, 1.8vw, 30px);
+  padding: 0;
 }
 
 .service-list li {
+  counter-increment: svc-cap;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   font-family: var(--font-mono);
-  font-size: clamp(11px, 1vw, 16px);
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  transition: color 0.3s ease;
+  font-size: clamp(13px, 1.05vw, 16px);
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.82);
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
-.service-item:hover .service-list li {
-  color: var(--color-white);
+/* Numbered chip prefix — 01 02 03 in accent colour, mono, bordered */
+.service-list li::before {
+  content: counter(svc-cap, decimal-leading-zero);
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 0.7vw, 11px);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  padding: 4px 8px;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  background: var(--accent-soft);
+  line-height: 1;
+  transition: transform 0.3s ease, background 0.3s ease;
 }
+
+.svc-cap { flex: 1 1 auto; }
+
+.service-item:hover .service-list li { color: var(--color-white); }
+.service-item:hover .service-list li::before { transform: translateX(3px); }
+.service-item:hover .service-list li:nth-child(2)::before { transition-delay: 40ms; }
+.service-item:hover .service-list li:nth-child(3)::before { transition-delay: 80ms; }
+.service-item:hover .service-list li:nth-child(4)::before { transition-delay: 120ms; }
+.service-item:hover .service-list li:nth-child(5)::before { transition-delay: 160ms; }
+
+/* Status footer — mock telemetry strip beneath the capability list,
+   separated by a thin accent-tinted hairline. Reinforces the
+   "instrument panel" reading and gives each card a unique signature. */
+.svc-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: clamp(12px, 1.1vw, 18px);
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 0.7vw, 11px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.svc-foot-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: svc-foot-pulse 2.4s ease-in-out infinite;
+  flex: 0 0 auto;
+}
+
+@keyframes svc-foot-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+.svc-foot-key { color: rgba(255, 255, 255, 0.32); }
+.svc-foot-val { color: var(--accent); font-weight: 600; margin-left: 4px; }
+.svc-foot-sep { color: rgba(255, 255, 255, 0.18); margin: 0 4px; }
 
 /* ========================================
    Contact Section
@@ -2251,11 +2452,23 @@ body.mobile-optimized .about-moon-overlay {
 
     .services-grid {
         grid-template-columns: 1fr; /* Stack services */
-        gap: 20px;
+        gap: 16px;
     }
 
     .service-item {
-        padding: 20px;
+        padding: 22px 20px 24px;
+    }
+
+    /* Wide-card title constraint doesn't apply on stacked layout */
+    .services-grid .service-item:nth-child(1) .service-title {
+        max-width: 100%;
+    }
+
+    /* Shrink ghost numeral on phones so it doesn't crowd the title */
+    .svc-ghost {
+        font-size: clamp(80px, 26vw, 130px);
+        top: -10px;
+        right: 4px;
     }
 
     .projects-grid {
@@ -2276,11 +2489,6 @@ body.mobile-optimized .about-moon-overlay {
 
     .projects-grid .project-card:nth-child(1),
     .projects-grid .project-card:nth-child(3) {
-        grid-column: auto;
-    }
-
-    .services-grid .service-item:nth-child(2),
-    .services-grid .service-item:nth-child(4) {
         grid-column: auto;
     }
 
@@ -2321,28 +2529,28 @@ body.mobile-optimized .about-moon-overlay {
         max-width: 100%;
     }
     
-    /* Services Section */
+    /* Services Section — keep dossiers left-aligned on mobile so the
+       header row (index + tag, space-between) and the bullet rows read
+       naturally. Only the section heading/label centers. */
     .services-section .section-content {
-        align-items: center;
-        text-align: center;
+        align-items: stretch;
+        text-align: left;
         max-width: 100%;
     }
-    
+
     .services-section .section-label {
         flex-direction: row;
         justify-content: center;
         width: 100%;
     }
-    
+
     .service-item {
-        text-align: center;
-        align-items: center;
-        display: flex;
-        flex-direction: column;
+        text-align: left;
+        align-items: stretch;
     }
-    
+
     .service-list {
-        text-align: center;
+        text-align: left;
         padding-left: 0;
     }
     

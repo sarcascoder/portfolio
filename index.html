@@ -218,12 +218,12 @@
         background: #000;
         color: #fff;
         border-radius: 100px;
-        padding: 16px 28px;
-        min-width: 200px;
+        padding: clamp(22px, 2.4vw, 32px) clamp(40px, 5vw, 64px);
+        min-width: clamp(280px, 30vw, 420px);
         font-family: 'Carlito', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
         font-weight: 700;
-        font-size: 15px;
-        letter-spacing: 2px;
+        font-size: clamp(22px, 2.4vw, 34px);
+        letter-spacing: 3px;
         text-transform: uppercase;
         cursor: none;
         overflow: hidden;
@@ -266,9 +266,9 @@
       }
       .ld-pill-cursor {
         display: inline-block;
-        width: 10px;
-        height: 20px;
-        margin-left: 8px;
+        width: clamp(12px, 1vw, 16px);
+        height: clamp(26px, 2.4vw, 36px);
+        margin-left: 10px;
         background: #fff;
         vertical-align: middle;
         animation: ld-blink 1s steps(2, start) infinite;
@@ -277,10 +277,10 @@
       /* Small box-icon shown to the left of WELCOME */
       .ld-pill-icon {
         display: inline-block;
-        width: 12px;
-        height: 12px;
+        width: clamp(16px, 1.3vw, 22px);
+        height: clamp(16px, 1.3vw, 22px);
         background: #fff;
-        border-radius: 1px;
+        border-radius: 2px;
       }
 
       /* Ready state (after 100%): percent layer collapses, WELCOME fades in */
@@ -324,9 +324,9 @@
         .ld-topbar { top: 14px; left: 16px; right: 16px; }
         .ld-title  { font-size: 13px; }
         .ld-game   { transform: scale(0.85); transform-origin: right center; }
-        .ld-pill   { font-size: 12px; padding: 13px 22px; letter-spacing: 1.4px; min-width: 170px; }
-        .ld-pill-cursor { width: 8px; height: 16px; margin-left: 6px; }
-        .ld-pill-icon   { width: 10px; height: 10px; }
+        .ld-pill   { font-size: 18px; padding: 18px 34px; letter-spacing: 2px; min-width: 230px; }
+        .ld-pill-cursor { width: 11px; height: 22px; margin-left: 8px; }
+        .ld-pill-icon   { width: 14px; height: 14px; }
         .ld-marquee-track { font-size: clamp(42px, 14vw, 84px); }
       }
 
@@ -715,60 +715,126 @@
           <span class="label-text">SERVICES</span>
         </div>
 
+        <!-- OPERATIONAL CAPABILITIES — five capability "dossiers".
+             Each card shares the same chassis (index + role tag, ghost
+             numeral, title, capability rows) but carries a distinct
+             accent colour driven by data-service so the section reads
+             as five instruments instead of one monochrome wall. -->
         <div class="services-grid">
-          <div class="service-item" data-service="creative">
-            <div class="service-icon">✦</div>
-            <h3 class="service-title">Complex Documents Reading and Retrieving Relevent Information on Your Local Device</h3>
+          <article class="service-item" data-service="knowledge">
+            <header class="svc-head">
+              <span class="svc-id">SVC // 01</span>
+              <span class="svc-tag">[ KNOWLEDGE RETRIEVAL ]</span>
+            </header>
+            <span class="svc-ghost" aria-hidden="true">01</span>
+            <h3 class="service-title">Local-First Document Intelligence</h3>
+            <p class="svc-blurb">Run retrieval over private corpora on your own hardware — answers stay on-device.</p>
+            <div class="svc-divider"><span class="svc-divider-line"></span><span class="svc-divider-meta">05 CAPABILITIES</span></div>
             <ul class="service-list">
-              <li>Finance RAG</li>
-              <li>Enterprise RAG</li>
-              <li>General RAG</li>
-              <li>Specific Information Calculation and Extraction from Documents</li>
-              <li>Compliance Checking and Reviewing</li>
+              <li><span class="svc-cap">Finance RAG</span></li>
+              <li><span class="svc-cap">Enterprise RAG</span></li>
+              <li><span class="svc-cap">General-purpose RAG</span></li>
+              <li><span class="svc-cap">Targeted extraction &amp; calculation</span></li>
+              <li><span class="svc-cap">Compliance review &amp; checking</span></li>
             </ul>
-          </div>
+            <footer class="svc-foot">
+              <span class="svc-foot-dot"></span>
+              <span class="svc-foot-key">STATUS</span><span class="svc-foot-val">OPERATIONAL</span>
+              <span class="svc-foot-sep">·</span>
+              <span class="svc-foot-key">STACK</span><span class="svc-foot-val">LLAMA · CHROMA · LANGCHAIN</span>
+            </footer>
+          </article>
 
-          <div class="service-item" data-service="digital">
-            <div class="service-icon">✦</div>
+          <article class="service-item" data-service="fullstack">
+            <header class="svc-head">
+              <span class="svc-id">SVC // 02</span>
+              <span class="svc-tag">[ FULL-STACK INTERFACES ]</span>
+            </header>
+            <span class="svc-ghost" aria-hidden="true">02</span>
             <h3 class="service-title">Full Stack Web Development</h3>
+            <p class="svc-blurb">From the design system to the deployment pipeline — interfaces that feel deliberate.</p>
+            <div class="svc-divider"><span class="svc-divider-line"></span><span class="svc-divider-meta">04 CAPABILITIES</span></div>
             <ul class="service-list">
-              <li>UI/UX Design</li>
-              <li>Full Stack App</li>
-              <li>Full Stack Interactive Web Sites</li>
-              <li>3D Web Sites</li>
+              <li><span class="svc-cap">UI / UX design</span></li>
+              <li><span class="svc-cap">Full-stack applications</span></li>
+              <li><span class="svc-cap">Interactive marketing sites</span></li>
+              <li><span class="svc-cap">3D &amp; WebGL experiences</span></li>
             </ul>
-          </div>
+            <footer class="svc-foot">
+              <span class="svc-foot-dot"></span>
+              <span class="svc-foot-key">STATUS</span><span class="svc-foot-val">OPERATIONAL</span>
+              <span class="svc-foot-sep">·</span>
+              <span class="svc-foot-key">STACK</span><span class="svc-foot-val">REACT · NODE · POSTGRES · GSAP</span>
+            </footer>
+          </article>
 
-          <div class="service-item" data-service="strategy">
-            <div class="service-icon">✦</div>
-            <h3 class="service-title">Visual Detections from Image and Videos</h3>
+          <article class="service-item" data-service="vision">
+            <header class="svc-head">
+              <span class="svc-id">SVC // 03</span>
+              <span class="svc-tag">[ COMPUTER VISION ]</span>
+            </header>
+            <span class="svc-ghost" aria-hidden="true">03</span>
+            <h3 class="service-title">Visual Detection &amp; Tracking</h3>
+            <p class="svc-blurb">Detect, segment and follow what matters across stills and live video.</p>
+            <div class="svc-divider"><span class="svc-divider-line"></span><span class="svc-divider-meta">05 CAPABILITIES</span></div>
             <ul class="service-list">
-              <li>Surface Defect Detections</li>
-              <li>Object Detection</li>
-              <li>Image Processing</li>
-              <li>Object Segmentation</li>
-              <li>Video Object Tracking</li>
+              <li><span class="svc-cap">Surface defect detection</span></li>
+              <li><span class="svc-cap">Object detection</span></li>
+              <li><span class="svc-cap">Image processing</span></li>
+              <li><span class="svc-cap">Object segmentation</span></li>
+              <li><span class="svc-cap">Video object tracking</span></li>
             </ul>
-          </div>
+            <footer class="svc-foot">
+              <span class="svc-foot-dot"></span>
+              <span class="svc-foot-key">STATUS</span><span class="svc-foot-val">OPERATIONAL</span>
+              <span class="svc-foot-sep">·</span>
+              <span class="svc-foot-key">STACK</span><span class="svc-foot-val">TORCH · YOLO · OPENCV</span>
+            </footer>
+          </article>
 
-          <div class="service-item" data-service="strategy">
-            <div class="service-icon">✦</div>
+          <article class="service-item" data-service="creative">
+            <header class="svc-head">
+              <span class="svc-id">SVC // 04</span>
+              <span class="svc-tag">[ APPLIED SOLUTIONING ]</span>
+            </header>
+            <span class="svc-ghost" aria-hidden="true">04</span>
             <h3 class="service-title">Creative Smart Solutioning</h3>
+            <p class="svc-blurb">Awkward edge-cases, weird hardware constraints, custom rigs — the bespoke layer.</p>
+            <div class="svc-divider"><span class="svc-divider-line"></span><span class="svc-divider-meta">03 CAPABILITIES</span></div>
             <ul class="service-list">
-              <li>Finding Smart Solutions for Specific Cases</li>
-              <li>Hardware Solutioning</li>
-              <li>Specific Lightining</li>
+              <li><span class="svc-cap">Case-specific smart solutions</span></li>
+              <li><span class="svc-cap">Hardware solutioning</span></li>
+              <li><span class="svc-cap">Bespoke lighting setups</span></li>
             </ul>
-          </div>
-          <div class="service-item" data-service="strategy">
-            <div class="service-icon">✦</div>
-            <h3 class="service-title">LLMs Finetuning & System Design</h3>
+            <footer class="svc-foot">
+              <span class="svc-foot-dot"></span>
+              <span class="svc-foot-key">STATUS</span><span class="svc-foot-val">BESPOKE</span>
+              <span class="svc-foot-sep">·</span>
+              <span class="svc-foot-key">STACK</span><span class="svc-foot-val">HARDWARE · OPTICS · FIRMWARE</span>
+            </footer>
+          </article>
+
+          <article class="service-item" data-service="llm">
+            <header class="svc-head">
+              <span class="svc-id">SVC // 05</span>
+              <span class="svc-tag">[ LANGUAGE MODELS ]</span>
+            </header>
+            <span class="svc-ghost" aria-hidden="true">05</span>
+            <h3 class="service-title">LLM Fine-Tuning &amp; System Design</h3>
+            <p class="svc-blurb">Pick the right model, train it on the right data, ship it behind the right architecture.</p>
+            <div class="svc-divider"><span class="svc-divider-line"></span><span class="svc-divider-meta">03 CAPABILITIES</span></div>
             <ul class="service-list">
-              <li>Can work for you to Fine tune LLMs</li>
-              <li>Selection of Relevent Models and Tech Stack for your case</li>
-              <li>Consulting</li>
+              <li><span class="svc-cap">Fine-tuning end-to-end</span></li>
+              <li><span class="svc-cap">Model &amp; stack selection</span></li>
+              <li><span class="svc-cap">System-design consulting</span></li>
             </ul>
-          </div>
+            <footer class="svc-foot">
+              <span class="svc-foot-dot"></span>
+              <span class="svc-foot-key">STATUS</span><span class="svc-foot-val">OPERATIONAL</span>
+              <span class="svc-foot-sep">·</span>
+              <span class="svc-foot-key">STACK</span><span class="svc-foot-val">TRL · PEFT · VLLM</span>
+            </footer>
+          </article>
         </div>
       </div>
     </section>
