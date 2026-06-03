@@ -174,12 +174,18 @@ class MercuryGlobe {
         this.renderer = new WebGLRenderer({
             canvas: this.canvas,
             alpha: true,
-            antialias: !this.isMobile,
+            // MSAA on everywhere — the staircase aliasing on the smiley
+            // edges at high-DPI phones was the dominant visible artifact.
+            // Worth the GPU cost on mobile because the canvas is small.
+            antialias: true,
             powerPreference: 'high-performance'
         });
         this.renderer.setSize(this.width, this.height);
-        // Pixel ratio 1.5 (was 1.75) — ~30% fewer fragments on Retina, invisible at this size
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1 : 1.5));
+        // DPR cap: 1.5 on desktop, 1.75 on mobile so Retina phones actually
+        // use their real pixel density. Previously capped at 1 on mobile,
+        // which forced a 4× downsample on DPR-2 screens and was the source
+        // of the chunky pixels reported in the contact section.
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.75 : 1.5));
         this.renderer.physicallyCorrectLights = true;
         this.renderer.toneMapping = ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
@@ -646,14 +652,29 @@ class MercuryGlobe {
                 }
             });
             tlMobileContact.to(this.innerEl, {
-                // Smaller scale than the hero because on mobile the
-                // container is shifted to top:85% (body.in-contact) so the
-                // globe sits BELOW the contact copy. A full-size globe at
-                // that anchor would clip the viewport bottom.
-                scale: 0.9,
+                scale: 1,
                 opacity: 1,
                 z: 0,
                 filter: "blur(0px)",
+                ease: "power2.inOut"
+            }, 0);
+            // Move the CONTAINER down for the contact section so the
+            // globe sits BELOW the "LET'S CREATE..." copy. Wrapper
+            // architecture is preserved because GSAP is still the only
+            // writer to the container's transform — we just hand it
+            // explicit top / width / height values per scroll position
+            // instead of relying on a body class + CSS @media rule that
+            // was unreliable on some devices.
+            tlMobileContact.to(this.container, {
+                // Top edge at ~50% so the globe sits immediately below
+                // the "DROP AN EMAIL" button (which ends around 48% on
+                // a portrait phone). 60vmin keeps it sized for the
+                // remaining vertical space without clipping the footer.
+                top: '50%',
+                width: '100vmin',
+                height: '60vmin',
+                xPercent: -50,
+                yPercent: 0,
                 ease: "power2.inOut"
             }, 0);
             tlMobileContact.to(this.camera.position, {
@@ -1486,7 +1507,7 @@ class MercuryGlobe {
         this.camera.aspect = this.width / this.height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width, this.height);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1 : 1.5));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.75 : 1.5));
     }
     
     lerp(start, end, factor) {

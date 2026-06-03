@@ -3362,16 +3362,28 @@ body.mobile-optimized.in-tech-stack #mercury-container {
   visibility: hidden;
 }
 
-/* On mobile, the contact-section copy sits centred while the mercury
-   container is pinned at top: 35% — so the globe overlaps the
-   "LET'S CREATE SOMETHING AMAZING" copy. Push the globe centre down to
-   85% of viewport when contact is in view so the globe reads BELOW the
-   text. CSS positioning only — GSAP's scroll timeline keeps owning
-   scale/opacity on innerEl, so the wrapper-architecture separation
-   stays intact. Desktop is unaffected (container is full-viewport
-   fixed above 1024px). */
-body.mobile-optimized.in-contact #mercury-container {
-  top: 85% !important;
+/* On mobile, the contact-section copy sits in the upper half of the
+   viewport. The mercury container is otherwise pinned at top: 35% with
+   translate(-50%,-50%), which lands the globe centred ON the
+   "LET'S CREATE SOMETHING AMAZING" copy. While the contact section is
+   in view, anchor the globe's TOP edge below the copy and shrink it
+   so it reads as a separate element BELOW the text.
+
+   We switch the centering transform to translateX-only so `top` now
+   refers to the element's top edge, not its centre. Combined with
+   smaller width/height, the globe occupies the bottom band of the
+   viewport instead of overlapping the headline.
+
+   Guarded by a @media query instead of body.mobile-optimized so the
+   rule fires on any small viewport (the JS flag is async — earlier
+   versions were sometimes painting before mobile-optimized landed). */
+@media (max-width: 768px) {
+  body.in-contact #mercury-container {
+    top: 62% !important;
+    width: 66vmin !important;
+    height: 66vmin !important;
+    transform: translateX(-50%) !important;
+  }
 }
 
 
