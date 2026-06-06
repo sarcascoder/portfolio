@@ -1087,49 +1087,63 @@ class MercuryGlobe {
         // mouth. Hidden by default; animate() flips visibility when the
         // cursor is within ANGRY_RADIUS_PX of the smiley's screen position.
 
-        // Angry left brow: outer point HIGH, inner point LOW
+        // Angry left brow: sweeping arc — inner end (near nose) sits low,
+        // peak rises toward the outer-upper area, outer tail comes down.
+        //
+        // TWEAK GUIDE — each Vector3 below is (x, y, z):
+        //   x  → horizontal position. NEGATIVE = left of face center.
+        //        More negative = further LEFT (outward).
+        //   y  → vertical position. POSITIVE = up.
+        //        Higher y = brow sits higher on the face.
+        //   z  → depth. More negative = pushed BACK behind the face plane.
+        //
+        // The three points define the curve:
+        //   1) INNER end (near the nose) — start of the brow.
+        //   2) CONTROL point — pulls the arc's shape. Higher y = taller
+        //      arch. Push x outward to shift the peak toward the outer side.
+        //   3) OUTER end (far side, away from face center) — end of the brow.
         const angryLeftBrowCurve = new QuadraticBezierCurve3(
-            new Vector3(-0.78 * s, 1.18 * s, faceZ - 0.15 * s),
-            new Vector3(-0.50 * s, 1.00 * s, faceZ - 0.05 * s),
-            new Vector3(-0.18 * s, 0.72 * s, faceZ - 0.15 * s)
+            new Vector3(-0.20 * s, 0.85 * s, faceZ - 0.15 * s), // INNER end: low + near center. Lower y = inner tip dives more toward nose.
+            new Vector3(-0.55 * s, 1.20 * s, faceZ - 0.05 * s), // CONTROL: arch peak. Raise y for taller arch. Push x more negative to shift peak outward.
+            new Vector3(-0.95 * s, 1.05 * s, faceZ - 0.15 * s)  // OUTER end: high + far left. Decrease y to droop outer tail. Increase |x| to extend brow outward.
         );
         this.angryLeftBrow = new Mesh(
-            new TubeGeometry(angryLeftBrowCurve, 20, 0.05 * s, 8, false), browMaterial.clone()
+            new TubeGeometry(angryLeftBrowCurve, 40, 0.04 * s, 10, false), browMaterial.clone()
         );
         this.angryLeftBrow.visible = false;
         this.spinGroup.add(this.angryLeftBrow);
 
         this.angryLeftBrowGlow = new Mesh(
-            new TubeGeometry(angryLeftBrowCurve, 20, 0.065 * s, 8, false),
+            new TubeGeometry(angryLeftBrowCurve, 40, 0.055 * s, 10, false),
             browGlowMaterial.clone()
         );
         this.angryLeftBrowGlow.visible = false;
         this.spinGroup.add(this.angryLeftBrowGlow);
 
-        // Angry right brow: mirror — outer point HIGH on the right, inner LOW
+        // Angry right brow: mirror inverted-V arch
         const angryRightBrowCurve = new QuadraticBezierCurve3(
-            new Vector3(0.18 * s, 0.72 * s, faceZ - 0.15 * s),
-            new Vector3(0.50 * s, 1.00 * s, faceZ - 0.05 * s),
-            new Vector3(0.78 * s, 1.18 * s, faceZ - 0.15 * s)
+            new Vector3(0.20 * s, 0.85 * s, faceZ - 0.15 * s),
+            new Vector3(0.55 * s, 1.20 * s, faceZ - 0.05 * s),
+            new Vector3(0.95 * s, 1.05 * s, faceZ - 0.05 * s)
         );
         this.angryRightBrow = new Mesh(
-            new TubeGeometry(angryRightBrowCurve, 20, 0.05 * s, 8, false), browMaterial.clone()
+            new TubeGeometry(angryRightBrowCurve, 40, 0.04 * s, 10, false), browMaterial.clone()
         );
         this.angryRightBrow.visible = false;
         this.spinGroup.add(this.angryRightBrow);
 
         this.angryRightBrowGlow = new Mesh(
-            new TubeGeometry(angryRightBrowCurve, 20, 0.065 * s, 8, false),
+            new TubeGeometry(angryRightBrowCurve, 40, 0.055 * s, 10, false),
             browGlowMaterial.clone()
         );
         this.angryRightBrowGlow.visible = false;
         this.spinGroup.add(this.angryRightBrowGlow);
 
-        // Frown mouth: corners DOWN, middle UP — inverted arc.
+        // Frown mouth: deeper inverted arc — corners DOWN, middle high UP.
         const frownCurve = new QuadraticBezierCurve3(
-            new Vector3(-0.80 * s, -1.05 * s, faceZ - 0.25 * s),
-            new Vector3(0.00 * s, -0.55 * s, faceZ),
-            new Vector3(0.80 * s, -1.05 * s, faceZ - 0.25 * s)
+            new Vector3(-0.85 * s, -1.10 * s, faceZ - 0.25 * s),
+            new Vector3(0.00 * s, -0.40 * s, faceZ),
+            new Vector3(0.85 * s, -1.10 * s, faceZ - 0.25 * s)
         );
         this.frownMouth = new Mesh(
             new TubeGeometry(frownCurve, 40, 0.065 * s, 10, false), smileMaterial.clone()
@@ -1218,7 +1232,17 @@ class MercuryGlobe {
                 // Render after the disk and disable depth testing so the
                 // face is always visible inside the central void instead of
                 // being occluded by the singularity sphere geometry.
-                part.renderOrder = 1;
+                //
+                // The glow materials use side: BackSide and are slightly
+                // larger than their fill pair — they create the bright rim
+                // around each feature. With depthTest off, the glow's back
+                // face would otherwise bleed THROUGH the fill (showing as a
+                // cyan haze inside eyes / mouth / brow tubes). Splitting
+                // renderOrder so every glow draws at 1 and every fill draws
+                // at 2 forces the fill to overwrite the glow inside the
+                // fill area, leaving only the 12% rim visible.
+                const isGlow = part.material && part.material.side === BackSide;
+                part.renderOrder = isGlow ? 1 : 2;
                 if (part.material) part.material.depthTest = false;
 
                 // Store initial max opacity for transition
@@ -1648,27 +1672,50 @@ class MercuryGlobe {
         const isAngry = !this.isMobile && distSq < ANGRY_RADIUS_PX * ANGRY_RADIUS_PX;
         const isDarkTheme = document.documentElement.getAttribute('data-theme') !== 'light';
         if (isAngry && isDarkTheme) {
-            if (this.happyExpressionParts) {
-                this.happyExpressionParts.forEach(p => {
-                    if (p) p.visible = false;
+            // Angry mode swaps the dark-theme emoji for the LIGHT-THEME emoji
+            // (wink + smirk + tongue) — the same face the light theme uses.
+            // We override the theme-transition opacity that ran above.
+            if (this.darkParts) {
+                this.darkParts.forEach(p => {
+                    if (p && p.material) {
+                        p.material.opacity = 0;
+                        p.visible = false;
+                    }
                 });
             }
-            if (this.angryParts) {
-                this.angryParts.forEach(p => {
-                    if (p) p.visible = true;
+            if (this.lightParts) {
+                this.lightParts.forEach(p => {
+                    if (p && p.material) {
+                        const maxOp = p.userData.maxOpacity || 1;
+                        p.material.opacity = maxOp;
+                        p.visible = true;
+                    }
                 });
             }
+            // Keep the always-visible left brow up; hide unused angry parts.
+            [this.leftEyebrow, this.leftEyebrowGlow,
+             this.leftBrowCapL, this.leftBrowCapLGlow,
+             this.leftBrowCapR, this.leftBrowCapRGlow].forEach(p => {
+                if (p) p.visible = true;
+            });
+            [this.angryLeftBrow, this.angryLeftBrowGlow,
+             this.angryRightBrow, this.angryRightBrowGlow,
+             this.frownMouth, this.frownMouthGlow].forEach(p => {
+                if (p) p.visible = false;
+            });
         } else {
-            // Restore the "always visible in dark" happy brows + caps; the
-            // theme-transition loop above already restored opacity-driven
-            // visibility for the darkParts subset (smile/hooks/right brow).
+            // Restore dark/light visibility — theme-transition loop above
+            // already drove darkParts/lightParts opacities for this frame.
+            // Just make sure stale angry-only parts are hidden.
             if (this.angryParts) {
                 this.angryParts.forEach(p => {
-                    if (p) p.visible = false;
+                    if (p) {
+                        p.visible = false;
+                        p.scale.set(1, 1, 1);
+                        p.position.y = 0;
+                    }
                 });
             }
-            // Re-show the always-visible happy brow set (left brow + caps)
-            // in case angry mode toggled them off.
             const alwaysVisibleHappy = [
                 this.leftEyebrow, this.leftEyebrowGlow,
                 this.leftBrowCapL, this.leftBrowCapLGlow,
