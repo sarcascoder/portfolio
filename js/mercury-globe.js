@@ -1671,60 +1671,75 @@ class MercuryGlobe {
         // Force-disable angry mode on mobile so the smiley always smiles.
         const isAngry = !this.isMobile && distSq < ANGRY_RADIUS_PX * ANGRY_RADIUS_PX;
         const isDarkTheme = document.documentElement.getAttribute('data-theme') !== 'light';
-        if (isAngry && isDarkTheme) {
-            // Angry mode swaps the dark-theme emoji for the LIGHT-THEME emoji
-            // (wink + smirk + tongue) — the same face the light theme uses.
-            // We override the theme-transition opacity that ran above.
+        // === ANGRY MODE TRANSITION ===
+        // Cross-fade between the dark-theme emoji and the light-theme emoji
+        // over a few hundred ms when the cursor enters / leaves the hover
+        // radius. While the cross-fade is in flight we inject a glitch:
+        // per-frame XY jitter + random opacity dropouts on individual parts,
+        // so the swap reads as a brief signal break rather than a clean fade.
+        const angryTarget = (isAngry && isDarkTheme) ? 1 : 0;
+        this.angryProgress = this.lerp(this.angryProgress || 0, angryTarget, 0.10);
+        const aProg = this.angryProgress;
+        const inTransition = aProg > 0.03 && aProg < 0.97;
+        // Bell curve: 0 at the endpoints, 1 in the middle of the transition.
+        const glitchIntensity = inTransition ? Math.sin(aProg * Math.PI) : 0;
+
+        // Override the dark/light opacities the theme loop set. In dark
+        // theme: dark fades OUT as aProg → 1, light fades IN as aProg → 1.
+        // In light theme: aProg stays at 0 and we don't touch anything.
+        if (isDarkTheme) {
             if (this.darkParts) {
                 this.darkParts.forEach(p => {
-                    if (p && p.material) {
-                        p.material.opacity = 0;
-                        p.visible = false;
-                    }
+                    if (!p || !p.material) return;
+                    const maxOp = p.userData.maxOpacity || 1;
+                    p.material.opacity = maxOp * (1 - aProg);
+                    p.visible = p.material.opacity > 0.01;
                 });
             }
             if (this.lightParts) {
                 this.lightParts.forEach(p => {
-                    if (p && p.material) {
-                        const maxOp = p.userData.maxOpacity || 1;
-                        p.material.opacity = maxOp;
-                        p.visible = true;
-                    }
+                    if (!p || !p.material) return;
+                    const maxOp = p.userData.maxOpacity || 1;
+                    p.material.opacity = maxOp * aProg;
+                    p.visible = p.material.opacity > 0.01;
                 });
             }
-            // Keep the always-visible left brow up; hide unused angry parts.
-            [this.leftEyebrow, this.leftEyebrowGlow,
-             this.leftBrowCapL, this.leftBrowCapLGlow,
-             this.leftBrowCapR, this.leftBrowCapRGlow].forEach(p => {
-                if (p) p.visible = true;
-            });
-            [this.angryLeftBrow, this.angryLeftBrowGlow,
-             this.angryRightBrow, this.angryRightBrowGlow,
-             this.frownMouth, this.frownMouthGlow].forEach(p => {
+        }
+        // Left brow + caps stay on through angry mode.
+        [this.leftEyebrow, this.leftEyebrowGlow,
+         this.leftBrowCapL, this.leftBrowCapLGlow,
+         this.leftBrowCapR, this.leftBrowCapRGlow].forEach(p => {
+            if (p) p.visible = true;
+        });
+        // Angry-only parts (legacy: angry brows, frown mouth) stay hidden.
+        if (this.angryParts) {
+            this.angryParts.forEach(p => {
                 if (p) p.visible = false;
             });
-        } else {
-            // Restore dark/light visibility — theme-transition loop above
-            // already drove darkParts/lightParts opacities for this frame.
-            // Just make sure stale angry-only parts are hidden.
-            if (this.angryParts) {
-                this.angryParts.forEach(p => {
-                    if (p) {
-                        p.visible = false;
-                        p.scale.set(1, 1, 1);
-                        p.position.y = 0;
-                    }
-                });
-            }
-            const alwaysVisibleHappy = [
-                this.leftEyebrow, this.leftEyebrowGlow,
-                this.leftBrowCapL, this.leftBrowCapLGlow,
-                this.leftBrowCapR, this.leftBrowCapRGlow
-            ];
-            alwaysVisibleHappy.forEach(p => {
-                if (p) p.visible = true;
+        }
+
+        // GLITCH: random opacity dropouts on visible emoji parts during the
+        // transition. The smileyGroup jitter is applied later in the frame,
+        // after the cursor parallax sets its position.
+        if (glitchIntensity > 0.05) {
+            const dropChance = 0.18 * glitchIntensity;
+            const partsToGlitch = [];
+            if (this.darkParts) partsToGlitch.push(...this.darkParts);
+            if (this.lightParts) partsToGlitch.push(...this.lightParts);
+            partsToGlitch.forEach(p => {
+                if (!p || !p.material || !p.visible) return;
+                if (Math.random() < dropChance) {
+                    p.material.opacity *= 0.25;
+                }
             });
         }
+        // Cache jitter for the smileyGroup position write below.
+        this._glitchJitterX = glitchIntensity > 0.05
+            ? (Math.random() - 0.5) * 0.22 * glitchIntensity
+            : 0;
+        this._glitchJitterY = glitchIntensity > 0.05
+            ? (Math.random() - 0.5) * 0.22 * glitchIntensity
+            : 0;
 
         this.targetRotation.y = offsetX * this.config.maxRotation;
         // Phones place the globe at top:35% (CSS @media ≤768), so globeCenterY
@@ -1777,8 +1792,8 @@ class MercuryGlobe {
 
             const px = (this.currentRotation.y + this.idleRotation.y) * this.smileyParallax * 0.3;
             const py = -(this.currentRotation.x + this.idleRotation.x) * this.smileyParallax * 0.3;
-            this.smileyGroup.position.x = this.diskShiftX + px;
-            this.smileyGroup.position.y = this.smileyOffsetY + py;
+            this.smileyGroup.position.x = this.diskShiftX + px + (this._glitchJitterX || 0);
+            this.smileyGroup.position.y = this.smileyOffsetY + py + (this._glitchJitterY || 0);
         }
 
         // Keep the camera aimed at the origin regardless of GSAP-driven
@@ -1800,7 +1815,12 @@ class MercuryGlobe {
             this.themeProgress * 13 +
             this.eyebrowOffset * 7 +
             (this.modelSpinGroup ? this.modelSpinGroup.rotation.y * 211 : 0) +
-            (this.camera ? this.camera.position.z * 53 : 0);
+            (this.camera ? this.camera.position.z * 53 : 0) +
+            (this.angryProgress || 0) * 137 +
+            // While the glitch is active we want every frame, since jitter
+            // and opacity dropouts are random — add Math.random() to bust
+            // the dirty-key cache.
+            (glitchIntensity > 0.05 ? Math.random() * 1000 : 0);
         if (this._lastRenderKey === undefined || Math.abs(key - this._lastRenderKey) > 0.0004) {
             this._lastRenderKey = key;
             this.renderer.render(this.scene, this.camera);
