@@ -134,6 +134,7 @@ class MercuryGlobe {
         this.createLighting();
         this.loadMercuryModel();
         this.createSmileyFace();
+        this.setupCornerSmiley();
         // NOTE: setupScrollAnimation is now deferred until model is loaded
         this.bindEvents();
         this.animate();
@@ -716,22 +717,11 @@ class MercuryGlobe {
         // Smiley face is only revealed in the last section (#contact), once
         // the user has scrolled down into the bottom of it. Hidden everywhere
         // else. Layout-independent, so it lives outside the matchMedia branches.
-        // Reveal the smiley once the user crosses into the last section and
-        // keep it on through the very bottom. Uses enter/leave callbacks on a
-        // single start point instead of isActive, because isActive is
-        // ambiguous exactly at the page bottom (end === max) and would hide the
-        // face at 100% scroll.
-        const showSmiley = () => { if (this.smileyGroup) this.smileyGroup.visible = true; };
-        const hideSmiley = () => { if (this.smileyGroup) this.smileyGroup.visible = false; };
-        ScrollTrigger.create({
-            trigger: "#contact",
-            start: "top center",   // contact top reaches viewport centre
-            end: "max",            // ...through the end of the document
-            onEnter: showSmiley,       // scrolled down into the section
-            onEnterBack: showSmiley,   // scrolled back up into it from below
-            onLeaveBack: hideSmiley,   // scrolled up out of the section
-            onRefresh: (self) => { if (self.isActive) showSmiley(); else hideSmiley(); }
-        });
+        // The smiley face on the black hole is retired — it now lives as a 2D
+        // SVG smiley on the fixed corner contact globe (see index.html
+        // #contact-earth-container). smileyGroup stays built but permanently
+        // hidden (visible=false at creation) so the rest of the pipeline is
+        // undisturbed.
 
         // Force a refresh to ensure start positions are calculated correctly if starting mid-page
         setTimeout(() => {
@@ -1363,6 +1353,67 @@ class MercuryGlobe {
         this.updateTheme(initialTheme === 'dark');
     }
 
+    /**
+     * Relocate the 3D smiley off the black hole and into its own tiny scene
+     * rendered on top of the fixed corner "contact" globe. The face is parented
+     * to a pivot placed BEHIND it (its rotation reference origin sits along -z
+     * from the globe's visual centre), so when it turns toward the cursor it
+     * swings across the sphere's front like a face painted on a ball rather
+     * than spinning flat.
+     */
+    setupCornerSmiley() {
+        const host = document.getElementById('contact-earth-container');
+        if (!host || !this.smileyGroup) return;
+        this.cornerHost = host;   // cached for per-frame cursor tracking
+
+        // --- tunables ---
+        const CORNER_SCALE = 0.5;   // face size inside the corner globe
+        const PIVOT_DEPTH = 1.6;    // how far the face sits in front of its pivot (the -z reference origin)
+        const FRAME_PADDING = 1.35; // breathing room around the face in frame
+
+        // Detach from the black-hole scene graph.
+        if (this.smileyGroup.parent) this.smileyGroup.parent.remove(this.smileyGroup);
+        this.smileyGroup.scale.setScalar(CORNER_SCALE);
+        this.smileyGroup.rotation.set(0, 0, 0);
+        this.smileyGroup.position.set(0, 0, 0);
+        this.smileyGroup.visible = true;
+
+        this.cornerScene = new Scene();
+        this.cornerPivot = new Group();            // rotation origin (behind the face)
+        this.cornerScene.add(this.cornerPivot);
+        this.cornerPivot.add(this.smileyGroup);
+        // Harmless for the mostly-unlit MeshBasicMaterial face; keeps any lit
+        // part visible.
+        this.cornerScene.add(new AmbientLight(0xffffff, 1.0));
+
+        // Centre the face on the pivot, then push it forward by PIVOT_DEPTH so
+        // the pivot ends up behind it.
+        const box = new Box3().setFromObject(this.smileyGroup);
+        const center = new Vector3(); box.getCenter(center);
+        const size = new Vector3(); box.getSize(size);
+        this.smileyGroup.position.set(-center.x, -center.y, -center.z + PIVOT_DEPTH);
+
+        // Frame the camera to the face.
+        const w = host.clientWidth || 60, h = host.clientHeight || 60;
+        const fov = 40;
+        const maxDim = Math.max(size.x, size.y) || 1;
+        const dist = (maxDim / 2) / Math.tan((fov / 2) * Math.PI / 180) * FRAME_PADDING;
+        this.cornerCamera = new PerspectiveCamera(fov, w / h, 0.1, 100);
+        this.cornerCamera.position.set(0, 0, PIVOT_DEPTH + dist);
+        this.cornerCamera.lookAt(0, 0, PIVOT_DEPTH);
+
+        // Dedicated transparent renderer mounted over the globe SVG.
+        this.cornerCanvas = document.createElement('canvas');
+        this.cornerCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;';
+        host.appendChild(this.cornerCanvas);
+        this.cornerRenderer = new WebGLRenderer({ canvas: this.cornerCanvas, alpha: true, antialias: true });
+        this.cornerRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.cornerRenderer.setSize(w, h, false);
+        this.cornerRenderer.outputColorSpace = SRGBColorSpace;
+        this.cornerRenderer.toneMapping = ACESFilmicToneMapping;
+        this.cornerRenderer.toneMappingExposure = 1.0;
+    }
+
     bindEvents() {
         // Bind both mouse and touch handlers so hybrid devices (iPad, touch laptops)
         // always rotate whichever input the user reaches for.
@@ -1583,8 +1634,19 @@ class MercuryGlobe {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width, this.height);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.75 : 1.5));
+
+        // Keep the corner smiley renderer matched to the (responsive) globe.
+        if (this.cornerRenderer && this.cornerCamera) {
+            const host = document.getElementById('contact-earth-container');
+            if (host) {
+                const w = host.clientWidth || 60, h = host.clientHeight || 60;
+                this.cornerCamera.aspect = w / h;
+                this.cornerCamera.updateProjectionMatrix();
+                this.cornerRenderer.setSize(w, h, false);
+            }
+        }
     }
-    
+
     lerp(start, end, factor) {
         return start + (end - start) * factor;
     }
@@ -1839,15 +1901,25 @@ class MercuryGlobe {
         // A small translation parallax is layered on top so the face also
         // drifts subtly with the cursor — the rotation is what reads as
         // "looking at" the cursor.
-        if (this.smileyGroup) {
-            const lookFactor = 0.9;
-            this.smileyGroup.rotation.y = (this.currentRotation.y + this.idleRotation.y) * lookFactor;
-            this.smileyGroup.rotation.x = (this.currentRotation.x + this.idleRotation.x) * lookFactor;
-
-            const px = (this.currentRotation.y + this.idleRotation.y) * this.smileyParallax * 0.3;
-            const py = -(this.currentRotation.x + this.idleRotation.x) * this.smileyParallax * 0.3;
-            this.smileyGroup.position.x = this.diskShiftX + px + (this._glitchJitterX || 0);
-            this.smileyGroup.position.y = this.smileyOffsetY + py + (this._glitchJitterY || 0);
+        // The smiley now lives in the corner mini-scene. Turn its pivot toward
+        // the cursor so the face looks at the pointer — but measured relative to
+        // the CORNER globe's own on-screen position, NOT the black hole's, so it
+        // tracks the cursor from where it actually sits.
+        if (this.cornerPivot && this.cornerHost) {
+            const r = this.cornerHost.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            const ox = (this.mouse.x - cx) / (window.innerWidth / 2);
+            const oy = (this.mouse.y - cy) / (window.innerHeight / 2);
+            // Smaller swing radius — the face turns more subtly toward the
+            // cursor. Lower this factor for even less movement.
+            const maxLook = this.config.maxRotation * 0.32;
+            const targetY = Math.max(-1, Math.min(1, ox)) * maxLook;
+            const targetX = Math.max(-1, Math.min(1, oy)) * maxLook;
+            this._cornerLookY = this.lerp(this._cornerLookY || 0, targetY, this.config.smoothing);
+            this._cornerLookX = this.lerp(this._cornerLookX || 0, targetX, this.config.smoothing);
+            this.cornerPivot.rotation.y = this._cornerLookY + this.idleRotation.y;
+            this.cornerPivot.rotation.x = this._cornerLookX + this.idleRotation.x;
         }
 
         // Keep the camera aimed at the origin regardless of GSAP-driven
@@ -1878,6 +1950,12 @@ class MercuryGlobe {
         if (this._lastRenderKey === undefined || Math.abs(key - this._lastRenderKey) > 0.0004) {
             this._lastRenderKey = key;
             this.renderer.render(this.scene, this.camera);
+        }
+
+        // Corner smiley: tiny canvas, render every frame so its idle drift and
+        // cursor tracking stay smooth independent of the main dirty-key gate.
+        if (this.cornerRenderer) {
+            this.cornerRenderer.render(this.cornerScene, this.cornerCamera);
         }
     }
 }
