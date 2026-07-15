@@ -32,7 +32,10 @@ class MercuryGlobe {
             smoothing: 0.12,
         };
 
-        this.frameInterval = 1000 / 60;
+        // Cap the black-hole loop at 30fps. It's a slow background swirl — 30fps
+        // is visually identical to 60 but halves the heavy fullscreen renders.
+        this.blackHoleFps = 30;
+        this.frameInterval = 1000 / this.blackHoleFps;
         this.lastFrameTime = 0;
         
         this.currentRotation = { x: 0, y: 0 };
@@ -96,7 +99,7 @@ class MercuryGlobe {
         // the CSS has already centered the globe.
         this.isMobileLayout = window.matchMedia('(max-width: 1024px)').matches;
         this.isMobile = window.innerWidth <= 768; // used for perf / sensitivity only
-        this.frameInterval = this.isMobile ? 1000 / 30 : 1000 / 60;
+        this.frameInterval = 1000 / (this.blackHoleFps || 30);
 
         if (this.isMobileLayout) {
             this.config.maxRotation = 0.85;
@@ -184,18 +187,23 @@ class MercuryGlobe {
         this.renderer = new WebGLRenderer({
             canvas: this.canvas,
             alpha: true,
-            // MSAA on everywhere — the staircase aliasing on the smiley
-            // edges at high-DPI phones was the dominant visible artifact.
-            // Worth the GPU cost on mobile because the canvas is small.
-            antialias: true,
+            // MSAA OFF. It was only here to smooth the smiley's edges, but the
+            // smiley now renders in its own corner canvas — so full-screen
+            // multisampling on this fullscreen canvas was pure cost for no
+            // benefit. The disk is soft/textured (anisotropy handles the disk
+            // shimmer), so dropping MSAA is a big GPU saving with little
+            // visible change.
+            antialias: false,
             powerPreference: 'high-performance'
         });
         this.renderer.setSize(this.width, this.height);
-        // DPR cap: 1.5 on desktop, 1.75 on mobile so Retina phones actually
-        // use their real pixel density. Previously capped at 1 on mobile,
-        // which forced a 4× downsample on DPR-2 screens and was the source
-        // of the chunky pixels reported in the contact section.
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.75 : 1.5));
+        // DPR cap for the fullscreen black-hole canvas. This is the single
+        // biggest GPU dial: fragment-shading cost scales with pixel count, so
+        // 1.0 on desktop (vs 1.5) roughly halves the shaded pixels on a Retina
+        // Mac. Mobile keeps a little more density (canvas is physically small).
+        // Raise these if the disk looks too soft.
+        this.blackHoleMaxDPR = this.isMobile ? 1.5 : 1.0;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.blackHoleMaxDPR));
         this.renderer.physicallyCorrectLights = true;
         this.renderer.toneMapping = ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
@@ -280,10 +288,11 @@ class MercuryGlobe {
                 finalBox.getCenter(finalCenter);
                 this.mercuryPivot.position.sub(finalCenter);
 
-                // Max anisotropy the GPU supports — kills the moiré/false-colour
-                // banding on the fine radial disk texture when it's viewed at a
-                // grazing angle.
-                const maxAniso = this.renderer.capabilities.getMaxAnisotropy();
+                // Anisotropy tames the moiré/false-colour banding on the fine
+                // radial disk texture at grazing angles. Capped at 4 (not the
+                // GPU max of 16) — 4 removes nearly all the shimmer at a
+                // fraction of the per-fragment sampling cost.
+                const maxAniso = Math.min(this.renderer.capabilities.getMaxAnisotropy(), 4);
                 // colour textures need sRGB decoding; data maps (roughness, normal,
                 // metalness, ao) must stay linear or they shift hue.
                 const colorMaps = ['map', 'emissiveMap'];
@@ -1365,6 +1374,7 @@ class MercuryGlobe {
         const host = document.getElementById('contact-earth-container');
         if (!host || !this.smileyGroup) return;
         this.cornerHost = host;   // cached for per-frame cursor tracking
+        this.cornerHostRect = host.getBoundingClientRect();  // refreshed in onResize
 
         // --- tunables ---
         const CORNER_SCALE = 0.5;   // face size inside the corner globe
@@ -1633,17 +1643,15 @@ class MercuryGlobe {
         this.camera.aspect = this.width / this.height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width, this.height);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 1.75 : 1.5));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.blackHoleMaxDPR ?? (this.isMobile ? 1.5 : 1.0)));
 
         // Keep the corner smiley renderer matched to the (responsive) globe.
-        if (this.cornerRenderer && this.cornerCamera) {
-            const host = document.getElementById('contact-earth-container');
-            if (host) {
-                const w = host.clientWidth || 60, h = host.clientHeight || 60;
-                this.cornerCamera.aspect = w / h;
-                this.cornerCamera.updateProjectionMatrix();
-                this.cornerRenderer.setSize(w, h, false);
-            }
+        if (this.cornerRenderer && this.cornerCamera && this.cornerHost) {
+            this.cornerHostRect = this.cornerHost.getBoundingClientRect();
+            const w = this.cornerHost.clientWidth || 60, h = this.cornerHost.clientHeight || 60;
+            this.cornerCamera.aspect = w / h;
+            this.cornerCamera.updateProjectionMatrix();
+            this.cornerRenderer.setSize(w, h, false);
         }
     }
 
@@ -1905,8 +1913,11 @@ class MercuryGlobe {
         // the cursor so the face looks at the pointer — but measured relative to
         // the CORNER globe's own on-screen position, NOT the black hole's, so it
         // tracks the cursor from where it actually sits.
-        if (this.cornerPivot && this.cornerHost) {
-            const r = this.cornerHost.getBoundingClientRect();
+        if (this.cornerPivot && this.cornerHostRect) {
+            // Use the cached rect — the corner globe is position:fixed, so its
+            // screen box only changes on resize, not per frame. Calling
+            // getBoundingClientRect() every frame forced a layout reflow.
+            const r = this.cornerHostRect;
             const cx = r.left + r.width / 2;
             const cy = r.top + r.height / 2;
             const ox = (this.mouse.x - cx) / (window.innerWidth / 2);
@@ -1918,8 +1929,10 @@ class MercuryGlobe {
             const targetX = Math.max(-1, Math.min(1, oy)) * maxLook;
             this._cornerLookY = this.lerp(this._cornerLookY || 0, targetY, this.config.smoothing);
             this._cornerLookX = this.lerp(this._cornerLookX || 0, targetX, this.config.smoothing);
-            this.cornerPivot.rotation.y = this._cornerLookY + this.idleRotation.y;
-            this.cornerPivot.rotation.x = this._cornerLookX + this.idleRotation.x;
+            // No idle drift here — the face settles when the cursor stops so its
+            // renderer can go fully idle (see the gated draw in animate()).
+            this.cornerPivot.rotation.y = this._cornerLookY;
+            this.cornerPivot.rotation.x = this._cornerLookX;
         }
 
         // Keep the camera aimed at the origin regardless of GSAP-driven
@@ -1947,15 +1960,56 @@ class MercuryGlobe {
             // and opacity dropouts are random — add Math.random() to bust
             // the dirty-key cache.
             (glitchIntensity > 0.05 ? Math.random() * 1000 : 0);
+        let mainDrew = false;
         if (this._lastRenderKey === undefined || Math.abs(key - this._lastRenderKey) > 0.0004) {
             this._lastRenderKey = key;
             this.renderer.render(this.scene, this.camera);
+            mainDrew = true;
         }
 
-        // Corner smiley: tiny canvas, render every frame so its idle drift and
-        // cursor tracking stay smooth independent of the main dirty-key gate.
-        if (this.cornerRenderer) {
-            this.cornerRenderer.render(this.cornerScene, this.cornerCamera);
+        // Corner smiley: only redraw when the face actually turned. Once the
+        // cursor stops and the look settles, this stops drawing entirely instead
+        // of running a whole extra WebGL context at 60fps.
+        let cornerDrew = false;
+        if (this.cornerRenderer && this.cornerPivot) {
+            const rx = this.cornerPivot.rotation.x, ry = this.cornerPivot.rotation.y;
+            if (this._cornerLastRX === undefined ||
+                Math.abs(rx - this._cornerLastRX) > 0.0004 ||
+                Math.abs(ry - this._cornerLastRY) > 0.0004) {
+                this._cornerLastRX = rx;
+                this._cornerLastRY = ry;
+                this.cornerRenderer.render(this.cornerScene, this.cornerCamera);
+                cornerDrew = true;
+            }
+        }
+
+        // --- lightweight perf counters (window.__mgPerf) ---
+        // Counts real draw calls + rAF ticks per second so we can measure the
+        // effect of these optimisations instead of guessing.
+        const p = (window.__mgPerf ||= { fps: 0, mainRPS: 0, cornerRPS: 0, _f: 0, _m: 0, _c: 0, _t: 0 });
+        p._f++; if (mainDrew) p._m++; if (cornerDrew) p._c++;
+        if (now - p._t >= 1000) {
+            p.fps = p._f; p.mainRPS = p._m; p.cornerRPS = p._c;
+            p._f = p._m = p._c = 0; p._t = now;
+
+            // On-screen HUD — only when the URL contains ?perf (or #perf), so it
+            // never shows in production. Lets you read the numbers without the
+            // console.
+            if (/perf/.test(location.search + location.hash)) {
+                if (!this._perfHud) {
+                    this._perfHud = document.createElement('div');
+                    this._perfHud.style.cssText =
+                        'position:fixed;top:8px;left:8px;z-index:2147483647;' +
+                        'font:12px/1.5 monospace;color:#0ff;background:rgba(0,0,0,.72);' +
+                        'padding:6px 9px;border:1px solid #0ff6;border-radius:6px;' +
+                        'pointer-events:none;white-space:pre;';
+                    document.body.appendChild(this._perfHud);
+                }
+                this._perfHud.textContent =
+                    `fps          ${p.fps}\n` +
+                    `black hole   ${p.mainRPS}/s\n` +
+                    `corner smiley ${p.cornerRPS}/s`;
+            }
         }
     }
 }
