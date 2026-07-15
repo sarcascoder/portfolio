@@ -6,6 +6,40 @@
     <meta name="description" content="Portfolio - Creative Digital Agency" />
     <title>PORTFOLIO | Creative Digital Agency</title>
 
+    <!-- 3D gate. Every machine gets the SAME full 3D experience — the only
+         time we fall back to the static hero is when the browser can't create
+         a WebGL context at all (it literally cannot render the scene). No
+         low-end / reduced-motion / software-render downgrades. Sets
+         window.__render3D. -->
+    <script>
+      (function () {
+        function capable() {
+          try {
+            var c = document.createElement('canvas');
+            return !!(c.getContext('webgl2') || c.getContext('webgl') ||
+                      c.getContext('experimental-webgl'));
+          } catch (e) { return false; }
+        }
+        // Manual override for A/B heat testing: ?no3d forces the static
+        // fallback (all WebGL off) so you can compare heat with vs without the
+        // 3D scenes and pinpoint the real cost.
+        var qs = location.search;
+        var forceOff = /[?&]no3d\b/.test(qs);
+        window.__render3D = !forceOff && capable();
+        if (!window.__render3D) document.documentElement.classList.add('no-3d');
+
+        // Heat-diagnosis toggles (query params). Each disables one subsystem so
+        // you can binary-search what's actually cooking the CPU/GPU:
+        //   ?noblur   -> kill every backdrop-filter blur (Retina-expensive)
+        //   ?noanim   -> kill every CSS animation + transition
+        //   ?novideo  -> pause/stop all <video> decode
+        var h = document.documentElement;
+        if (/[?&]noblur\b/.test(qs))  h.classList.add('diag-noblur');
+        if (/[?&]noanim\b/.test(qs))  h.classList.add('diag-noanim');
+        if (/[?&]novideo\b/.test(qs)) h.classList.add('diag-novideo');
+      })();
+    </script>
+
     <!-- Google Fonts - Dot Matrix Style -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1230,7 +1264,10 @@
     <script type="module" src="js/hover-preview.js"></script>
     <script type="module" src="js/mercury-globe.js"></script>
     <script type="module" src="js/portal-effect.js"></script>
-    
+    <script type="module" src="js/anim-pause.js"></script>
+    <script type="module" src="js/idle-freeze.js"></script>
+    <script type="module" src="js/perf-diag.js"></script>
+
     <!-- Mission telemetry HUD: balances the contact globe in the opposite corner,
          shows live section tracking + scroll progress + UTC clock. See js/telemetry.js. -->
     <div id="telemetry-hud" class="telemetry-hud" aria-hidden="true">

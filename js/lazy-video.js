@@ -34,6 +34,24 @@
             return;
         }
 
+        // Project videos: never decode more than one at a time. Three looping
+        // decoders running concurrently was a real GPU/CPU heat source, so the
+        // grid videos now load their bytes on approach but only PLAY while the
+        // pointer is over them (and every other one pauses). Everything else
+        // keeps the old load+autoplay-on-view behaviour.
+        const isHoverPlay = (v) => v.classList.contains('project-video');
+        const projectVideos = [...videos].filter(isHoverPlay);
+        const pauseAllProjects = (except) => projectVideos.forEach((v) => { if (v !== except) v.pause(); });
+        projectVideos.forEach((v) => {
+            const on = () => { attachSource(v); pauseAllProjects(v); playSafely(v); };
+            const off = () => v.pause();
+            v.addEventListener('pointerenter', on);
+            v.addEventListener('pointerleave', off);
+            // Also cover hovering the card wrapper, not just the video itself.
+            const card = v.closest('.project-card') || v.parentElement;
+            if (card) { card.addEventListener('pointerenter', on); card.addEventListener('pointerleave', off); }
+        });
+
         // Lazy-load: 300px rootMargin gives the video a head start
         if (videos.length) {
             const observer = new IntersectionObserver((entries) => {
@@ -41,7 +59,8 @@
                     const video = entry.target;
                     if (entry.isIntersecting) {
                         attachSource(video);
-                        playSafely(video);
+                        // Hover-play videos load but stay paused until hovered.
+                        if (!isHoverPlay(video)) playSafely(video);
                     } else if (video.dataset.loaded === 'true') {
                         video.pause();
                     }

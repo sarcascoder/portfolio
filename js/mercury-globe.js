@@ -32,9 +32,10 @@ class MercuryGlobe {
             smoothing: 0.12,
         };
 
-        // Cap the black-hole loop at 30fps. It's a slow background swirl — 30fps
-        // is visually identical to 60 but halves the heavy fullscreen renders.
-        this.blackHoleFps = 30;
+        // Cap the black-hole loop at 20fps. It's a slow background swirl, so a
+        // low frame rate looks fine and cuts the heavy fullscreen renders by a
+        // third vs 30 (and 3x vs 60). Lower this for even less heat.
+        this.blackHoleFps = 20;
         this.frameInterval = 1000 / this.blackHoleFps;
         this.lastFrameTime = 0;
         
@@ -72,9 +73,10 @@ class MercuryGlobe {
         // the model itself, so the spin reads as natural rotation).
         // Continuous in-place swirl speed. The disk spins around its OWN normal
         // (the pivot's local Y — the disk's flat axis) so it rotates like a
-        // turntable in one direction, no tumbling. Set to 0 to freeze it;
-        // negative flips the spin direction.
-        this.diskSpinSpeed = 0.005;
+        // turntable in one direction, no tumbling. Kept slow on purpose — a
+        // gentle drift reads as "alive" without looking busy, and lets the low
+        // frame-rate cap below stay smooth. Set to 0 to freeze; negative flips.
+        this.diskSpinSpeed = 0.0022;
         // Fixed viewing orientation of the whole disk. rotation.y swings the
         // disk between face-on (0) and edge-on; rotation.x nods it down. These
         // set the locked camera angle; the swirl above is independent of them.
@@ -1668,8 +1670,12 @@ class MercuryGlobe {
         // as soon as the user moves the cursor (which updates
         // lastInteractionTime) we're back to full-rate.
         const idleFor = now - (this.lastInteractionTime || 0);
-        const interval = (idleFor > 2000 && !this.isMobile)
-            ? 1000 / 30
+        // While interacting: full (capped) rate. Once idle, the disk is only
+        // doing its very slow crawl, which reads fine at ~10fps — so we render
+        // far fewer of the heavy fullscreen frames. This is the main idle heat
+        // lever now that the disk decelerates instead of freezing.
+        const interval = (idleFor > 2500)
+            ? 1000 / 10
             : this.frameInterval;
         if (now - this.lastFrameTime < interval) return;
         this.lastFrameTime = now;
@@ -1883,15 +1889,25 @@ class MercuryGlobe {
         const idleAmplitude = this.isMobile ? 0.35 : 0.22;
         const driftY = Math.sin(t) * idleAmplitude;
         const driftX = Math.sin(t * 0.7) * idleAmplitude * 0.4;
+
         this.idleRotation.x = this.lerp(this.idleRotation.x, driftX * idleAmount, 0.05);
         this.idleRotation.y = this.lerp(this.idleRotation.y, driftY * idleAmount, 0.05);
 
-        // Disk auto-rotates continuously around its own normal (the pivot's
-        // local Y — the disk's flat axis in this model) so it swirls in place
-        // like a turntable: one direction, no tumbling. The fixed viewing
-        // tilt/yaw live on modelSpinGroup and are untouched by this spin.
+        // Idle deceleration (not a freeze): when the user stops interacting the
+        // disk gently eases from its full swirl speed down to a very slow crawl
+        // — it never fully stops. `decT` ramps 0→1 over ~6s (starting after
+        // 1.5s idle) so the slowdown is gradual, not abrupt; the lerp smooths it
+        // further. On the next interaction timeSinceInteraction resets and it
+        // eases back up to full speed. Because the disk always keeps moving a
+        // little, the render loop drops to a low idle fps (see the throttle at
+        // the top of animate) rather than stopping — slow motion reads fine at a
+        // low frame rate, so we still cut heat without going fully static.
+        const IDLE_SPIN_FLOOR = 0.0009; // the very-slow speed it settles toward
+        const decT = Math.min(1, Math.max(0, (timeSinceInteraction - 1500) / 6000));
+        const targetSpin = this.diskSpinSpeed - (this.diskSpinSpeed - IDLE_SPIN_FLOOR) * decT;
+        this._effSpin = this.lerp(this._effSpin ?? this.diskSpinSpeed, targetSpin, 0.04);
         if (this.mercuryPivot) {
-            this.mercuryPivot.rotation.y += this.diskSpinSpeed;
+            this.mercuryPivot.rotation.y += this._effSpin;
         }
 
         // Subtle cursor parallax: tilt the whole scene a small amount with
@@ -2016,8 +2032,15 @@ class MercuryGlobe {
 
 window.MercuryGlobe = MercuryGlobe;
 
-// Self-initialize when DOM is ready
+// Self-initialize when DOM is ready — unless the capability gate disabled 3D
+// (low-end / no-GPU / software-render / reduced-motion). In that case we skip
+// the whole WebGL scene and let the CSS .no-3d fallback show, then dismiss the
+// loading screen so those users still get straight into the site.
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.__render3D === false) {
+        if (typeof window.finishLoading === 'function') window.finishLoading();
+        return;
+    }
     const heroContainer = document.getElementById('mercury-container');
     if (heroContainer) {
         window.mercuryGlobe = new MercuryGlobe(heroContainer);

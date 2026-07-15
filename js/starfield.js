@@ -516,6 +516,9 @@ class Starfield {
 // first visit. The loading screen has its own CSS-only starfield so there's
 // no visible gap.
 function bootStarfield() {
+    // Skip the WebGL starfield on machines the capability gate flagged as
+    // low-end / no-GPU / software-render / reduced-motion (see index.html head).
+    if (typeof window !== 'undefined' && window.__render3D === false) return;
     if (typeof window !== 'undefined' && !window.__starfieldBooted) {
         window.__starfieldBooted = true;
         new Starfield();

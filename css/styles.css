@@ -4466,3 +4466,86 @@ body.mobile-optimized.in-tech-stack #mercury-container {
     gap: 24px;
   }
 }
+
+/* =====================================================================
+   NO-3D FALLBACK
+   Shown when the capability gate (index.html <head>) disables WebGL for
+   low-end / no-GPU / software-render / reduced-motion machines. The heavy
+   3D scenes never initialise; these static, near-zero-cost visuals stand
+   in for them so the site still looks intentional and stays cool.
+   ===================================================================== */
+
+/* Static "black hole": a dark event-horizon core ringed by a warm
+   accretion glow, drawn as a single tilted radial gradient. */
+html.no-3d #mercury-inner {
+  background:
+    radial-gradient(ellipse 44% 26% at 43% 52%,
+      #000000 0 19%,
+      rgba(255, 246, 228, 0.92) 21%,
+      rgba(255, 156, 74, 0.55) 25%,
+      rgba(196, 60, 40, 0.24) 33%,
+      rgba(0, 0, 0, 0) 47%);
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Faint static starfield stand-in so the backdrop isn't flat black. */
+html.no-3d body {
+  background-color: #04050a;
+  background-image:
+    radial-gradient(1px 1px at 18% 24%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 72% 38%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 46% 68%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 86% 74%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(1px 1px at 32% 84%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 62% 12%, rgba(255,255,255,0.55), transparent);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* =====================================================================
+   OFF-SCREEN ANIMATION PAUSE
+   Infinite CSS animations never stop on their own — they keep the
+   compositor (and GPU) busy even for content you've scrolled past. This
+   pauses every animation inside a section once it leaves the viewport;
+   js/anim-pause.js toggles .anim-paused via IntersectionObserver. Visible
+   content animates normally; off-screen content costs nothing.
+   ===================================================================== */
+.anim-paused,
+.anim-paused * {
+  animation-play-state: paused !important;
+}
+
+/* =====================================================================
+   HEAT DIAGNOSIS TOGGLES (query-param gated — see index.html <head>)
+   Used to isolate the real CPU/GPU cost by disabling one subsystem at a
+   time: ?noblur, ?noanim. Harmless in production (never activated
+   without the query param).
+   ===================================================================== */
+.diag-noblur,
+.diag-noblur *,
+.diag-noblur *::before,
+.diag-noblur *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.diag-noanim,
+.diag-noanim *,
+.diag-noanim *::before,
+.diag-noanim *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* =====================================================================
+   IDLE FREEZE
+   After a few seconds without interaction, pause every CSS animation so
+   the page goes fully static — like an ordinary website — letting the GPU
+   compositor sleep and stop re-computing the backdrop blurs behind moving
+   elements. Resumes instantly on any input. Toggled by js/idle-freeze.js.
+   ===================================================================== */
+html.is-idle *,
+html.is-idle *::before,
+html.is-idle *::after {
+  animation-play-state: paused !important;
+}
