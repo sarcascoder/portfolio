@@ -5,7 +5,7 @@
  */
 
 import {
-    ACESFilmicToneMapping, AmbientLight, BackSide, Box3, Color, DirectionalLight, DoubleSide, Group, HemisphereLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera, QuadraticBezierCurve3, SRGBColorSpace, Scene, Shape, ShapeGeometry, SphereGeometry, TubeGeometry, Vector3, WebGLRenderer
+    ACESFilmicToneMapping, AmbientLight, BackSide, Box3, Color, DirectionalLight, DoubleSide, Group, HemisphereLight, LinearFilter, LinearMipmapLinearFilter, Mesh, MeshBasicMaterial, MeshStandardMaterial, PerspectiveCamera, QuadraticBezierCurve3, SRGBColorSpace, Scene, Shape, ShapeGeometry, SphereGeometry, TubeGeometry, Vector3, WebGLRenderer
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -67,7 +67,16 @@ class MercuryGlobe {
         // — the disk's perpendicular axis. The viewing tilt now comes from
         // the camera being above the disk plane rather than from rotating
         // the model itself, so the spin reads as natural rotation).
+        // Continuous in-place swirl speed. The disk spins around its OWN normal
+        // (the pivot's local Y — the disk's flat axis) so it rotates like a
+        // turntable in one direction, no tumbling. Set to 0 to freeze it;
+        // negative flips the spin direction.
         this.diskSpinSpeed = 0.005;
+        // Fixed viewing orientation of the whole disk. rotation.y swings the
+        // disk between face-on (0) and edge-on; rotation.x nods it down. These
+        // set the locked camera angle; the swirl above is independent of them.
+        this.diskFixedYaw = 1.0;   // ~57° — the 3/4 tilt seen in the hero
+        this.diskFixedTilt = 0.18; // ~10° downward nod
 
         // Theme Transition State
         this.themeProgress = 0; // 0 = Light, 1 = Dark
@@ -206,8 +215,11 @@ class MercuryGlobe {
         // perpendicular axis (natural black-hole rotation, visible swirl).
         this.modelSpinGroup = new Group();
         this.modelSpinGroup.position.x = this.diskShiftX;
-        // No manual base tilt — the viewing angle comes from the camera
-        // being above y=0, so the horizontal disk reads naturally.
+        // Fixed resting orientation (see diskFixedYaw / diskFixedTilt). rotation.x
+        // is the outermost Euler axis, so when diskSpinSpeed is non-zero the
+        // per-frame rotation.y spin still swirls the disk while this tilt holds.
+        this.modelSpinGroup.rotation.x = this.diskFixedTilt;
+        this.modelSpinGroup.rotation.y = this.diskFixedYaw;
         this.spinGroup.add(this.modelSpinGroup);
     }
 
@@ -237,12 +249,12 @@ class MercuryGlobe {
 
     loadMercuryModel() {
         const loader = new GLTFLoader();
-        // Meshopt decoder is required to read the meshopt-compressed
-        // blackhole.glb (geometry was crunched ~10× via gltf-transform).
+        // Meshopt decoder is kept registered so meshopt-compressed .glb files
+        // still load. black_hole.glb itself is uncompressed geometry.
         loader.setMeshoptDecoder(MeshoptDecoder);
 
         loader.load(
-            '/blackhole.glb',
+            '/black_hole.glb',
             (gltf) => {
                 this.mercuryModel = gltf.scene;
 
@@ -267,15 +279,32 @@ class MercuryGlobe {
                 finalBox.getCenter(finalCenter);
                 this.mercuryPivot.position.sub(finalCenter);
 
+                // Max anisotropy the GPU supports — kills the moiré/false-colour
+                // banding on the fine radial disk texture when it's viewed at a
+                // grazing angle.
+                const maxAniso = this.renderer.capabilities.getMaxAnisotropy();
+                // colour textures need sRGB decoding; data maps (roughness, normal,
+                // metalness, ao) must stay linear or they shift hue.
+                const colorMaps = ['map', 'emissiveMap'];
+                const dataMaps = ['roughnessMap', 'metalnessMap', 'normalMap', 'aoMap', 'alphaMap'];
+                const tuneTexture = (tex, isColor) => {
+                    if (!tex) return;
+                    if (isColor) tex.colorSpace = SRGBColorSpace;
+                    tex.anisotropy = maxAniso;
+                    tex.generateMipmaps = true;
+                    tex.minFilter = LinearMipmapLinearFilter;
+                    tex.magFilter = LinearFilter;
+                    tex.needsUpdate = true;
+                };
                 this.mercuryModel.traverse((child) => {
                     if (child.isMesh && child.material) {
-                        // Ensure correct color space for texture
-                        if (child.material.map) {
-                            child.material.map.colorSpace = SRGBColorSpace;
-                            child.material.map.needsUpdate = true;
-                        }
-                        // Keep the model's own PBR values but ensure it looks good
-                        child.material.needsUpdate = true;
+                        const mats = Array.isArray(child.material) ? child.material : [child.material];
+                        mats.forEach((mat) => {
+                            colorMaps.forEach((k) => tuneTexture(mat[k], true));
+                            dataMaps.forEach((k) => tuneTexture(mat[k], false));
+                            // Keep the model's own PBR values but ensure it looks good
+                            mat.needsUpdate = true;
+                        });
                     }
                 });
 
@@ -682,6 +711,26 @@ class MercuryGlobe {
                 ease: "power2.inOut",
                 onUpdate: () => this.camera.lookAt(0, 0, 0)
             }, 0);
+        });
+
+        // Smiley face is only revealed in the last section (#contact), once
+        // the user has scrolled down into the bottom of it. Hidden everywhere
+        // else. Layout-independent, so it lives outside the matchMedia branches.
+        // Reveal the smiley once the user crosses into the last section and
+        // keep it on through the very bottom. Uses enter/leave callbacks on a
+        // single start point instead of isActive, because isActive is
+        // ambiguous exactly at the page bottom (end === max) and would hide the
+        // face at 100% scroll.
+        const showSmiley = () => { if (this.smileyGroup) this.smileyGroup.visible = true; };
+        const hideSmiley = () => { if (this.smileyGroup) this.smileyGroup.visible = false; };
+        ScrollTrigger.create({
+            trigger: "#contact",
+            start: "top center",   // contact top reaches viewport centre
+            end: "max",            // ...through the end of the document
+            onEnter: showSmiley,       // scrolled down into the section
+            onEnterBack: showSmiley,   // scrolled back up into it from below
+            onLeaveBack: hideSmiley,   // scrolled up out of the section
+            onRefresh: (self) => { if (self.isActive) showSmiley(); else hideSmiley(); }
         });
 
         // Force a refresh to ensure start positions are calculated correctly if starting mid-page
@@ -1303,6 +1352,8 @@ class MercuryGlobe {
         });
         this.smileyGroup.scale.setScalar(this.smileyScale);
         this.smileyGroup.position.set(this.diskShiftX, this.smileyOffsetY, this.smileyOffsetZ);
+        // Temporarily hidden — set back to true to bring the smiley face back.
+        this.smileyGroup.visible = false;
         this.spinGroup.add(this.smileyGroup);
 
         // Initialize theme state
@@ -1765,9 +1816,12 @@ class MercuryGlobe {
         this.idleRotation.x = this.lerp(this.idleRotation.x, driftX * idleAmount, 0.05);
         this.idleRotation.y = this.lerp(this.idleRotation.y, driftY * idleAmount, 0.05);
 
-        // Disk auto-rotates continuously around its own disk-plane axis (Y).
-        if (this.modelSpinGroup) {
-            this.modelSpinGroup.rotation.y += this.diskSpinSpeed;
+        // Disk auto-rotates continuously around its own normal (the pivot's
+        // local Y — the disk's flat axis in this model) so it swirls in place
+        // like a turntable: one direction, no tumbling. The fixed viewing
+        // tilt/yaw live on modelSpinGroup and are untouched by this spin.
+        if (this.mercuryPivot) {
+            this.mercuryPivot.rotation.y += this.diskSpinSpeed;
         }
 
         // Subtle cursor parallax: tilt the whole scene a small amount with
