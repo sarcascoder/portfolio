@@ -67,6 +67,13 @@ class Starfield {
         this.velocity = new Vector3(0, 0, 0);
         this.targetVelocity = new Vector3(0, 0, 0);
         this.mouse = new Vector2(0, 0);
+
+        // Pin the stars in place: no ambient drift, no scroll/keyboard velocity,
+        // no mouse camera-parallax. The dirty-flag check in animate() then draws
+        // the field once and skips the WebGL draw on every subsequent frame,
+        // which is a big compute saving. Set to false to restore the moving
+        // starfield.
+        this.staticStars = true;
         
         // Physics
         this.friction = 0.96;
@@ -75,8 +82,9 @@ class Starfield {
 
         // Systems
         this.createStars();
-        this.createCometSystem();
-        
+        // Comets removed — this.comets stays undefined and every reference to it
+        // is null-guarded, so no shooting stars spawn or render.
+
         // Controls
         this.initControls();
         
@@ -432,25 +440,34 @@ class Starfield {
         if (!this.isPageVisible || this.isUniverseCovering) return;
 
         // Physics
-        this.velocity.lerp(this.targetVelocity, 0.05);
-        this.targetVelocity.multiplyScalar(this.friction);
+        if (this.staticStars) {
+            // Stars are pinned — keep velocity clamped to zero every frame so
+            // scroll/keyboard input can't nudge them, and skip drift + camera
+            // parallax entirely. The dirty-flag render below then draws once
+            // and idles.
+            this.velocity.set(0, 0, 0);
+            this.targetVelocity.set(0, 0, 0);
+        } else {
+            this.velocity.lerp(this.targetVelocity, 0.05);
+            this.targetVelocity.multiplyScalar(this.friction);
 
-        // Ambient drift only runs while the user is active. Once idle, velocity
-        // decays via friction → stars gently settle to stationary → the
-        // dirty-flag check below skips the GPU draw. Any input wakes it back up.
-        if (!isIdle) {
-            const ambientDrift = this.isMobile ? 0.35 : 0.18;
-            this.velocity.z += ambientDrift * 0.01;
-            const t = performance.now() * 0.0002;
-            this.velocity.x += Math.sin(t) * 0.004;
-            this.velocity.y += Math.cos(t * 0.8) * 0.003;
+            // Ambient drift only runs while the user is active. Once idle, velocity
+            // decays via friction → stars gently settle to stationary → the
+            // dirty-flag check below skips the GPU draw. Any input wakes it back up.
+            if (!isIdle) {
+                const ambientDrift = this.isMobile ? 0.35 : 0.18;
+                this.velocity.z += ambientDrift * 0.01;
+                const t = performance.now() * 0.0002;
+                this.velocity.x += Math.sin(t) * 0.004;
+                this.velocity.y += Math.cos(t * 0.8) * 0.003;
+            }
+
+            // Camera Look — stronger on mobile so touch panning has presence
+            const lookX = this.mouse.y * (this.isMobile ? 0.75 : 1.0);
+            const lookY = -this.mouse.x * (this.isMobile ? 0.75 : 1.0);
+            this.camera.rotation.x += (lookX - this.camera.rotation.x) * this.lookSpeed;
+            this.camera.rotation.y += (lookY - this.camera.rotation.y) * this.lookSpeed;
         }
-
-        // Camera Look — stronger on mobile so touch panning has presence
-        const lookX = this.mouse.y * (this.isMobile ? 0.75 : 1.0);
-        const lookY = -this.mouse.x * (this.isMobile ? 0.75 : 1.0);
-        this.camera.rotation.x += (lookX - this.camera.rotation.x) * this.lookSpeed;
-        this.camera.rotation.y += (lookY - this.camera.rotation.y) * this.lookSpeed;
 
         // MAIN FEATURE: Move the Universe (Infinite Wrap)
         // Instead of moving Camera, we move the Stars opposite to velocity
@@ -469,8 +486,7 @@ class Starfield {
             }
         }
 
-        // Update Comets (throttled on mobile via spawn rates in updateComets)
-        this.updateComets();
+        // Comets removed.
 
         // Dirty-flag render: if the universe isn't moving, nothing has changed
         // on screen, so skip the WebGL draw call entirely. The scene is dirty
