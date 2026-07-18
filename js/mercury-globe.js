@@ -81,7 +81,10 @@ class MercuryGlobe {
         // disk between face-on (0) and edge-on; rotation.x nods it down. These
         // set the locked camera angle; the swirl above is independent of them.
         this.diskFixedYaw = 1.0;   // ~57° — the 3/4 tilt seen in the hero
-        this.diskFixedTilt = 0.18; // ~10° downward nod
+        this.diskFixedTilt = 0.5;  // ~29° downward nod — opens the disk into a
+                                   // fuller 3/4 view from the start. Increase to
+                                   // open more (flatter-on), decrease toward 0
+                                   // for edge-on.
 
         // Theme Transition State
         this.themeProgress = 0; // 0 = Light, 1 = Dark

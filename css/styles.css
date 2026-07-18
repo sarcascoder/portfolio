@@ -2250,13 +2250,20 @@ body.mobile-optimized .about-moon-overlay {
     height: clamp(40px, 4vw, 60px); /* Smaller logo */
     width: auto;
     object-fit: contain;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    opacity: 0.5; /* Even less bright */
-    filter: brightness(0.6);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.3s ease;
+    opacity: 1;
+    /* Boost vibrancy + contrast and add a neon glow so the bird reads clearly
+       against the dark space backdrop. */
+    filter: brightness(1.3) saturate(1.8) contrast(1.15)
+            drop-shadow(0 0 6px rgba(0, 234, 255, 0.5))
+            drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
 }
 
 .logo-image-link:hover .site-logo {
     transform: scale(1.1);
+    filter: brightness(1.45) saturate(2) contrast(1.2)
+            drop-shadow(0 0 10px rgba(0, 234, 255, 0.7))
+            drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
 /* ========================================
