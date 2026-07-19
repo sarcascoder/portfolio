@@ -80,11 +80,12 @@ class MercuryGlobe {
         // Fixed viewing orientation of the whole disk. rotation.y swings the
         // disk between face-on (0) and edge-on; rotation.x nods it down. These
         // set the locked camera angle; the swirl above is independent of them.
-        this.diskFixedYaw = 1.0;   // ~57° — the 3/4 tilt seen in the hero
-        this.diskFixedTilt = 0.5;  // ~29° downward nod — opens the disk into a
-                                   // fuller 3/4 view from the start. Increase to
-                                   // open more (flatter-on), decrease toward 0
-                                   // for edge-on.
+        this.diskFixedYaw = 1.0;   // spin offset about the disk normal (no silhouette change)
+        this.diskFixedTilt = 0.07; // rotation.x — FORWARD nod. Small = near edge-on;
+                                   // larger tips it top-down/open (too much = flat pancake).
+        this.diskFixedRoll = 0.59;  // rotation.z — SIDEWAYS roll. Leans the near-edge-on
+                                   // disk diagonally (Interstellar-style). Increase to lean
+                                   // more; flip the sign to lean the other way.
 
         // Theme Transition State
         this.themeProgress = 0; // 0 = Light, 1 = Dark
@@ -234,6 +235,7 @@ class MercuryGlobe {
         // per-frame rotation.y spin still swirls the disk while this tilt holds.
         this.modelSpinGroup.rotation.x = this.diskFixedTilt;
         this.modelSpinGroup.rotation.y = this.diskFixedYaw;
+        this.modelSpinGroup.rotation.z = this.diskFixedRoll; // sideways diagonal lean
         this.spinGroup.add(this.modelSpinGroup);
     }
 
